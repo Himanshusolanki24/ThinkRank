@@ -12,89 +12,91 @@
 
 @layer base {
   :root {
-    /* Skill Genome - Dark Theme Primary */
-    --background: 240 5% 11%;
+    /* Skill Genome - New Violet Theme */
+    --background: 240 10% 4%;
     --foreground: 0 0% 98%;
 
-    --card: 240 5% 13%;
+    --card: 240 10% 5%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 5% 13%;
+    --popover: 240 10% 5%;
     --popover-foreground: 0 0% 98%;
 
-    /* Poison Pink Primary */
-    --primary: 330 94% 73%;
-    --primary-foreground: 240 5% 11%;
+    /* Electric Violet Primary */
+    --primary: 263 70% 58%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 4% 18%;
+    --secondary: 240 5% 12%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 4% 20%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 55%;
 
-    --accent: 330 94% 73%;
-    --accent-foreground: 240 5% 11%;
+    --accent: 263 70% 58%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 4% 22%;
-    --input: 240 4% 22%;
-    --ring: 330 94% 73%;
+    --border: 240 5% 12%;
+    --input: 240 5% 12%;
+    --ring: 263 70% 58%;
 
     --radius: 0.75rem;
 
-    /* Custom Skill Genome Colors */
-    --genome-pink: 330 94% 73%;
-    --genome-pink-glow: 330 100% 80%;
-    --genome-dark: 240 5% 11%;
-    --genome-darker: 240 6% 8%;
-    --genome-card: 240 5% 13%;
-    --genome-border: 240 4% 22%;
+    /* Custom Skill Genome Colors - Violet Theme */
+    --genome-violet: 263 70% 58%;
+    --genome-violet-glow: 263 80% 70%;
+    --genome-purple: 280 65% 60%;
+    --genome-cyan: 187 85% 53%;
+    --genome-dark: 240 10% 4%;
+    --genome-darker: 240 10% 2%;
+    --genome-card: 240 10% 6%;
+    --genome-border: 240 5% 12%;
     
     /* Skill Level Colors */
-    --skill-beginner: 45 93% 58%;
-    --skill-intermediate: 199 89% 48%;
-    --skill-advanced: 142 71% 45%;
-    --skill-expert: 330 94% 73%;
+    --skill-beginner: 142 70% 50%;
+    --skill-intermediate: 45 93% 55%;
+    --skill-advanced: 25 95% 55%;
+    --skill-expert: 263 70% 58%;
     
     /* Chart Colors */
-    --chart-1: 330 94% 73%;
-    --chart-2: 199 89% 48%;
-    --chart-3: 142 71% 45%;
-    --chart-4: 45 93% 58%;
-    --chart-5: 280 87% 65%;
+    --chart-1: 263 70% 58%;
+    --chart-2: 187 85% 53%;
+    --chart-3: 142 70% 50%;
+    --chart-4: 45 93% 55%;
+    --chart-5: 340 82% 60%;
 
-    --sidebar-background: 240 5% 11%;
+    --sidebar-background: 240 10% 4%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 330 94% 73%;
-    --sidebar-primary-foreground: 240 5% 11%;
-    --sidebar-accent: 240 4% 18%;
+    --sidebar-primary: 263 70% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 12%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 4% 22%;
-    --sidebar-ring: 330 94% 73%;
+    --sidebar-border: 240 5% 12%;
+    --sidebar-ring: 263 70% 58%;
   }
 
   .light {
     --background: 0 0% 100%;
-    --foreground: 240 5% 11%;
+    --foreground: 240 10% 4%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 5% 11%;
+    --card-foreground: 240 10% 4%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 5% 11%;
+    --popover-foreground: 240 10% 4%;
 
-    --primary: 330 94% 55%;
+    --primary: 263 70% 55%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 240 5% 96%;
-    --secondary-foreground: 240 5% 11%;
+    --secondary-foreground: 240 10% 4%;
 
     --muted: 240 5% 96%;
     --muted-foreground: 240 5% 40%;
 
-    --accent: 330 94% 55%;
+    --accent: 263 70% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -102,10 +104,10 @@
 
     --border: 240 5% 90%;
     --input: 240 5% 90%;
-    --ring: 330 94% 55%;
+    --ring: 263 70% 55%;
 
-    --genome-pink: 330 94% 55%;
-    --genome-pink-glow: 330 100% 65%;
+    --genome-violet: 263 70% 55%;
+    --genome-violet-glow: 263 80% 65%;
     --genome-dark: 0 0% 100%;
     --genome-darker: 240 5% 96%;
     --genome-card: 0 0% 100%;
@@ -129,20 +131,20 @@
 }
 
 @layer components {
-  /* Genome Glow Effects */
+  /* Genome Glow Effects - Violet Theme */
   .genome-glow {
-    box-shadow: 0 0 20px hsl(var(--genome-pink) / 0.3),
-                0 0 40px hsl(var(--genome-pink) / 0.1);
+    box-shadow: 0 0 20px hsl(var(--genome-violet) / 0.3),
+                0 0 40px hsl(var(--genome-violet) / 0.1);
   }
 
   .genome-glow-intense {
-    box-shadow: 0 0 30px hsl(var(--genome-pink) / 0.5),
-                0 0 60px hsl(var(--genome-pink) / 0.2),
-                0 0 100px hsl(var(--genome-pink) / 0.1);
+    box-shadow: 0 0 30px hsl(var(--genome-violet) / 0.5),
+                0 0 60px hsl(var(--genome-violet) / 0.2),
+                0 0 100px hsl(var(--genome-violet) / 0.1);
   }
 
   .genome-glow-subtle {
-    box-shadow: 0 0 10px hsl(var(--genome-pink) / 0.2);
+    box-shadow: 0 0 10px hsl(var(--genome-violet) / 0.2);
   }
 
   /* Card Styles */
@@ -153,7 +155,7 @@
 
   .genome-card:hover {
     @apply border-primary/30;
-    box-shadow: 0 4px 20px hsl(var(--genome-pink) / 0.1);
+    box-shadow: 0 4px 20px hsl(var(--genome-violet) / 0.1);
     transform: translateY(-2px);
   }
 
@@ -163,32 +165,44 @@
       135deg,
       hsl(var(--genome-dark)) 0%,
       hsl(var(--genome-darker)) 50%,
-      hsl(240 6% 6%) 100%
+      hsl(240 10% 3%) 100%
     );
   }
 
-  .gradient-pink-dark {
+  .gradient-violet-dark {
     background: linear-gradient(
       135deg,
-      hsl(var(--genome-pink) / 0.15) 0%,
+      hsl(var(--genome-violet) / 0.15) 0%,
       transparent 50%
     );
   }
 
-  .gradient-radial-pink {
+  .gradient-radial-violet {
     background: radial-gradient(
       ellipse at center,
-      hsl(var(--genome-pink) / 0.1) 0%,
+      hsl(var(--genome-violet) / 0.1) 0%,
       transparent 70%
     );
   }
 
   /* Text Gradients */
-  .text-gradient-pink {
+  .text-gradient-violet {
     background: linear-gradient(
       135deg,
-      hsl(var(--genome-pink)) 0%,
-      hsl(var(--genome-pink-glow)) 100%
+      hsl(var(--genome-violet)) 0%,
+      hsl(var(--genome-violet-glow)) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-main {
+    background: linear-gradient(
+      135deg,
+      hsl(263 70% 58%) 0%,
+      hsl(280 65% 60%) 50%,
+      hsl(187 85% 53%) 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -197,34 +211,48 @@
 
   /* Neural Network Animation */
   .neural-line {
-    stroke: hsl(var(--genome-pink) / 0.3);
+    stroke: hsl(var(--genome-violet) / 0.3);
     stroke-width: 1;
   }
 
   .neural-node {
-    fill: hsl(var(--genome-pink));
-    filter: drop-shadow(0 0 6px hsl(var(--genome-pink) / 0.6));
+    fill: hsl(var(--genome-violet));
+    filter: drop-shadow(0 0 6px hsl(var(--genome-violet) / 0.6));
   }
 
   /* Button Variants */
   .btn-genome-primary {
     @apply bg-primary text-primary-foreground font-semibold;
-    @apply px-6 py-3 rounded-lg;
+    @apply px-6 py-3 rounded-xl;
     @apply transition-all duration-300;
     @apply hover:scale-105;
-    box-shadow: 0 4px 14px hsl(var(--genome-pink) / 0.4);
+    background: linear-gradient(135deg, hsl(263 70% 58%), hsl(280 65% 55%));
+    box-shadow: 0 4px 14px hsl(var(--genome-violet) / 0.4);
   }
 
   .btn-genome-primary:hover {
-    box-shadow: 0 6px 20px hsl(var(--genome-pink) / 0.5);
+    box-shadow: 0 6px 20px hsl(var(--genome-violet) / 0.5);
   }
 
   .btn-genome-secondary {
     @apply bg-transparent text-foreground font-medium;
-    @apply px-6 py-3 rounded-lg;
+    @apply px-6 py-3 rounded-xl;
     @apply border border-border;
     @apply transition-all duration-300;
     @apply hover:border-primary/50 hover:bg-primary/5;
+  }
+
+  /* Glass effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-violet {
+    background: rgba(139, 92, 246, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(139, 92, 246, 0.1);
   }
 
   /* Progress Bars */
@@ -234,24 +262,24 @@
 
   .progress-genome-fill {
     @apply h-full rounded-full;
-    background: linear-gradient(90deg, hsl(var(--genome-pink)), hsl(var(--genome-pink-glow)));
+    background: linear-gradient(90deg, hsl(var(--genome-violet)), hsl(var(--genome-cyan)));
   }
 
   /* Skill Level Indicators */
   .skill-beginner {
-    @apply text-yellow-400;
+    @apply text-emerald-400;
   }
 
   .skill-intermediate {
-    @apply text-blue-400;
+    @apply text-amber-400;
   }
 
   .skill-advanced {
-    @apply text-green-400;
+    @apply text-orange-400;
   }
 
   .skill-expert {
-    @apply text-primary;
+    @apply text-violet-400;
   }
 }
 
@@ -269,6 +297,11 @@
     animation: neural-flow 3s linear infinite;
   }
 
+  .animate-gradient {
+    animation: gradient-shift 8s ease-in-out infinite;
+    background-size: 200% 200%;
+  }
+
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
@@ -277,17 +310,22 @@
   @keyframes pulse-glow {
     0%, 100% { 
       opacity: 1;
-      filter: drop-shadow(0 0 8px hsl(var(--genome-pink) / 0.6));
+      filter: drop-shadow(0 0 8px hsl(var(--genome-violet) / 0.6));
     }
     50% { 
       opacity: 0.8;
-      filter: drop-shadow(0 0 16px hsl(var(--genome-pink) / 0.8));
+      filter: drop-shadow(0 0 16px hsl(var(--genome-violet) / 0.8));
     }
   }
 
   @keyframes neural-flow {
     0% { stroke-dashoffset: 100; }
     100% { stroke-dashoffset: 0; }
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
   }
 
   /* Scrollbar Styling */
@@ -301,11 +339,37 @@
   }
 
   .scrollbar-genome::-webkit-scrollbar-thumb {
-    background: hsl(var(--genome-pink) / 0.5);
+    background: hsl(var(--genome-violet) / 0.5);
     border-radius: 3px;
   }
 
   .scrollbar-genome::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--genome-pink));
+    background: hsl(var(--genome-violet));
+  }
+
+  /* Aurora glow effect */
+  .aurora-glow {
+    position: relative;
+  }
+
+  .aurora-glow::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(
+      45deg,
+      hsl(263 70% 58% / 0.3),
+      hsl(280 65% 60% / 0.3),
+      hsl(187 85% 53% / 0.3),
+      hsl(263 70% 58% / 0.3)
+    );
+    border-radius: inherit;
+    filter: blur(20px);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .aurora-glow:hover::before {
+    opacity: 1;
   }
 }

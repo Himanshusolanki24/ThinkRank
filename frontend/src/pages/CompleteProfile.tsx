@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -381,9 +380,7 @@ const CompleteProfile = () => {
 
     return (
         <div className="min-h-screen bg-background">
-            <Navbar />
-
-            <main className="pt-24 pb-12">
+            <main className="pt-12 pb-12">
                 <div className="container mx-auto px-4 max-w-2xl">
                     {/* Header */}
                     <motion.div

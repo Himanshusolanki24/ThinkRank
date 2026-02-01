@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -231,8 +230,7 @@ const TaskDetail = () => {
     if (!task) {
         return (
             <div className="min-h-screen bg-background">
-                <Navbar />
-                <main className="pt-20 pb-12">
+                <main className="pt-8 pb-12">
                     <div className="container mx-auto px-4 text-center">
                         <p className="text-muted-foreground">Task not found.</p>
                         <Button variant="genome" onClick={() => navigate("/tasks")} className="mt-4">
@@ -246,9 +244,7 @@ const TaskDetail = () => {
 
     return (
         <div className="min-h-screen bg-background">
-            <Navbar />
-
-            <main className="pt-20 pb-12">
+            <main className="pt-8 pb-12">
                 <div className="container mx-auto px-4 max-w-3xl">
                     {/* Back Button */}
                     <Button

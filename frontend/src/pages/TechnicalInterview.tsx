@@ -1,23 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/Navbar";
 import { NeuralBackground } from "@/components/NeuralBackground";
 import { useAuth } from "@/contexts/AuthContext";
+import { RecruiterPanel } from "@/components/interview/RecruiterPanel";
+import { QuestionWorkspace } from "@/components/interview/QuestionWorkspace";
+import { InterviewReport } from "@/components/interview/InterviewReport";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 import {
     ArrowRight,
     Loader2,
-    CheckCircle,
-    XCircle,
-    AlertCircle,
-    Brain,
-    Sparkles,
-    Target,
-    Trophy,
-    RotateCcw,
-    Home,
     ChevronRight,
+    Play,
+    Terminal,
+    Cpu,
+    ShieldCheck,
+    Settings,
+    Maximize
 } from "lucide-react";
 import { API_BASE_URL, parseApiResponse } from "@/lib/api";
 
@@ -36,6 +36,19 @@ interface Evaluation {
     feedback: string;
     strengths?: string;
     improvements?: string;
+    classification?: "wrong" | "partial" | "correct";
+    matchedKeywords?: string[];
+    matchPercentage?: number;
+    recruiterMessage?: string;
+}
+
+interface QuestionData {
+    topic: string;
+    subtopic: string;
+    difficulty: string;
+    expected_keywords: string[];
+    follow_ups: Record<string, string[]>;
+    isFollowUp: boolean;
 }
 
 interface AnswerResult {
@@ -43,18 +56,22 @@ interface AnswerResult {
     question: string;
     answer: string;
     evaluation: Evaluation;
+    classification?: string;
+    topic?: string;
+    subtopic?: string;
 }
 
 const TechnicalInterview = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const sounds = useSoundEffects();
 
-    // State
+    // Core interview state
     const [skills, setSkills] = useState<Skill[]>([]);
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [currentQuestion, setCurrentQuestion] = useState<string>("");
     const [currentQuestionNumber, setCurrentQuestionNumber] = useState(0);
-    const [totalQuestions] = useState(6);
+    const [totalQuestions] = useState(10);
     const [answer, setAnswer] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState("");
@@ -63,8 +80,20 @@ const TechnicalInterview = () => {
     const [results, setResults] = useState<AnswerResult[]>([]);
     const [isComplete, setIsComplete] = useState(false);
     const [averageScore, setAverageScore] = useState(0);
-    const [showEvaluation, setShowEvaluation] = useState(false);
     const [lastEvaluation, setLastEvaluation] = useState<Evaluation | null>(null);
+
+    // Follow-up engine state
+    const [questionData, setQuestionData] = useState<QuestionData | null>(null);
+    const [currentTopic, setCurrentTopic] = useState<string>("");
+    const [currentSubtopic, setCurrentSubtopic] = useState<string>("");
+    const [attemptCount, setAttemptCount] = useState(0);
+    const [classification, setClassification] = useState<"wrong" | "partial" | "correct" | null>(null);
+    const [recruiterMessage, setRecruiterMessage] = useState("");
+    const [hint, setHint] = useState<string | null>(null);
+    const [isFollowUp, setIsFollowUp] = useState(false);
+    const [topicAttempts, setTopicAttempts] = useState<Record<string, number>>({});
+    const [interviewReport, setInterviewReport] = useState<any>(null);
+    const [mobileTab, setMobileTab] = useState<'workspace' | 'recruiter'>('workspace');
 
     // Load skills on mount
     useEffect(() => {
@@ -79,15 +108,25 @@ const TechnicalInterview = () => {
         }
     }, []);
 
+    // Effect for Recruiter Message Sound
+    useEffect(() => {
+        if (recruiterMessage) {
+            sounds.playMessage();
+        }
+    }, [recruiterMessage]);
+
     // Start interview
     const startInterview = async () => {
+        sounds.playClick();
+
         if (skills.length === 0) {
-            setError("No skills found. Please extract skills first.");
+            setError("No skills detected. Initiate skill extraction protocol first.");
+            sounds.playError();
             return;
         }
 
         setIsLoading(true);
-        setLoadingMessage("Generating your first question...");
+        setLoadingMessage("INITIALIZING NEURAL INTERFACE...");
         setError(null);
 
         try {
@@ -97,21 +136,34 @@ const TechnicalInterview = () => {
                 body: JSON.stringify({
                     skills: skills.map(s => s.name),
                     userId: user?.id,
+                    useFollowUpEngine: true,
                 }),
             });
 
             const data = await parseApiResponse(response);
 
             if (!data.success) {
-                throw new Error(data.error || "Failed to start interview");
+                throw new Error(data.error || "System Initialization Failed");
             }
 
+            sounds.playSuccess();
             setSessionId(data.data.sessionId);
             setCurrentQuestion(data.data.question);
             setCurrentQuestionNumber(1);
             setPreviousQuestions([data.data.question]);
-        } catch (err: any) {
-            setError(err.message || "Failed to start interview");
+
+            if (data.data.questionData) {
+                setQuestionData(data.data.questionData);
+                setCurrentTopic(data.data.currentTopic || data.data.questionData.topic);
+                setCurrentSubtopic(data.data.currentSubtopic || data.data.questionData.subtopic);
+            }
+            setRecruiterMessage(data.data.recruiterMessage || "System ready. Begin analysis.");
+            setAttemptCount(0);
+            setIsFollowUp(false);
+            setInterviewReport(null); // Reset report
+        } catch (err: unknown) {
+            sounds.playError();
+            setError(err instanceof Error ? err.message : "Connection Error");
         } finally {
             setIsLoading(false);
             setLoadingMessage("");
@@ -120,13 +172,13 @@ const TechnicalInterview = () => {
 
     // Submit answer
     const submitAnswer = async () => {
-        if (!answer.trim()) {
-            setError("Please provide an answer");
-            return;
-        }
+        if (!answer.trim()) return;
+        sounds.playClick();
 
         setIsLoading(true);
-        setLoadingMessage("AI is evaluating your answer...");
+        // Random "processing" technical jargon
+        const loadingTexts = ["ANALYZING SYNTAX...", "EVALUATING SEMANTICS...", "COMPILING RESPONSE...", "RUNNING TEST CASES..."];
+        setLoadingMessage(loadingTexts[Math.floor(Math.random() * loadingTexts.length)]);
         setError(null);
 
         try {
@@ -141,459 +193,307 @@ const TechnicalInterview = () => {
                     skills: skills.map(s => s.name),
                     userId: user?.id,
                     previousQuestions,
+                    questionData,
+                    topicAttempts,
+                    useFollowUpEngine: true,
                 }),
             });
 
             const data = await parseApiResponse(response);
 
             if (!data.success) {
-                throw new Error(data.error || "Failed to submit answer");
+                throw new Error(data.error || "Submission Failed");
+            }
+
+            // Classification feedback sounds
+            if (data.data.classification === 'correct') {
+                sounds.playSuccess();
+            } else if (data.data.classification === 'wrong') {
+                sounds.playError();
+            } else {
+                sounds.playMessage(); // Partial gets a message ping
             }
 
             const evaluation = data.data.evaluation;
-
-            // Store result
             const result: AnswerResult = {
                 questionNumber: currentQuestionNumber,
                 question: currentQuestion,
                 answer: answer.trim(),
                 evaluation,
+                classification: data.data.classification,
+                topic: currentTopic,
+                subtopic: currentSubtopic,
             };
             setResults(prev => [...prev, result]);
 
-            // Show evaluation
+            setClassification(data.data.classification || null);
             setLastEvaluation(evaluation);
-            setShowEvaluation(true);
 
             if (data.data.isComplete) {
-                // Interview complete
                 setIsComplete(true);
                 setAverageScore(data.data.averageScore);
+                setRecruiterMessage(data.data.recruiterMessage || "Session Concluded.");
+                if (data.data.interviewReport) {
+                    setInterviewReport(data.data.interviewReport);
+                }
+                sounds.playSuccess(); // Extra chime for completion
 
-                // Save results to database for Dashboard
+                // Save results in background
                 if (user?.id) {
-                    // Include all skills in the interview record, not just the first one
-                    const skillNames = skills.map(s => s.name);
-                    const skillLabel = skillNames.length > 3
-                        ? `${skillNames.slice(0, 3).join(", ")} +${skillNames.length - 3} more`
-                        : skillNames.join(", ") || "General";
-
-                    try {
-                        await fetch(`${API_BASE_URL}/api/interview/save-results`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                userId: user.id,
-                                skill: skillLabel,
-                                skillsArray: skillNames, // Pass all skills for individual tracking
-                                averageScore: data.data.averageScore,
-                                totalQuestions: 6,
-                                correctAnswers: Math.round((data.data.averageScore / 10) * 6),
-                                xpEarned: Math.round(data.data.averageScore * 10),
-                            }),
-                        });
-                    } catch (saveErr) {
-                        console.error("Failed to save interview results:", saveErr);
-                    }
+                    saveResults(data.data.averageScore, currentQuestionNumber);
                 }
             } else {
-                // After showing evaluation, load next question
+                // Delay for visual feedback before next question
                 setTimeout(() => {
-                    setShowEvaluation(false);
                     setCurrentQuestion(data.data.nextQuestion);
                     setCurrentQuestionNumber(data.data.nextQuestionNumber);
                     setPreviousQuestions(prev => [...prev, data.data.nextQuestion]);
                     setAnswer("");
-                    setLastEvaluation(null);
-                }, 3000);
+                    // setLastEvaluation(null); // Keep last evaluation for sidebar context
+
+                    if (data.data.nextQuestionData) {
+                        setQuestionData(data.data.nextQuestionData);
+                    }
+                    setCurrentTopic(data.data.currentTopic || currentTopic);
+                    setCurrentSubtopic(data.data.currentSubtopic || currentSubtopic);
+                    setAttemptCount(data.data.attemptCount || 0);
+                    setIsFollowUp(data.data.isFollowUp || false);
+                    setRecruiterMessage(data.data.recruiterMessage || "");
+                    setHint(data.data.hint || null);
+                    if (data.data.topicAttempts) {
+                        setTopicAttempts(data.data.topicAttempts);
+                    }
+                }, 2000);
             }
-        } catch (err: any) {
-            setError(err.message || "Failed to submit answer");
+        } catch (err: unknown) {
+            sounds.playError();
+            setError(err instanceof Error ? err.message : "Submission Failed");
         } finally {
             setIsLoading(false);
             setLoadingMessage("");
         }
     };
 
-    // Get score color
-    const getScoreColor = (score: number) => {
-        if (score >= 8) return "text-green-400";
-        if (score >= 6) return "text-yellow-400";
-        if (score >= 4) return "text-orange-400";
-        return "text-red-400";
+    const saveResults = async (avgScore: number, totalQs: number) => {
+        const skillNames = skills.map(s => s.name);
+        try {
+            await fetch(`${API_BASE_URL}/api/interview/save-results`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userId: user?.id,
+                    skill: skillNames.length > 3 ? `${skillNames.slice(0, 3).join(", ")} +${skillNames.length - 3}` : skillNames.join(", "),
+                    skillsArray: skillNames,
+                    averageScore: avgScore,
+                    totalQuestions: totalQs,
+                    correctAnswers: Math.round((avgScore / 10) * totalQs),
+                    xpEarned: Math.round(avgScore * 10),
+                }),
+            });
+        } catch (saveErr) {
+            console.error("Failed to save interview results:", saveErr);
+        }
     };
 
-    const getScoreBg = (score: number) => {
-        if (score >= 8) return "from-green-500/20 to-emerald-500/20 border-green-500/30";
-        if (score >= 6) return "from-yellow-500/20 to-amber-500/20 border-yellow-500/30";
-        if (score >= 4) return "from-orange-500/20 to-red-500/20 border-orange-500/30";
-        return "from-red-500/20 to-rose-500/20 border-red-500/30";
-    };
-
-    // Render interview start screen
-    const renderStartScreen = () => (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-2xl mx-auto text-center"
-        >
-            <div className="relative group mb-8">
-                <div className="absolute -inset-[1px] bg-gradient-to-r from-blue-500/50 to-cyan-500/50 rounded-2xl opacity-50 blur-sm" />
-                <div className="relative bg-card/90 backdrop-blur-xl rounded-2xl border border-border/50 p-8">
-                    <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 flex items-center justify-center border border-blue-500/30">
-                        <Brain className="w-10 h-10 text-blue-400" />
-                    </div>
-
-                    <h1 className="text-3xl font-bold text-foreground mb-3">
-                        Technical Interview
-                    </h1>
-                    <p className="text-muted-foreground mb-6">
-                        You'll answer {totalQuestions} questions based on your skill genome.
-                        Each answer will be evaluated by AI in real-time.
-                    </p>
-
-                    {skills.length > 0 && (
-                        <div className="mb-6">
-                            <p className="text-sm text-muted-foreground mb-3">
-                                Questions will be based on:
-                            </p>
-                            <div className="flex flex-wrap justify-center gap-2">
-                                {skills.slice(0, 8).map((skill) => (
-                                    <span
-                                        key={skill.name}
-                                        className="px-3 py-1 rounded-full text-xs font-medium"
-                                        style={{
-                                            backgroundColor: skill.color,
-                                            color: skill.textColor,
-                                        }}
-                                    >
-                                        {skill.name}
-                                    </span>
-                                ))}
-                                {skills.length > 8 && (
-                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
-                                        +{skills.length - 8} more
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {error && (
-                        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
-                            <div className="flex items-center gap-2 text-red-400">
-                                <AlertCircle className="w-5 h-5" />
-                                <p className="text-sm">{error}</p>
-                            </div>
-                        </div>
-                    )}
-
-                    <Button
-                        variant="genome"
-                        size="lg"
-                        onClick={startInterview}
-                        disabled={isLoading || skills.length === 0}
-                        className="w-full group"
-                    >
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                {loadingMessage}
-                            </>
-                        ) : (
-                            <>
-                                <Sparkles className="w-5 h-5" />
-                                Start Interview
-                                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                            </>
-                        )}
-                    </Button>
-
-                    {skills.length === 0 && (
-                        <p className="text-sm text-amber-400 mt-4">
-                            No skills found. Please extract skills from GitHub or resume first.
-                        </p>
-                    )}
-                </div>
-            </div>
-        </motion.div>
-    );
-
-    // Render question screen
-    const renderQuestionScreen = () => (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl mx-auto"
-        >
-            {/* Progress bar */}
-            <div className="mb-8">
-                <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-foreground">
-                        Question {currentQuestionNumber} of {totalQuestions}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                        {Math.round((currentQuestionNumber / totalQuestions) * 100)}% complete
-                    </span>
-                </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(currentQuestionNumber / totalQuestions) * 100}%` }}
-                        className="h-full bg-gradient-to-r from-primary to-purple-500 rounded-full"
-                        transition={{ duration: 0.5 }}
-                    />
-                </div>
-            </div>
-
-            {/* Question card */}
-            <div className="relative group mb-6">
-                <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-2xl opacity-50 blur-sm" />
-                <div className="relative bg-card/90 backdrop-blur-xl rounded-2xl border border-border/50 p-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                            <Target className="w-4 h-4 text-primary" />
-                        </div>
-                        <span className="text-sm font-medium text-primary">
-                            Question {currentQuestionNumber}
-                        </span>
-                    </div>
-
-                    <h2 className="text-xl font-semibold text-foreground mb-6 leading-relaxed">
-                        {currentQuestion}
-                    </h2>
-
-                    {error && (
-                        <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
-                            <div className="flex items-center gap-2 text-red-400">
-                                <AlertCircle className="w-4 h-4" />
-                                <p className="text-sm">{error}</p>
-                            </div>
-                        </div>
-                    )}
-
-                    <textarea
-                        value={answer}
-                        onChange={(e) => setAnswer(e.target.value)}
-                        placeholder="Type your answer here..."
-                        rows={6}
-                        disabled={isLoading || showEvaluation}
-                        className="w-full bg-background/50 border border-border rounded-xl p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 resize-none"
-                    />
-
-                    <div className="flex justify-end mt-4">
-                        <Button
-                            variant="genome"
-                            size="lg"
-                            onClick={submitAnswer}
-                            disabled={isLoading || !answer.trim() || showEvaluation}
-                            className="group"
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    {loadingMessage}
-                                </>
-                            ) : (
-                                <>
-                                    Submit Answer
-                                    <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Evaluation popup */}
-            <AnimatePresence>
-                {showEvaluation && lastEvaluation && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
-                    >
-                        <motion.div
-                            initial={{ y: 20 }}
-                            animate={{ y: 0 }}
-                            className="max-w-lg mx-4"
-                        >
-                            <div className={`relative bg-card/95 backdrop-blur-xl rounded-2xl border ${getScoreBg(lastEvaluation.score)} p-8 text-center`}>
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ delay: 0.2, type: "spring" }}
-                                    className={`w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-r ${getScoreBg(lastEvaluation.score)} flex items-center justify-center`}
-                                >
-                                    <span className={`text-4xl font-bold ${getScoreColor(lastEvaluation.score)}`}>
-                                        {lastEvaluation.score}
-                                    </span>
-                                </motion.div>
-
-                                <h3 className="text-xl font-semibold text-foreground mb-2">
-                                    {lastEvaluation.score >= 8
-                                        ? "Excellent!"
-                                        : lastEvaluation.score >= 6
-                                            ? "Good Job!"
-                                            : lastEvaluation.score >= 4
-                                                ? "Keep Improving"
-                                                : "Needs Work"}
-                                </h3>
-
-                                <p className="text-muted-foreground mb-4">
-                                    {lastEvaluation.feedback}
-                                </p>
-
-                                {!isComplete && (
-                                    <p className="text-sm text-primary animate-pulse">
-                                        Loading next question...
-                                    </p>
-                                )}
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </motion.div>
-    );
-
-    // Render results screen
-    const renderResultsScreen = () => (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-4xl mx-auto"
-        >
-            {/* Final score card */}
-            <div className="relative group mb-8">
-                <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/50 via-purple-500/50 to-pink-500/50 rounded-2xl opacity-75 blur-sm" />
-                <div className="relative bg-card/90 backdrop-blur-xl rounded-2xl border border-border/50 p-8 text-center">
-                    <Trophy className="w-16 h-16 mx-auto mb-4 text-yellow-400" />
-
-                    <h1 className="text-3xl font-bold text-foreground mb-2">
-                        Interview Complete!
-                    </h1>
-
-                    <p className="text-muted-foreground mb-6">
-                        Here's how you performed across all {totalQuestions} questions
-                    </p>
-
-                    <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 flex items-center justify-center border-4 border-primary/30">
-                        <div className="text-center">
-                            <div className={`text-4xl font-bold ${getScoreColor(averageScore)}`}>
-                                {averageScore.toFixed(1)}
-                            </div>
-                            <div className="text-xs text-muted-foreground">out of 10</div>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-center gap-4">
-                        <Button
-                            variant="genome-outline"
-                            onClick={() => {
-                                setResults([]);
-                                setIsComplete(false);
-                                setCurrentQuestionNumber(0);
-                                setSessionId(null);
-                                setPreviousQuestions([]);
-                                setAnswer("");
-                            }}
-                        >
-                            <RotateCcw className="w-4 h-4" />
-                            Try Again
-                        </Button>
-                        <Button
-                            variant="genome"
-                            onClick={() => navigate("/dashboard")}
-                        >
-                            Go to Dashboard
-                            <ChevronRight className="w-4 h-4" />
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Individual results */}
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-                Question by Question Breakdown
-            </h2>
-            <div className="space-y-4">
-                {results.map((result, index) => (
-                    <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="relative group"
-                    >
-                        <div className="relative bg-card/80 backdrop-blur-xl rounded-xl border border-border/50 p-6">
-                            <div className="flex items-start gap-4">
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${getScoreBg(result.evaluation.score)}`}>
-                                    <span className={`text-lg font-bold ${getScoreColor(result.evaluation.score)}`}>
-                                        {result.evaluation.score}
-                                    </span>
-                                </div>
-
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <span className="text-sm font-medium text-primary">
-                                            Question {result.questionNumber}
-                                        </span>
-                                        {result.evaluation.score >= 7 ? (
-                                            <CheckCircle className="w-4 h-4 text-green-400" />
-                                        ) : (
-                                            <XCircle className="w-4 h-4 text-orange-400" />
-                                        )}
-                                    </div>
-
-                                    <p className="text-foreground font-medium mb-2">
-                                        {result.question}
-                                    </p>
-
-                                    <p className="text-sm text-muted-foreground mb-2">
-                                        <span className="font-medium">Your answer:</span>{" "}
-                                        {result.answer.length > 150
-                                            ? result.answer.substring(0, 150) + "..."
-                                            : result.answer}
-                                    </p>
-
-                                    <p className="text-sm text-primary">
-                                        {result.evaluation.feedback}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
-        </motion.div>
-    );
-
-    return (
-        <div className="min-h-screen bg-background">
-            <Navbar />
-
-            <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24 pb-12">
+    // Render: Start Screen (Immersive Mode)
+    if (currentQuestionNumber === 0 && !isComplete) {
+        return (
+            <div className="min-h-screen bg-[#050505] font-sans text-gray-100 relative overflow-hidden flex flex-col items-center justify-center">
                 <NeuralBackground />
-
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black pointer-events-none" />
 
                 <motion.div
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.2, 0.4, 0.2],
-                    }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-500/15 to-cyan-500/15 rounded-full blur-3xl"
-                />
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative z-10 max-w-4xl w-full p-4"
+                >
+                    <div className="bg-[#0A0A0B]/80 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative">
+                        {/* Decorative Top Bar */}
+                        <div className="h-1 bg-gradient-to-r from-violet-600 via-cyan-500 to-indigo-600 w-full" />
 
-                <div className="container mx-auto px-4 relative z-10">
-                    {currentQuestionNumber === 0 && !isComplete && renderStartScreen()}
-                    {currentQuestionNumber > 0 && !isComplete && renderQuestionScreen()}
-                    {isComplete && renderResultsScreen()}
+                        <div className="grid md:grid-cols-2">
+                            {/* Left Content */}
+                            <div className="p-12 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-32 bg-violet-500/10 blur-3xl rounded-full pointer-events-none" />
+                                <div className="relative z-10">
+                                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-8 border border-white/10 shadow-lg">
+                                        <Cpu className="w-8 h-8 text-cyan-400" />
+                                    </div>
+                                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+                                        Skill Genome <span className="text-cyan-400">Interview</span>
+                                    </h1>
+                                    <p className="text-lg text-gray-400 mb-8 leading-relaxed">
+                                        Enter the adaptive neural assessment chamber. The system will analyze your technical depth and critical thinking in real-time.
+                                    </p>
+                                    <Button
+                                        onClick={startInterview}
+                                        disabled={isLoading || skills.length === 0}
+                                        className="h-14 px-8 bg-white hover:bg-gray-100 text-black font-bold text-lg rounded-xl tracking-wide transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <Loader2 className="w-5 h-5 animate-spin mr-3" />
+                                                {loadingMessage}
+                                            </>
+                                        ) : (
+                                            <>
+                                                INITIALIZE SESSION
+                                                <ArrowRight className="w-5 h-5 ml-3" />
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* Right Content (Skill Grid) */}
+                            <div className="bg-[#0F0F16] p-12 flex flex-col border-l border-white/5 relative">
+                                <div className="flex-1 flex flex-col justify-center">
+                                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-6 font-mono">
+                                        Detected Skill Matrix
+                                    </h3>
+                                    {skills.length > 0 ? (
+                                        <div className="flex flex-wrap gap-2">
+                                            {skills.map((skill) => (
+                                                <div key={skill.name} className="px-4 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-sm font-medium text-gray-300">
+                                                    {skill.name}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="p-6 border border-dashed border-red-500/30 rounded-xl bg-red-500/5">
+                                            <p className="text-red-400 text-sm flex items-center gap-2">
+                                                <ShieldCheck className="w-4 h-4" />
+                                                NO SKILLS SYNCED
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="mt-8 pt-8 border-t border-white/5 flex justify-between text-xs font-mono text-gray-600">
+                                    <span>V2.4.0 STABLE</span>
+                                    <span>LATENCY: 12ms</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
+
+    // Render: Results Screen (Mission Report)
+    if (isComplete) {
+        if (interviewReport) {
+            return (
+                <div className="min-h-screen bg-[#050505] font-sans text-gray-100 relative overflow-hidden flex flex-col">
+                    <NeuralBackground />
+                    <div className="flex-1 overflow-auto relative z-10 pt-10 pb-10">
+                        <InterviewReport
+                            report={interviewReport}
+                            onRestart={() => { sounds.playClick(); window.location.reload(); }}
+                            onDashboard={() => { sounds.playClick(); navigate("/dashboard"); }}
+                        />
+                    </div>
                 </div>
-            </section>
+            );
+        }
+        // Fallback for missing report
+        return (
+            <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-4">Processing Results...</h1>
+                    <Button onClick={() => window.location.reload()}>Reload</Button>
+                </div>
+            </div>
+        );
+    }
+
+    // Move this to top level
+
+
+    // ... (rest of logic)
+
+    // Render: Main Console Interface (Immersive Mode)
+    return (
+        <div className="h-screen bg-[#050505] font-sans text-gray-100 flex flex-col overflow-hidden relative selection:bg-cyan-500/30">
+            <NeuralBackground />
+
+            {/* Top HUD */}
+            <header className="h-16 border-b border-white/5 bg-[#0A0A0B]/80 backdrop-blur-md flex items-center justify-between px-4 md:px-6 sticky top-0 z-30 shrink-0">
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-cyan-500 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shrink-0">
+                        SG
+                    </div>
+                    <div className="hidden md:block">
+                        <h1 className="text-sm font-bold text-white tracking-wide">INTERVIEW PROTOCOL</h1>
+                        <p className="text-[10px] text-gray-500 font-mono tracking-widest">SECURE CONNECTION ESTABLISHED</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    {/* Mobile Tabs */}
+                    <div className="flex md:hidden bg-white/5 p-1 rounded-lg border border-white/10">
+                        <button
+                            onClick={() => setMobileTab('recruiter')}
+                            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${mobileTab === 'recruiter' ? 'bg-cyan-500/20 text-cyan-400' : 'text-gray-400'}`}
+                        >
+                            Briefing
+                        </button>
+                        <button
+                            onClick={() => setMobileTab('workspace')}
+                            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${mobileTab === 'workspace' ? 'bg-cyan-500/20 text-cyan-400' : 'text-gray-400'}`}
+                        >
+                            Code
+                        </button>
+                    </div>
+
+                    <Button variant="ghost" size="icon" className="hover:bg-white/5">
+                        <Settings className="w-5 h-5 text-gray-400" />
+                    </Button>
+                </div>
+            </header>
+
+            <div className="flex-1 flex overflow-hidden relative z-20">
+                {/* Left Panel: Recruiter Comms */}
+                <aside className={`
+                    w-full md:w-[300px] lg:w-[380px] 
+                    flex flex-col border-r border-white/5 relative z-30 h-full bg-[#050505]
+                    absolute md:relative inset-0
+                    transition-transform duration-300 ease-in-out
+                    ${mobileTab === 'recruiter' ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+                `}>
+                    <RecruiterPanel
+                        recruiterMessage={recruiterMessage}
+                        currentTopic={currentTopic}
+                        currentSubtopic={currentSubtopic}
+                        attemptCount={attemptCount}
+                        hint={hint}
+                        isFollowUp={isFollowUp}
+                        classification={classification}
+                        lastEvaluation={lastEvaluation}
+                    />
+                </aside>
+
+                {/* Right Panel: Workspace */}
+                <main className={`
+                    flex-1 h-full relative overflow-hidden bg-[#0A0A0B]
+                    transition-transform duration-300 ease-in-out
+                    absolute md:relative inset-0 md:translate-x-0
+                    ${mobileTab === 'workspace' ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+                `}>
+                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03]" />
+                    <QuestionWorkspace
+                        questionNumber={currentQuestionNumber}
+                        totalQuestions={10}
+                        question={currentQuestion}
+                        answer={answer}
+                        setAnswer={setAnswer}
+                        onSubmit={submitAnswer}
+                        isLoading={isLoading}
+                        difficulty={questionData?.difficulty}
+                        onType={sounds.playTyping}
+                    />
+                </main>
+            </div>
         </div>
     );
 };

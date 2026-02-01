@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Navbar } from "@/components/Navbar";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
   ResponsiveContainer,
   AreaChart,
   Area,
@@ -26,14 +19,21 @@ import {
   Star,
   Trophy,
   AlertCircle,
-  BookCheck,
-  Calendar,
+  Sparkles,
+  ArrowUpRight,
+  Activity,
+  Code2,
+  Flame,
+  Brain,
+  Network,
+  GitBranch,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import { API_BASE_URL, parseApiResponse } from "@/lib/api";
-import ActivityHeatmap from "@/components/ActivityHeatmap";
+import { D3SkillNetwork } from "@/components/D3SkillNetwork";
+import { CytoscapeSkillGraph } from "@/components/CytoscapeSkillGraph";
 
 interface InterviewResult {
   id: string;
@@ -68,13 +68,94 @@ interface ExtractedSkill {
   textColor: string;
 }
 
-interface ActivityData {
-  date: string;
-  count: number;
-}
+
+
+// Background component
+const DashboardBackground = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[120px]" />
+    <div className="absolute top-60 -left-40 w-[400px] h-[400px] bg-cyan-500/8 rounded-full blur-[100px]" />
+    <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-purple-600/8 rounded-full blur-[100px]" />
+  </div>
+);
+
+// Stat card component
+const StatCard = ({
+  icon: Icon,
+  value,
+  label,
+  color,
+  bgColor,
+  trend,
+  delay = 0
+}: {
+  icon: any;
+  value: string | number;
+  label: string;
+  color: string;
+  bgColor: string;
+  trend?: string;
+  delay?: number;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay }}
+    whileHover={{ scale: 1.02, y: -2 }}
+    className="relative group"
+  >
+    <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className="relative p-5 rounded-2xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-sm hover:border-white/10 transition-all duration-300">
+      <div className="flex items-center justify-between mb-3">
+        <div className={`w-11 h-11 rounded-xl ${bgColor} flex items-center justify-center`}>
+          <Icon className={`w-5 h-5 ${color}`} />
+        </div>
+        {trend && (
+          <span className="flex items-center gap-0.5 text-xs font-medium text-emerald-400">
+            <ArrowUpRight className="w-3 h-3" />
+            {trend}
+          </span>
+        )}
+      </div>
+      <p className="text-2xl font-bold text-white mb-1">{value}</p>
+      <p className="text-sm text-gray-400">{label}</p>
+    </div>
+  </motion.div>
+);
+
+// Quick action button
+const QuickAction = ({
+  icon: Icon,
+  title,
+  description,
+  to,
+  gradient
+}: {
+  icon: any;
+  title: string;
+  description: string;
+  to: string;
+  gradient: string;
+}) => (
+  <Link to={to}>
+    <motion.div
+      whileHover={{ scale: 1.02, y: -2 }}
+      className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/10 transition-all cursor-pointer group"
+    >
+      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
+        <Icon className="w-6 h-6 text-white" />
+      </div>
+      <div className="flex-1">
+        <p className="font-semibold text-white group-hover:text-violet-300 transition-colors">{title}</p>
+        <p className="text-sm text-gray-400">{description}</p>
+      </div>
+      <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-violet-400 group-hover:translate-x-1 transition-all" />
+    </motion.div>
+  </Link>
+);
 
 const Dashboard = () => {
-  const { user, profile, isProfileComplete } = useAuth();
+  const { user, profile } = useAuth();
   const [interviewResults, setInterviewResults] = useState<InterviewResult[]>([]);
   const [skillData, setSkillData] = useState<SkillData[]>([]);
   const [weeklyProgress, setWeeklyProgress] = useState<WeeklyData[]>([]);
@@ -87,13 +168,10 @@ const Dashboard = () => {
     overallScore: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [activityData, setActivityData] = useState<ActivityData[]>([]);
-  const [heatmapLoading, setHeatmapLoading] = useState(true);
+  const [graphView, setGraphView] = useState<"d3" | "cytoscape">("d3");
 
-  // Get username or fallback
   const displayName = profile?.username || profile?.full_name?.split(" ")[0] || "there";
 
-  // Load extracted skills from localStorage
   useEffect(() => {
     const storedSkills = localStorage.getItem("extractedSkills");
     if (storedSkills) {
@@ -110,34 +188,17 @@ const Dashboard = () => {
   useEffect(() => {
     if (user?.id) {
       fetchDashboardData();
-      fetchActivityHeatmap();
     } else {
       setLoading(false);
-      setHeatmapLoading(false);
     }
   }, [user?.id, extractedSkills]);
 
-  const fetchActivityHeatmap = async () => {
-    if (!user?.id) return;
-    setHeatmapLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/daily-tasks/activity-heatmap/${user.id}`);
-      const data = await parseApiResponse(response);
-      if (data.success) {
-        setActivityData(data.data || []);
-      }
-    } catch (error) {
-      console.error("Error fetching activity heatmap:", error);
-    } finally {
-      setHeatmapLoading(false);
-    }
-  };
+
 
   const fetchDashboardData = async () => {
     if (!user?.id) return;
 
     try {
-      // Fetch interview results
       const { data: interviews, error: interviewError } = await supabase
         .from("interview_results")
         .select("*")
@@ -151,12 +212,8 @@ const Dashboard = () => {
       const interviewData = interviews || [];
       setInterviewResults(interviewData);
 
-      // Calculate stats
       if (interviewData.length > 0) {
-        // Total XP
         const totalXp = interviewData.reduce((sum, i) => sum + (i.xp_earned || 0), 0);
-
-        // Overall score (average percentage)
         const avgScore = interviewData.reduce((sum, i) => {
           const percentage = i.total_questions > 0
             ? (i.correct_answers / i.total_questions) * 100
@@ -164,23 +221,20 @@ const Dashboard = () => {
           return sum + percentage;
         }, 0) / interviewData.length;
 
-        // Build skill data for radar chart - combine extracted skills with interview results
-        const skillMap = new Map<string, { total: number; count: number }>();
-
-        // First, add all extracted skills with 0 score
-        extractedSkills.slice(0, 8).forEach((skillName) => {
-          skillMap.set(skillName, { total: 0, count: 0 });
+        const skillMap = new Map<string, { total: number; count: number; xp: number }>();
+        extractedSkills.slice(0, 12).forEach((skillName) => {
+          skillMap.set(skillName, { total: 0, count: 0, xp: 0 });
         });
 
-        // Then, update with interview results
         interviewData.forEach((interview) => {
-          const existing = skillMap.get(interview.skill) || { total: 0, count: 0 };
+          const existing = skillMap.get(interview.skill) || { total: 0, count: 0, xp: 0 };
           const score = interview.total_questions > 0
             ? (interview.correct_answers / interview.total_questions) * 100
             : 0;
           skillMap.set(interview.skill, {
             total: existing.total + score,
             count: existing.count + 1,
+            xp: existing.xp + (interview.xp_earned || 0),
           });
         });
 
@@ -191,16 +245,14 @@ const Dashboard = () => {
         }));
         setSkillData(skills);
 
-        // Focus areas (lowest 3 skills)
         const sortedSkills = [...skills].sort((a, b) => a.value - b.value);
         const focus: FocusArea[] = sortedSkills.slice(0, 3).map((s) => ({
           name: s.skill,
           level: s.value,
-          improvement: "+0%", // Can be calculated from historical data
+          improvement: "+0%",
         }));
         setFocusAreas(focus);
 
-        // Count skills mastered (scored >= 70%)
         const masteredSkills = skills.filter(s => s.value >= 70).length;
 
         setStats({
@@ -210,8 +262,7 @@ const Dashboard = () => {
           overallScore: Math.round(avgScore),
         });
       } else if (extractedSkills.length > 0) {
-        // No interviews yet, but show extracted skills in chart with 0 values
-        const skills: SkillData[] = extractedSkills.slice(0, 8).map((skillName) => ({
+        const skills: SkillData[] = extractedSkills.slice(0, 12).map((skillName) => ({
           skill: skillName,
           value: 0,
           fullMark: 100,
@@ -219,7 +270,6 @@ const Dashboard = () => {
         setSkillData(skills);
       }
 
-      // Build weekly progress (last 7 days)
       const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       const today = new Date();
       const weekData: WeeklyData[] = [];
@@ -229,7 +279,6 @@ const Dashboard = () => {
         date.setDate(date.getDate() - i);
         const dayName = days[date.getDay()];
 
-        // Sum XP earned on this day
         const dayXp = interviewData
           .filter((interview) => {
             const interviewDate = new Date(interview.interview_date);
@@ -248,17 +297,31 @@ const Dashboard = () => {
     }
   };
 
-  // Default data for new users
-  const defaultSkillData: SkillData[] = profile?.skills?.slice(0, 8).map((skill) => ({
-    skill,
-    value: 0,
-    fullMark: 100,
-  })) || [
-      { skill: "JavaScript", value: 0, fullMark: 100 },
-      { skill: "Python", value: 0, fullMark: 100 },
-      { skill: "React", value: 0, fullMark: 100 },
-      { skill: "SQL", value: 0, fullMark: 100 },
-    ];
+  // Prepare data for D3 and Cytoscape graphs
+  const graphSkillData = skillData.map((s, i) => {
+    const interviews = interviewResults.filter(ir => ir.skill === s.skill);
+    const totalXp = interviews.reduce((sum, ir) => sum + (ir.xp_earned || 0), 0);
+    return {
+      id: `skill-${i}`,
+      name: s.skill,
+      level: s.value >= 70 ? 3 : s.value >= 40 ? 2 : 1,
+      score: s.value,
+      category: "",
+      interviews: interviews.length,
+      xp: totalXp,
+    };
+  });
+
+  const cytoscapeData = skillData.map((s) => {
+    const interviews = interviewResults.filter(ir => ir.skill === s.skill);
+    const totalXp = interviews.reduce((sum, ir) => sum + (ir.xp_earned || 0), 0);
+    return {
+      name: s.skill,
+      score: s.value,
+      interviews: interviews.length,
+      xp: totalXp,
+    };
+  });
 
   const defaultWeeklyProgress: WeeklyData[] = [
     { day: "Mon", xp: 0 },
@@ -270,16 +333,16 @@ const Dashboard = () => {
     { day: "Sun", xp: 0 },
   ];
 
-  const displaySkillData = skillData.length > 0 ? skillData : defaultSkillData;
   const displayWeeklyProgress = weeklyProgress.some((d) => d.xp > 0) ? weeklyProgress : defaultWeeklyProgress;
   const hasData = interviewResults.length > 0;
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className="min-h-screen bg-[#0A0A0F] text-white">
+      <DashboardBackground />
 
-      <main className="pt-20 pb-12">
-        <div className="container mx-auto px-4">
+      <main className="relative z-10 pt-8 pb-12">
+        <div className="container mx-auto px-4 max-w-7xl">
+
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -287,402 +350,378 @@ const Dashboard = () => {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <h1 className="font-display text-3xl font-bold text-foreground mb-2">
-              Welcome back, <span className="text-gradient-pink">{displayName}</span>
-            </h1>
-            <p className="text-muted-foreground">
-              {stats.skillsMastered > 0
-                ? `You've mastered ${stats.skillsMastered} skill${stats.skillsMastered > 1 ? 's' : ''}! Keep evolving.`
-                : "Start your learning journey by taking an interview!"}
-            </p>
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">
+                  Welcome back, <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">{displayName}</span>
+                </h1>
+                <p className="text-gray-400">
+                  {stats.skillsMastered > 0
+                    ? `You've mastered ${stats.skillsMastered} skill${stats.skillsMastered > 1 ? 's' : ''}! Keep evolving.`
+                    : "Start your learning journey by taking an interview!"}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20">
+                  <Flame className="w-4 h-4 text-orange-400" />
+                  <span className="text-sm font-medium">{profile?.streak_count || 0} Day Streak</span>
+                </div>
+                <Link to="/build">
+                  <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white rounded-xl">
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Build Genome
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </motion.div>
 
           {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <StatCard
+              icon={Award}
+              value={stats.skillsMastered}
+              label="Skills Mastered"
+              color="text-violet-400"
+              bgColor="bg-violet-500/10"
+              delay={0.1}
+            />
+            <StatCard
+              icon={Zap}
+              value={stats.totalXp.toLocaleString()}
+              label="Total XP"
+              color="text-amber-400"
+              bgColor="bg-amber-500/10"
+              trend="+12%"
+              delay={0.15}
+            />
+            <StatCard
+              icon={Target}
+              value={stats.interviewsDone}
+              label="Interviews"
+              color="text-cyan-400"
+              bgColor="bg-cyan-500/10"
+              delay={0.2}
+            />
+            <StatCard
+              icon={TrendingUp}
+              value={`${stats.overallScore}%`}
+              label="Overall Score"
+              color="text-emerald-400"
+              bgColor="bg-emerald-500/10"
+              delay={0.25}
+            />
+          </div>
+
+          {/* Skill Genome Graph - D3 or Cytoscape */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mb-8"
           >
-            <Card variant="genome" className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Award className="w-5 h-5 text-primary" />
+            <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                    {graphView === "d3" ? (
+                      <Network className="w-5 h-5 text-violet-400" />
+                    ) : (
+                      <GitBranch className="w-5 h-5 text-violet-400" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white">
+                      {graphView === "d3" ? "Skill Network" : "Skill Relationships"}
+                    </h3>
+                    <p className="text-sm text-gray-400">
+                      {graphView === "d3"
+                        ? "Force-directed graph of your skills"
+                        : "See how your skills connect"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-2xl font-display font-bold text-foreground">
-                    {stats.skillsMastered}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Skills Mastered</p>
-                </div>
-              </div>
-            </Card>
 
-            <Card variant="genome" className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-skill-intermediate/10 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-skill-intermediate" />
-                </div>
-                <div>
-                  <p className="text-2xl font-display font-bold text-foreground">
-                    {stats.totalXp.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Total XP</p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setGraphView("d3")}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${graphView === "d3"
+                      ? "bg-violet-500/20 text-violet-400 border border-violet-500/30"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
+                      }`}
+                  >
+                    Network View
+                  </button>
+                  <button
+                    onClick={() => setGraphView("cytoscape")}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${graphView === "cytoscape"
+                      ? "bg-violet-500/20 text-violet-400 border border-violet-500/30"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
+                      }`}
+                  >
+                    Relationship View
+                  </button>
                 </div>
               </div>
-            </Card>
 
-            <Card variant="genome" className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-skill-advanced/10 flex items-center justify-center">
-                  <Target className="w-5 h-5 text-skill-advanced" />
-                </div>
-                <div>
-                  <p className="text-2xl font-display font-bold text-foreground">
-                    {stats.interviewsDone}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Interviews</p>
-                </div>
+              <div className="h-[450px]">
+                {graphSkillData.length > 0 ? (
+                  <AnimatePresence mode="wait">
+                    {graphView === "d3" ? (
+                      <motion.div
+                        key="d3"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="h-full"
+                      >
+                        <D3SkillNetwork
+                          skills={graphSkillData}
+                          onNodeClick={(skill) => console.log("Selected:", skill)}
+                        />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="cytoscape"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="h-full"
+                      >
+                        <CytoscapeSkillGraph
+                          skills={cytoscapeData}
+                          onNodeSelect={(skill) => console.log("Selected:", skill)}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                    <Brain className="w-16 h-16 text-gray-600 mb-4" />
+                    <p className="text-gray-400 mb-2">No skill data yet</p>
+                    <p className="text-sm text-gray-500 mb-4">Build your genome or take an interview to see your skill network</p>
+                    <Link to="/interview">
+                      <Button className="bg-gradient-to-r from-violet-600 to-purple-600 text-white">
+                        Start Your First Interview
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </div>
-            </Card>
-
-            <Card variant="genome" className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-skill-beginner/10 flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-skill-beginner" />
-                </div>
-                <div>
-                  <p className="text-2xl font-display font-bold text-foreground">
-                    {stats.overallScore}%
-                  </p>
-                  <p className="text-sm text-muted-foreground">Overall Score</p>
-                </div>
-              </div>
-            </Card>
+            </div>
           </motion.div>
 
           <div className="grid lg:grid-cols-3 gap-6">
-            {/* Skill Genome Chart */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="lg:col-span-2"
-            >
-              <Card variant="genome" className="h-full">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>Your Skill Genome</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {hasData
-                        ? "Based on your interview performance"
-                        : "Take interviews to build your skill map"}
-                    </p>
-                  </div>
-                  <Link to="/build">
-                    <Button variant="genome-ghost" size="sm">
-                      Build Genome
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </Link>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[350px]">
-                    {displaySkillData.length > 0 ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <RadarChart
-                          cx="50%"
-                          cy="50%"
-                          outerRadius="80%"
-                          data={displaySkillData}
-                        >
-                          <PolarGrid stroke="hsl(var(--border))" />
-                          <PolarAngleAxis
-                            dataKey="skill"
-                            tick={{
-                              fill: "hsl(var(--muted-foreground))",
-                              fontSize: 12,
-                            }}
-                          />
-                          <PolarRadiusAxis
-                            angle={30}
-                            domain={[0, 100]}
-                            tick={{
-                              fill: "hsl(var(--muted-foreground))",
-                              fontSize: 10,
-                            }}
-                            axisLine={false}
-                          />
-                          <Radar
-                            name="Skills"
-                            dataKey="value"
-                            stroke="hsl(var(--primary))"
-                            fill="hsl(var(--primary))"
-                            fillOpacity={hasData ? 0.3 : 0.1}
-                            strokeWidth={2}
-                          />
-                        </RadarChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-full text-center">
-                        <AlertCircle className="w-12 h-12 text-muted-foreground mb-4" />
-                        <p className="text-muted-foreground">No skill data yet</p>
-                        <Link to="/interview" className="mt-4">
-                          <Button variant="genome">Start Your First Interview</Button>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Focus Areas */}
+            {/* Quick Actions & Focus Areas */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
+              className="lg:col-span-2 space-y-6"
             >
-              <Card variant="genome" className="h-full">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="w-5 h-5 text-primary" />
-                    Focus Areas
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {hasData
-                      ? "Skills that need attention based on your interviews"
-                      : "Complete interviews to identify weak areas"}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  {focusAreas.length > 0 ? (
-                    <div className="space-y-4">
-                      {focusAreas.map((skill, index) => (
-                        <div key={skill.name}>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-foreground">
-                              {skill.name}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-skill-advanced">
-                                {skill.improvement}
-                              </span>
-                              <span className="text-sm text-muted-foreground">
-                                {skill.level}%
-                              </span>
-                            </div>
-                          </div>
-                          <div className="progress-genome">
-                            <motion.div
-                              className="progress-genome-fill"
-                              initial={{ width: 0 }}
-                              animate={{ width: `${skill.level}%` }}
-                              transition={{ duration: 1, delay: 0.5 + index * 0.2 }}
-                            />
-                          </div>
-                        </div>
-                      ))}
+              {/* Weekly Progress */}
+              <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white">Weekly Progress</h3>
+                    <p className="text-sm text-gray-400">
+                      {hasData ? "XP earned this week" : "Your weekly XP will appear here"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={displayWeeklyProgress}>
+                      <defs>
+                        <linearGradient id="xpGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="rgb(139, 92, 246)" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="rgb(139, 92, 246)" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis
+                        dataKey="day"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "rgba(255, 255, 255, 0.5)", fontSize: 12 }}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "rgba(255, 255, 255, 0.5)", fontSize: 12 }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "rgba(10, 10, 15, 0.9)",
+                          border: "1px solid rgba(255, 255, 255, 0.1)",
+                          borderRadius: "12px",
+                        }}
+                        labelStyle={{ color: "#fff" }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="xp"
+                        stroke="rgb(139, 92, 246)"
+                        strokeWidth={2}
+                        fill="url(#xpGradient)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Recent Activity */}
+              <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-purple-400" />
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-8 text-center">
-                      <Target className="w-10 h-10 text-muted-foreground mb-3" />
-                      <p className="text-sm text-muted-foreground mb-4">
-                        No focus areas identified yet
-                      </p>
+                    <div>
+                      <h3 className="font-semibold text-white">Recent Activity</h3>
+                      <p className="text-sm text-gray-400">Your latest interviews</p>
                     </div>
-                  )}
-                  <Link to="/tasks" className="block mt-6">
-                    <Button variant="genome" className="w-full">
-                      {hasData ? "Practice Weak Skills" : "Build Genome"}
+                  </div>
+                  <Link to="/analytics">
+                    <Button variant="ghost" size="sm" className="text-violet-400 hover:text-violet-300 hover:bg-violet-500/10">
+                      View All
                     </Button>
                   </Link>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
+                </div>
 
-          {/* Bottom Row */}
-          <div className="grid lg:grid-cols-2 gap-6 mt-6">
-            {/* Weekly Progress */}
+                {interviewResults.length > 0 ? (
+                  <div className="space-y-3">
+                    {interviewResults.slice(0, 4).map((interview) => {
+                      const percentage = interview.total_questions > 0
+                        ? Math.round((interview.correct_answers / interview.total_questions) * 100)
+                        : 0;
+                      const isPassed = percentage >= 60;
+
+                      return (
+                        <div
+                          key={interview.id}
+                          className={`flex items-center justify-between p-3 rounded-xl ${isPassed
+                            ? "bg-emerald-500/5 border border-emerald-500/20"
+                            : "bg-white/[0.02] border border-white/[0.05]"
+                            }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isPassed ? "bg-emerald-500/10" : "bg-white/[0.05]"
+                              }`}>
+                              {isPassed ? (
+                                <Trophy className="w-4 h-4 text-emerald-400" />
+                              ) : (
+                                <Code2 className="w-4 h-4 text-gray-400" />
+                              )}
+                            </div>
+                            <div>
+                              <span className="text-sm font-medium text-white">
+                                {interview.skill} Interview
+                              </span>
+                              <p className="text-xs text-gray-400">
+                                {interview.correct_answers}/{interview.total_questions} correct • {percentage}%
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 text-amber-400">
+                            <Star className="w-3 h-3" />
+                            <span className="text-sm font-medium">{interview.xp_earned} XP</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Clock className="w-10 h-10 text-gray-500 mb-3" />
+                    <p className="text-sm text-gray-400 mb-4">No recent activity yet</p>
+                    <Link to="/interview">
+                      <Button variant="outline" className="border-white/10 text-white hover:bg-white/5">
+                        Start Interview
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Right Column */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
+              className="space-y-6"
             >
-              <Card variant="genome">
-                <CardHeader>
-                  <CardTitle>Weekly Progress</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {hasData
-                      ? "XP earned this week from interviews"
-                      : "Your weekly XP will appear here"}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[200px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={displayWeeklyProgress}>
-                        <defs>
-                          <linearGradient
-                            id="xpGradient"
-                            x1="0"
-                            y1="0"
-                            x2="0"
-                            y2="1"
-                          >
-                            <stop
-                              offset="5%"
-                              stopColor="hsl(var(--primary))"
-                              stopOpacity={0.3}
-                            />
-                            <stop
-                              offset="95%"
-                              stopColor="hsl(var(--primary))"
-                              stopOpacity={0}
-                            />
-                          </linearGradient>
-                        </defs>
-                        <XAxis
-                          dataKey="day"
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                        />
-                        <YAxis
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "hsl(var(--card))",
-                            border: "1px solid hsl(var(--border))",
-                            borderRadius: "8px",
-                          }}
-                          labelStyle={{ color: "hsl(var(--foreground))" }}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="xp"
-                          stroke="hsl(var(--primary))"
-                          strokeWidth={2}
-                          fill="url(#xpGradient)"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
+              {/* Quick Actions */}
+              <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-cyan-400" />
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+                  <h3 className="font-semibold text-white">Quick Actions</h3>
+                </div>
 
-            {/* Recent Activity */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-            >
-              <Card variant="genome">
-                <CardHeader className="flex flex-row items-center justify-between">
+                <div className="space-y-3">
+                  <QuickAction
+                    icon={Zap}
+                    title="Daily Tasks"
+                    description="Complete challenges"
+                    to="/tasks"
+                    gradient="from-violet-600 to-purple-600"
+                  />
+                  <QuickAction
+                    icon={Target}
+                    title="AI Interview"
+                    description="Practice with AI"
+                    to="/interview"
+                    gradient="from-cyan-600 to-blue-600"
+                  />
+                </div>
+              </div>
+
+              {/* Focus Areas */}
+              <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                    <Target className="w-5 h-5 text-orange-400" />
+                  </div>
                   <div>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Your latest interviews
-                    </p>
+                    <h3 className="font-semibold text-white">Focus Areas</h3>
+                    <p className="text-xs text-gray-400">Skills needing attention</p>
                   </div>
-                  <Link to="/interview">
-                    <Button variant="genome-ghost" size="sm">
-                      View All
-                    </Button>
-                  </Link>
-                </CardHeader>
-                <CardContent>
-                  {interviewResults.length > 0 ? (
-                    <div className="space-y-3">
-                      {interviewResults.slice(0, 4).map((interview) => {
-                        const percentage = interview.total_questions > 0
-                          ? Math.round((interview.correct_answers / interview.total_questions) * 100)
-                          : 0;
-                        const isPassed = percentage >= 60;
+                </div>
 
-                        return (
-                          <div
-                            key={interview.id}
-                            className={`flex items-center justify-between p-3 rounded-lg border ${isPassed
-                              ? "border-skill-advanced/30 bg-skill-advanced/5"
-                              : "border-border bg-card"
-                              }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${isPassed
-                                  ? "bg-skill-advanced/20"
-                                  : "bg-muted"
-                                  }`}
-                              >
-                                {isPassed ? (
-                                  <Trophy className="w-4 h-4 text-skill-advanced" />
-                                ) : (
-                                  <Clock className="w-4 h-4 text-muted-foreground" />
-                                )}
-                              </div>
-                              <div>
-                                <span className="text-sm font-medium text-foreground">
-                                  {interview.skill} Interview
-                                </span>
-                                <p className="text-xs text-muted-foreground">
-                                  {interview.correct_answers}/{interview.total_questions} correct • {percentage}%
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1 text-primary">
-                              <Star className="w-3 h-3" />
-                              <span className="text-sm font-medium">
-                                {interview.xp_earned} XP
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-8 text-center">
-                      <Clock className="w-10 h-10 text-muted-foreground mb-3" />
-                      <p className="text-sm text-muted-foreground mb-4">
-                        No recent activity yet
-                      </p>
-                      <Link to="/interview">
-                        <Button variant="genome-outline">Start Interview</Button>
-                      </Link>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                {focusAreas.length > 0 ? (
+                  <div className="space-y-4">
+                    {focusAreas.map((skill, index) => (
+                      <div key={skill.name}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-white">{skill.name}</span>
+                          <span className="text-sm text-gray-400">{skill.level}%</span>
+                        </div>
+                        <div className="h-2 rounded-full bg-white/[0.05] overflow-hidden">
+                          <motion.div
+                            className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-500"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${skill.level}%` }}
+                            transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400 text-center py-4">
+                    Complete interviews to identify focus areas
+                  </p>
+                )}
+              </div>
             </motion.div>
           </div>
-
-          {/* Activity Heatmap - Full Width */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="mt-6"
-          >
-            <Card variant="genome">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-primary" />
-                  Activity Overview
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Your learning activity over the past year
-                </p>
-              </CardHeader>
-              <CardContent>
-                <ActivityHeatmap data={activityData} loading={heatmapLoading} />
-              </CardContent>
-            </Card>
-          </motion.div>
         </div>
       </main>
     </div>

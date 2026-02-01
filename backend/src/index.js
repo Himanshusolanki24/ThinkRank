@@ -7,6 +7,8 @@ const { extractSkillsFromResume } = require("./services/resumeService");
 const authRoutes = require("./routes/authRoutes");
 const interviewRoutes = require("./routes/interviewRoutes");
 const dailyTasksRoutes = require("./routes/dailyTasksRoutes");
+const codingSignalsRoutes = require("./routes/codingSignalsRoutes");
+const practiceRoutes = require("./routes/practiceRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -43,6 +45,12 @@ app.use("/api/interview", interviewRoutes);
 
 // Daily tasks routes
 app.use("/api/daily-tasks", dailyTasksRoutes);
+
+// Coding signals routes (platform integrations)
+app.use("/api/coding-signals", codingSignalsRoutes);
+
+// Practice recommendation routes
+app.use("/api/practice", practiceRoutes);
 
 // GitHub skill extraction endpoint
 app.post("/api/github/skills", async (req, res) => {
@@ -119,7 +127,11 @@ app.use((error, req, res, next) => {
 
 // Start server
 // Start server
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, async () => {
     console.log(`🧬 Skill Genome API running on port ${PORT}`);
     console.log(`📊 Health check: http://0.0.0.0:${PORT}/api/health`);
+
+    // Check Python service health on startup
+    const { checkPythonServiceHealth } = require("./services/codingSignalsService");
+    await checkPythonServiceHealth();
 });

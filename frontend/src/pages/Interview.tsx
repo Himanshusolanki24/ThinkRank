@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { NeuralBackground } from "@/components/NeuralBackground";
+import { useSoundEffects } from "@/hooks/useSoundEffects";
 import {
     Play,
     Mic,
@@ -23,6 +23,11 @@ import {
     Code,
     Users,
     Briefcase,
+    Activity,
+    Cpu,
+    Database,
+    Network,
+    TerminalSquare
 } from "lucide-react";
 
 interface Skill {
@@ -41,10 +46,11 @@ interface StoredSkills {
 const Interview = () => {
     const [extractedSkills, setExtractedSkills] = useState<StoredSkills | null>(null);
     const [selectedInterviewType, setSelectedInterviewType] = useState<string | null>(null);
+    const [launching, setLaunching] = useState(false);
     const navigate = useNavigate();
+    const sounds = useSoundEffects();
 
     useEffect(() => {
-        // Load skills from localStorage
         const storedSkills = localStorage.getItem("extractedSkills");
         if (storedSkills) {
             try {
@@ -55,422 +61,339 @@ const Interview = () => {
         }
     }, []);
 
+    const handleLaunch = (typeId: string) => {
+        sounds.playClick();
+        setSelectedInterviewType(typeId);
+        setLaunching(true);
+
+        // Simulate system initialize
+        setTimeout(() => {
+            if (typeId === 'technical') {
+                navigate("/interview/technical");
+            } else {
+                // For now, other modes also route to technical or show a toast (simulated here by just routing)
+                // In a real app, these would have their own routes. 
+                // We'll route to technical but with a query param in a real scenario, 
+                // but for now let's just use the technical route as the "simulation engine".
+                navigate("/interview/technical");
+            }
+        }, 1500);
+    };
+
     const interviewTypes = [
         {
             id: "technical",
-            title: "Technical Interview",
-            description: "Algorithm, data structures, and coding challenges tailored to your skills",
-            icon: Code,
-            duration: "~15 min",
-            difficulty: "Adaptive",
-            gradient: "from-blue-500 to-cyan-500",
-            bgGradient: "from-blue-500/10 to-cyan-500/10",
+            title: "Technical Protocol",
+            subtitle: "ALGORITHM_BENCHMARK",
+            description: "Deep dive into data structures, system design, and coding challenges.",
+            icon: TerminalSquare,
+            duration: "AUTO",
+            difficulty: "ADAPTIVE",
+            gradient: "from-cyan-400 to-blue-500",
+            bgGradient: "from-cyan-500/10 to-blue-500/5",
+            border: "cyan",
             available: true,
-        },
-        {
-            id: "behavioral",
-            title: "Behavioral Interview",
-            description: "STAR method questions based on your experience and soft skills",
-            icon: MessageSquare,
-            duration: "30-45 min",
-            difficulty: "Intermediate",
-            gradient: "from-purple-500 to-pink-500",
-            bgGradient: "from-purple-500/10 to-pink-500/10",
-            comingSoon: true,
+            features: ["Live Execution", "Memory Profiling", "Edge Case Analysis"]
         },
         {
             id: "system-design",
             title: "System Design",
-            description: "Architecture and design problems for senior roles",
-            icon: Brain,
-            duration: "60-90 min",
-            difficulty: "Advanced",
-            gradient: "from-orange-500 to-red-500",
-            bgGradient: "from-orange-500/10 to-red-500/10",
-            comingSoon: true,
+            subtitle: "ARCHITECTURE_SIM",
+            description: "High-level distributed systems, scalability, and database design.",
+            icon: Network,
+            duration: "60 MIN",
+            difficulty: "HARD",
+            gradient: "from-violet-400 to-purple-500",
+            bgGradient: "from-violet-500/10 to-purple-500/5",
+            border: "violet",
+            available: true,
+            features: ["Whiteboard Mode", "Load Balancing", "Schema Design"]
+        },
+        {
+            id: "behavioral",
+            title: "Behavioral Analysis",
+            subtitle: "PSYCHOMETRIC_EVAL",
+            description: "STAR method assessment for leadership, conflict, and culture fit.",
+            icon: Users,
+            duration: "45 MIN",
+            difficulty: "MEDIUM",
+            gradient: "from-pink-400 to-rose-500",
+            bgGradient: "from-pink-500/10 to-rose-500/5",
+            border: "pink",
+            available: true,
+            features: ["Sentiment Analysis", "Tone Detection", "Core Values"]
         },
         {
             id: "manager",
-            title: "Manager Round",
-            description: "Leadership, team management, and strategic thinking",
-            icon: Users,
-            duration: "45-60 min",
-            difficulty: "Senior",
-            gradient: "from-green-500 to-emerald-500",
-            bgGradient: "from-green-500/10 to-emerald-500/10",
-            comingSoon: true,
+            title: "Leadership Core",
+            subtitle: "MANAGEMENT_TRACK",
+            description: "Strategic thinking, team management, and delivery execution.",
+            icon: Briefcase,
+            duration: "60 MIN",
+            difficulty: "EXPERT",
+            gradient: "from-emerald-400 to-green-500",
+            bgGradient: "from-emerald-500/10 to-green-500/5",
+            border: "emerald",
+            available: true,
+            features: ["Conflict Res", "Roadmapping", "hiring_sim.exe"]
         },
     ];
 
-    const features = [
-        {
-            icon: Mic,
-            title: "Voice Analysis",
-            description: "AI evaluates your communication clarity and confidence",
-        },
-        {
-            icon: Video,
-            title: "Video Recording",
-            description: "Review your performance with detailed playback",
-        },
-        {
-            icon: Target,
-            title: "Personalized Questions",
-            description: "Questions based on your extracted skill genome",
-        },
-        {
-            icon: Award,
-            title: "Performance Score",
-            description: "Get detailed feedback and improvement suggestions",
-        },
+    const stats = [
+        { label: "PROTOCOL VERSION", value: "v2.5.1", icon: Cpu },
+        { label: "AVG. PERFORMANCE", value: "Top 5%", icon: Activity },
+        { label: "GLOBAL RANK", value: "#42", icon: Award },
+        { label: "SYSTEM STATUS", value: "OPTIMAL", icon: Zap },
     ];
 
     return (
-        <div className="min-h-screen bg-background">
-            <Navbar />
+        <div className="min-h-screen bg-[#050505] text-white selection:bg-cyan-500/30 font-sans pb-20">
+            <NeuralBackground />
 
-            <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-                <NeuralBackground />
+            {/* Ambient Background Glows */}
+            <div className="fixed top-0 left-0 w-full h-[500px] bg-gradient-to-b from-violet-900/10 to-transparent pointer-events-none" />
+            <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-cyan-900/10 blur-[100px] pointer-events-none" />
 
-                {/* Gradient Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
-                <div className="absolute top-0 left-0 right-0 h-96 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+            <div className="container mx-auto px-4 lg:px-6 relative z-10 pt-8">
 
-                {/* Animated Orbs */}
+                {/* Dashboard Header */}
                 <motion.div
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.3, 0.5, 0.3],
-                    }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl"
-                />
-                <motion.div
-                    animate={{
-                        scale: [1.2, 1, 1.2],
-                        opacity: [0.2, 0.4, 0.2],
-                    }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-primary/15 to-pink-500/15 rounded-full blur-3xl"
-                />
-
-                <div className="container mx-auto px-4 relative z-10 py-20">
-                    {/* Header Section */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="text-center max-w-4xl mx-auto mb-16"
-                    >
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20 text-primary text-sm font-medium mb-6"
-                        >
-                            <Sparkles className="w-4 h-4" />
-                            <span>AI-Powered Interview Prep</span>
-                        </motion.div>
-
-                        <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-4 leading-tight">
-                            Master Your{" "}
-                            <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                                Interview
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-white/5 pb-8"
+                >
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="flex items-center gap-2 px-2 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-mono text-cyan-400 tracking-wider">
+                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+                                ONLINE
                             </span>
+                            <span className="text-xs font-mono text-gray-500">ID: {extractedSkills?.username?.toUpperCase() || "CANDIDATE_01"}</span>
+                        </div>
+                        <h1 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400">
+                            Mission Control
                         </h1>
-
-                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                            Practice with AI-driven mock interviews tailored to your skill genome.
-                            Get real-time feedback and ace your next opportunity.
+                        <p className="text-gray-400 mt-2 max-w-xl">
+                            Select a simulation module to begin your assessment. All neural networks are online and ready for processing.
                         </p>
-                    </motion.div>
+                    </div>
 
-                    {/* Skills Preview - Only show if skills exist */}
-                    {extractedSkills && extractedSkills.skills.length > 0 && (
+                    <div className="flex gap-4">
+                        {stats.map((stat, i) => (
+                            <div key={i} className="hidden lg:block bg-[#0A0A0B]/50 border border-white/5 rounded-xl p-3 min-w-[140px]">
+                                <div className="flex items-center gap-2 text-xs text-gray-500 mb-1 font-mono">
+                                    <stat.icon className="w-3 h-3" />
+                                    {stat.label}
+                                </div>
+                                <div className="text-lg font-bold text-white">{stat.value}</div>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
+
+                {/* Main Content Grid */}
+                <div className="grid lg:grid-cols-12 gap-8">
+
+                    {/* Left Col: Genome Identity (Skills) */}
+                    <div className="lg:col-span-4 space-y-6">
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="max-w-3xl mx-auto mb-12"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="bg-[#0A0A0B]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 relative overflow-hidden group"
                         >
-                            <div className="relative group">
-                                <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/50 via-purple-500/50 to-pink-500/50 rounded-2xl opacity-50 blur-sm" />
-                                <div className="relative bg-card/80 backdrop-blur-xl rounded-2xl border border-border/50 p-6">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <Target className="w-5 h-5 text-primary" />
-                                        <h3 className="font-semibold text-foreground">Your Skill Genome</h3>
-                                        <span className="text-sm text-muted-foreground">
-                                            ({extractedSkills.skills.length} skills detected)
-                                        </span>
-                                    </div>
+                            <div className="absolute top-0 right-0 p-24 bg-cyan-500/5 blur-3xl rounded-full" />
+
+                            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                                <DnaIcon />
+                                Genome Identity
+                            </h3>
+
+                            {extractedSkills && extractedSkills.skills.length > 0 ? (
+                                <div className="space-y-4">
                                     <div className="flex flex-wrap gap-2">
-                                        {extractedSkills.skills.slice(0, 12).map((skill, index) => (
-                                            <motion.span
-                                                key={skill.name}
-                                                initial={{ opacity: 0, scale: 0.8 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ delay: 0.4 + index * 0.05 }}
-                                                className="px-3 py-1.5 rounded-full text-sm font-medium"
-                                                style={{
-                                                    backgroundColor: skill.color,
-                                                    color: skill.textColor,
-                                                }}
+                                        {extractedSkills.skills.map((skill, i) => (
+                                            <span
+                                                key={i}
+                                                className="px-2.5 py-1 rounded bg-white/5 border border-white/10 text-xs font-mono text-gray-300 flex items-center gap-2 hover:bg-white/10 transition-colors cursor-default"
                                             >
+                                                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: skill.color }} />
                                                 {skill.name}
-                                            </motion.span>
-                                        ))}
-                                        {extractedSkills.skills.length > 12 && (
-                                            <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-muted text-muted-foreground">
-                                                +{extractedSkills.skills.length - 12} more
                                             </span>
-                                        )}
+                                        ))}
+                                    </div>
+
+                                    <div className="pt-6 border-t border-white/5">
+                                        <div className="flex justify-between text-xs text-gray-500 mb-2 font-mono">
+                                            <span>SKILL SYNTHESIS</span>
+                                            <span>{extractedSkills.skills.length * 12}%</span>
+                                        </div>
+                                        <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-gradient-to-r from-cyan-500 to-violet-500"
+                                                style={{ width: `${Math.min(extractedSkills.skills.length * 12, 100)}%` }}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    )}
+                            ) : (
+                                <div className="text-center py-8 text-gray-500 italic">
+                                    No genome data detected.
+                                </div>
+                            )}
 
-                    {/* Interview Type Cards */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
-                        className="max-w-5xl mx-auto mb-16"
-                    >
-                        <h2 className="text-xl font-semibold text-foreground text-center mb-8">
-                            Choose Your Interview Type
-                        </h2>
-                        <div className="grid md:grid-cols-2 gap-6">
+                            {/* Decorative Corner */}
+                            <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-cyan-500/20 rounded-tr-2xl" />
+                        </motion.div>
+
+                        {/* Quick Actions / Tips */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="bg-gradient-to-br from-violet-900/20 to-purple-900/10 border border-violet-500/20 rounded-2xl p-6"
+                        >
+                            <h4 className="text-sm font-bold text-violet-300 mb-2 flex items-center gap-2">
+                                <Sparkles className="w-4 h-4" />
+                                Pro Tip
+                            </h4>
+                            <p className="text-sm text-gray-400 leading-relaxed">
+                                The Behavioral module is now unlocked. Use it to practice your STAR responses layout. The AI will analyze your voice tone and confidence.
+                            </p>
+                        </motion.div>
+                    </div>
+
+                    {/* Right Col: Simulation Modules */}
+                    <div className="lg:col-span-8">
+                        <div className="grid md:grid-cols-2 gap-4">
                             {interviewTypes.map((type, index) => (
                                 <motion.div
                                     key={type.id}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.5 + index * 0.1 }}
-                                    whileHover={{ scale: 1.02, y: -4 }}
-                                    className={`relative group ${type.comingSoon ? "cursor-not-allowed" : "cursor-pointer"}`}
-                                    onClick={() => {
-                                        if (!type.comingSoon) {
-                                            setSelectedInterviewType(type.id);
-                                        }
-                                    }}
+                                    transition={{ delay: 0.2 + (index * 0.1) }}
+                                    onClick={() => handleLaunch(type.id)}
+                                    className={`relative group cursor-pointer overflow-hidden rounded-2xl border transition-all duration-300 bg-[#0A0A0B]/60 hover:bg-[#0A0A0B]
+                                        ${selectedInterviewType === type.id
+                                            ? `border-${type.border}-500/60 ring-1 ring-${type.border}-500/50`
+                                            : "border-white/5 hover:border-white/20"}
+                                    `}
                                 >
-                                    <div
-                                        className={`relative bg-card/90 backdrop-blur-xl rounded-2xl border border-border/50 p-6 transition-all duration-300 ${selectedInterviewType === type.id
-                                            ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                                            : ""
-                                            } ${type.comingSoon ? "opacity-60" : ""}`}
-                                    >
-                                        {type.comingSoon && (
-                                            <div className="absolute top-4 right-4">
-                                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-gray-500/20 to-gray-600/20 border border-gray-500/30 text-gray-400 text-xs font-medium">
-                                                    <Clock className="w-3 h-3" />
-                                                    Coming Soon
-                                                </span>
-                                            </div>
-                                        )}
-                                        {type.available && (
-                                            <div className="absolute top-4 right-4">
-                                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 text-green-400 text-xs font-medium">
-                                                    <Zap className="w-3 h-3" />
-                                                    Available
-                                                </span>
-                                            </div>
-                                        )}
+                                    {/* Active Gradient Background on Hover */}
+                                    <div className={`absolute inset-0 bg-gradient-to-br ${type.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
-                                        <div className="flex items-start gap-4">
-                                            <div
-                                                className={`w-14 h-14 rounded-xl bg-gradient-to-r ${type.bgGradient} flex items-center justify-center border border-border/50`}
-                                            >
-                                                <type.icon
-                                                    className={`w-7 h-7 bg-gradient-to-r ${type.gradient} bg-clip-text text-transparent`}
-                                                    style={{
-                                                        stroke: `url(#${type.id}-gradient)`,
-                                                    }}
-                                                />
-                                                <svg width="0" height="0">
-                                                    <defs>
-                                                        <linearGradient
-                                                            id={`${type.id}-gradient`}
-                                                            x1="0%"
-                                                            y1="0%"
-                                                            x2="100%"
-                                                            y2="0%"
-                                                        >
-                                                            <stop
-                                                                offset="0%"
-                                                                stopColor={
-                                                                    type.gradient.includes("blue")
-                                                                        ? "#3b82f6"
-                                                                        : type.gradient.includes("purple")
-                                                                            ? "#a855f7"
-                                                                            : type.gradient.includes("orange")
-                                                                                ? "#f97316"
-                                                                                : "#22c55e"
-                                                                }
-                                                            />
-                                                            <stop
-                                                                offset="100%"
-                                                                stopColor={
-                                                                    type.gradient.includes("cyan")
-                                                                        ? "#06b6d4"
-                                                                        : type.gradient.includes("pink")
-                                                                            ? "#ec4899"
-                                                                            : type.gradient.includes("red")
-                                                                                ? "#ef4444"
-                                                                                : "#10b981"
-                                                                }
-                                                            />
-                                                        </linearGradient>
-                                                    </defs>
-                                                </svg>
-                                            </div>
+                                    {/* Selection Glow */}
+                                    {selectedInterviewType === type.id && (
+                                        <div className={`absolute inset-0 bg-${type.border}-500/10`} />
+                                    )}
 
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold text-lg text-foreground mb-1">
-                                                    {type.title}
-                                                </h3>
-                                                <p className="text-sm text-muted-foreground mb-3">
-                                                    {type.description}
-                                                </p>
-                                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                                    <span className="flex items-center gap-1">
-                                                        <Clock className="w-3.5 h-3.5" />
-                                                        {type.duration}
-                                                    </span>
-                                                    <span className="flex items-center gap-1">
-                                                        <Zap className="w-3.5 h-3.5" />
-                                                        {type.difficulty}
+                                    <div className="p-6 relative z-10">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br ${type.gradient} text-white shadow-lg shadow-${type.border}-500/20`}>
+                                                <type.icon className="w-6 h-6" />
+                                            </div>
+                                            {selectedInterviewType === type.id ? (
+                                                <div className="flex items-center gap-2">
+                                                    <span className="relative flex h-3 w-3">
+                                                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full bg-${type.border}-400 opacity-75`}></span>
+                                                        <span className={`relative inline-flex rounded-full h-3 w-3 bg-${type.border}-500`}></span>
                                                     </span>
                                                 </div>
-                                            </div>
-
-                                            {selectedInterviewType === type.id && (
-                                                <motion.div
-                                                    initial={{ scale: 0 }}
-                                                    animate={{ scale: 1 }}
-                                                    className="absolute top-4 right-4"
-                                                >
-                                                    <CheckCircle className="w-6 h-6 text-primary" />
-                                                </motion.div>
+                                            ) : (
+                                                <div className="px-2 py-1 rounded bg-white/5 border border-white/5 text-[10px] uppercase font-mono text-gray-500">
+                                                    STANDBY
+                                                </div>
                                             )}
                                         </div>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </motion.div>
 
-                    {/* Features Grid */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.6 }}
-                        className="max-w-4xl mx-auto mb-16"
-                    >
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {features.map((feature, index) => (
-                                <motion.div
-                                    key={feature.title}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.7 + index * 0.1 }}
-                                    whileHover={{ y: -4 }}
-                                    className="group"
-                                >
-                                    <div className="relative bg-card/60 backdrop-blur-xl rounded-xl border border-border/50 p-5 text-center transition-all duration-300 hover:border-primary/30 hover:bg-card/80">
-                                        <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                                            <feature.icon className="w-6 h-6 text-primary" />
+                                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-cyan-50 transition-colors">
+                                            {type.title}
+                                        </h3>
+                                        <div className={`text-[10px] font-mono mb-4 text-${type.border}-400/80 uppercase tracking-wider`}>
+                                            {type.subtitle}
                                         </div>
-                                        <h4 className="font-medium text-foreground text-sm mb-1">
-                                            {feature.title}
-                                        </h4>
-                                        <p className="text-xs text-muted-foreground">
-                                            {feature.description}
+
+                                        <p className="text-sm text-gray-400 mb-6 min-h-[40px]">
+                                            {type.description}
                                         </p>
+
+                                        {/* Features List */}
+                                        <div className="space-y-2 mb-6">
+                                            {type.features.map((feature, i) => (
+                                                <div key={i} className="flex items-center gap-2 text-xs text-gray-500">
+                                                    <CheckCircle className={`w-3 h-3 text-${type.border}-500/50`} />
+                                                    {feature}
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                                            <div className="flex gap-4 text-xs font-mono text-gray-500">
+                                                <span className="flex items-center gap-1.5">
+                                                    <Clock className="w-3.5 h-3.5" /> {type.duration}
+                                                </span>
+                                                <span className="flex items-center gap-1.5">
+                                                    <Activity className="w-3.5 h-3.5" /> {type.difficulty}
+                                                </span>
+                                            </div>
+                                            <ChevronRight className={`w-4 h-4 text-gray-600 transition-transform group-hover:translate-x-1 group-hover:text-${type.border}-400`} />
+                                        </div>
                                     </div>
                                 </motion.div>
                             ))}
                         </div>
-                    </motion.div>
-
-                    {/* Start Interview CTA */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.8 }}
-                        className="text-center"
-                    >
-                        <div className="relative inline-block group">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-purple-500 to-pink-500 rounded-xl opacity-75 blur-sm group-hover:opacity-100 transition-all duration-500" />
-                            <Button
-                                variant="genome"
-                                size="xl"
-                                className="relative bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white shadow-2xl shadow-primary/25"
-                                disabled={!selectedInterviewType || selectedInterviewType !== "technical"}
-                                onClick={() => {
-                                    if (selectedInterviewType === "technical") {
-                                        navigate("/interview/technical");
-                                    }
-                                }}
-                            >
-                                <Play className="w-5 h-5" />
-                                Start Mock Interview
-                                <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                            </Button>
-                        </div>
-                        {!selectedInterviewType && (
-                            <p className="text-sm text-muted-foreground mt-4">
-                                Select Technical Interview to begin
-                            </p>
-                        )}
-                    </motion.div>
-
-                    {/* Stats Section */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 1 }}
-                        className="max-w-3xl mx-auto mt-20"
-                    >
-                        <div className="relative group">
-                            <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 via-purple-500/30 to-pink-500/30 rounded-2xl opacity-50 blur-sm" />
-                            <div className="relative bg-card/60 backdrop-blur-xl rounded-2xl border border-border/50 p-8">
-                                <div className="grid grid-cols-3 gap-8 text-center">
-                                    <div>
-                                        <div className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-                                            10K+
-                                        </div>
-                                        <div className="text-sm text-muted-foreground mt-1">
-                                            Interviews Completed
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
-                                            94%
-                                        </div>
-                                        <div className="text-sm text-muted-foreground mt-1">
-                                            Success Rate
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent">
-                                            500+
-                                        </div>
-                                        <div className="text-sm text-muted-foreground mt-1">
-                                            Companies Hiring
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
+                    </div>
                 </div>
-            </section>
 
-            <Footer />
+                {/* Launch Overlay Button (Fixed Bottom) */}
+                <AnimatePresence>
+                    {selectedInterviewType && (
+                        <motion.div
+                            initial={{ y: 100 }}
+                            animate={{ y: 0 }}
+                            exit={{ y: 100 }}
+                            className="fixed bottom-0 left-0 right-0 z-50 p-6 flex justify-center pointer-events-none"
+                        >
+                            <div className="pointer-events-auto">
+                                <Button
+                                    size="lg"
+                                    onClick={() => handleLaunch(selectedInterviewType)}
+                                    className="h-14 px-8 rounded-full bg-white text-black hover:bg-gray-200 shadow-[0_0_40px_rgba(255,255,255,0.3)] border border-white/50 text-base font-bold tracking-wide transition-all hover:scale-105 active:scale-95"
+                                >
+                                    {launching ? (
+                                        <span className="flex items-center gap-2">
+                                            INITIALIZING... <Zap className="w-4 h-4 animate-pulse" />
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center gap-2">
+                                            INITIALIZE PROTOCOL <Play className="w-4 h-4" />
+                                        </span>
+                                    )}
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+            </div>
         </div>
     );
 };
+
+// Simple visual components
+const DnaIcon = () => (
+    <svg className="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M2 15c6.667-6 13.333 0 20-6" />
+        <path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993" />
+        <path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993" />
+        <path d="M17 6l-2.5-2.5" />
+        <path d="M14 8l-1-1" />
+        <path d="M7 18l2.5 2.5" />
+        <path d="M3.5 14.5l-1 1" />
+        <path d="M20.5 9.5l1 1" />
+        <path d="M14 16l1 1" />
+        <path d="M8 6l1 1" />
+    </svg>
+);
 
 export default Interview;

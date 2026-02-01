@@ -1,6 +1,16 @@
 const express = require("express");
 const { supabaseAdmin, isSupabaseConfigured } = require("../config/supabaseClient");
-const { generateQuestion, evaluateAnswer, isMistralConfigured } = require("../services/mistralService");
+const {
+    generateQuestion,
+    generateStructuredQuestion,
+    generateFollowUpQuestion,
+    evaluateAnswer,
+    evaluateAnswerEnhanced,
+    generateInterviewReport,
+    isMistralConfigured
+} = require("../services/mistralService");
+const { makeFollowUpDecision, getHint } = require("../services/followUpService");
+const { getQuestionForTopic, matchSkillsToTopics, getSubtopicsForTopic } = require("../data/questionBank");
 
 const router = express.Router();
 
@@ -15,10 +25,10 @@ const checkConfig = (req, res, next) => {
     next();
 };
 
-// Start a new interview session
-router.post("/start", checkConfig, async (req, res) => {
+// Start a new interview session with structured questions
+router.post("/start", async (req, res) => {
     try {
-        const { skills, userId } = req.body;
+        const { skills, userId, useFollowUpEngine = true } = req.body;
 
         if (!skills || !Array.isArray(skills) || skills.length === 0) {
             return res.status(400).json({
@@ -36,7 +46,7 @@ router.post("/start", checkConfig, async (req, res) => {
                 .insert({
                     user_id: userId,
                     skills: skills.map(s => typeof s === 'object' ? s.name : s),
-                    total_questions: 6,
+                    total_questions: 10, // Max questions for follow-up mode
                     completed_questions: 0,
                     status: "in_progress",
                 })
@@ -50,8 +60,38 @@ router.post("/start", checkConfig, async (req, res) => {
             }
         }
 
-        // Generate first question
         const skillNames = skills.map(s => typeof s === 'object' ? s.name : s);
+
+        // Use the new structured question generator
+        if (useFollowUpEngine) {
+            const questionData = await generateStructuredQuestion(skillNames);
+
+            return res.json({
+                success: true,
+                data: {
+                    sessionId,
+                    questionNumber: 1,
+                    totalQuestions: 10,
+                    question: questionData.question,
+                    // Include structured data for follow-up engine
+                    questionData: {
+                        topic: questionData.topic,
+                        subtopic: questionData.subtopic,
+                        difficulty: questionData.difficulty,
+                        expected_keywords: questionData.expected_keywords,
+                        follow_ups: questionData.follow_ups,
+                        isFollowUp: false
+                    },
+                    currentTopic: questionData.topic,
+                    currentSubtopic: questionData.subtopic,
+                    attemptCount: 0,
+                    isFollowUp: false,
+                    recruiterMessage: "Let's begin! Tell me about your experience.",
+                },
+            });
+        }
+
+        // Legacy mode - simple question generation
         const question = await generateQuestion(skillNames, 1, []);
 
         res.json({
@@ -72,10 +112,22 @@ router.post("/start", checkConfig, async (req, res) => {
     }
 });
 
-// Submit an answer and get next question or results
-router.post("/submit", checkConfig, async (req, res) => {
+// Submit an answer with follow-up engine support
+router.post("/submit", async (req, res) => {
     try {
-        const { sessionId, questionNumber, question, answer, skills, userId, previousQuestions = [] } = req.body;
+        const {
+            sessionId,
+            questionNumber,
+            question,
+            answer,
+            skills,
+            userId,
+            previousQuestions = [],
+            // New follow-up engine params
+            questionData = null,
+            topicAttempts = {},
+            useFollowUpEngine = true
+        } = req.body;
 
         if (!question || !answer) {
             return res.status(400).json({
@@ -86,7 +138,158 @@ router.post("/submit", checkConfig, async (req, res) => {
 
         const skillNames = skills ? skills.map(s => typeof s === 'object' ? s.name : s) : [];
 
-        // Evaluate the answer
+        // Use enhanced evaluation with follow-up engine
+        if (useFollowUpEngine && questionData) {
+            const evaluation = await evaluateAnswerEnhanced(
+                question,
+                answer,
+                skillNames,
+                questionData.expected_keywords || []
+            );
+
+            // Store answer in database
+            if (isSupabaseConfigured() && supabaseAdmin && sessionId && !sessionId.startsWith("session_")) {
+                await supabaseAdmin
+                    .from("interview_answers")
+                    .insert({
+                        session_id: sessionId,
+                        question_number: questionNumber,
+                        question,
+                        answer,
+                        score: evaluation.score,
+                        feedback: evaluation.feedback,
+                        classification: evaluation.classification,
+                        topic: questionData?.topic || "General",
+                    });
+
+                await supabaseAdmin
+                    .from("interview_sessions")
+                    .update({ completed_questions: questionNumber })
+                    .eq("id", sessionId);
+            }
+
+            // Use the follow-up decision engine
+            const decision = makeFollowUpDecision({
+                currentQuestion: questionData,
+                answer,
+                userSkills: skillNames,
+                topicAttempts,
+                questionCount: questionNumber,
+                maxQuestions: 10
+            });
+
+            // If decision doesn't have a next question, generate one
+            if (!decision.isComplete && !decision.nextQuestion) {
+                const followUp = await generateFollowUpQuestion(
+                    questionData.topic,
+                    questionData.subtopic,
+                    questionData.difficulty,
+                    evaluation.classification,
+                    question,
+                    answer
+                );
+                decision.nextQuestion = followUp;
+            }
+
+            // Check if interview is complete
+            if (decision.isComplete) {
+                let averageScore = evaluation.score;
+
+                if (isSupabaseConfigured() && supabaseAdmin && sessionId && !sessionId.startsWith("session_")) {
+                    const { data: answers } = await supabaseAdmin
+                        .from("interview_answers")
+                        .select("score")
+                        .eq("session_id", sessionId);
+
+                    if (answers && answers.length > 0) {
+                        const totalScore = answers.reduce((sum, a) => sum + Number(a.score), 0);
+                        averageScore = totalScore / answers.length;
+
+                        await supabaseAdmin
+                            .from("interview_sessions")
+                            .update({
+                                average_score: averageScore,
+                                status: "completed",
+                                completed_at: new Date().toISOString(),
+                            })
+                            .eq("id", sessionId);
+                    }
+                }
+
+                // Generate comprehensive report
+                let interviewReport = null;
+                if (isSupabaseConfigured() && supabaseAdmin && sessionId && !sessionId.startsWith("session_")) {
+                    const { data: allAnswers } = await supabaseAdmin
+                        .from("interview_answers")
+                        .select("*")
+                        .eq("session_id", sessionId)
+                        .order("question_number", { ascending: true });
+
+                    if (allAnswers) {
+                        interviewReport = await generateInterviewReport({
+                            skills: skillNames,
+                            answers: allAnswers,
+                            averageScore: Math.round(averageScore * 10) / 10,
+                            totalQuestions: allAnswers.length
+                        });
+                    }
+                }
+
+                // If no database or report failed, try to generate with current context (fallback)
+                if (!interviewReport) {
+                    interviewReport = await generateInterviewReport({
+                        skills: skillNames,
+                        answers: [{
+                            question,
+                            answer,
+                            score: evaluation.score,
+                            feedback: evaluation.feedback,
+                            topic: questionData.topic
+                        }], // Partial data if DB fails
+                        averageScore: evaluation.score,
+                        totalQuestions: questionNumber
+                    });
+                }
+
+                return res.json({
+                    success: true,
+                    data: {
+                        isComplete: true,
+                        evaluation,
+                        averageScore: Math.round(averageScore * 10) / 10,
+                        classification: evaluation.classification,
+                        recruiterMessage: decision.recruiterMessage || "Great job completing the interview!",
+                        interviewReport // Return the full report
+                    },
+                });
+            }
+
+            // Return next question with all follow-up data
+            return res.json({
+                success: true,
+                data: {
+                    isComplete: false,
+                    evaluation,
+                    // Next question data
+                    nextQuestionNumber: questionNumber + 1,
+                    nextQuestion: decision.nextQuestion.question,
+                    nextQuestionData: decision.nextQuestion,
+                    // Follow-up engine data
+                    classification: evaluation.classification,
+                    currentTopic: decision.currentTopic,
+                    currentSubtopic: decision.currentSubtopic,
+                    attemptCount: decision.attemptCount,
+                    isFollowUp: decision.isFollowUp,
+                    recruiterMessage: evaluation.recruiterMessage || decision.recruiterMessage,
+                    hint: decision.hint,
+                    topicAttempts: decision.topicAttempts,
+                    matchedKeywords: evaluation.matchedKeywords,
+                    matchPercentage: evaluation.matchPercentage,
+                },
+            });
+        }
+
+        // Legacy mode - original evaluation flow
         const evaluation = await evaluateAnswer(question, answer, skillNames);
 
         // Store answer in database if configured
@@ -100,6 +303,7 @@ router.post("/submit", checkConfig, async (req, res) => {
                     answer,
                     score: evaluation.score,
                     feedback: evaluation.feedback,
+                    topic: questionData?.topic || skillNames[0] || "General",
                 });
 
             if (error) {
@@ -379,4 +583,3 @@ router.post("/save-results", async (req, res) => {
 });
 
 module.exports = router;
-

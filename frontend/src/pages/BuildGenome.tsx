@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { NeuralBackground } from "@/components/NeuralBackground";
 import {
@@ -220,9 +219,7 @@ const BuildGenome = () => {
 
     return (
         <div className="min-h-screen bg-background">
-            <Navbar />
-
-            <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+            <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-12">
                 <NeuralBackground />
 
                 {/* Gradient Overlays */}

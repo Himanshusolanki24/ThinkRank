@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { NeuralBackground } from "@/components/NeuralBackground";
 import {
@@ -120,10 +119,8 @@ const HowItWorks = () => {
 
     return (
         <div className="min-h-screen bg-background">
-            <Navbar />
-
             {/* Hero Section */}
-            <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden pt-16">
+            <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden pt-8">
                 <NeuralBackground />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
 

@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-ro
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProfileCompletionModal } from "@/components/ProfileCompletionModal";
+import { Layout } from "@/components/Layout";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Tasks from "./pages/Tasks";
@@ -19,6 +20,8 @@ import Interview from "./pages/Interview";
 import TechnicalInterview from "./pages/TechnicalInterview";
 import CompleteProfile from "./pages/CompleteProfile";
 import TaskDetail from "./pages/TaskDetail";
+import CodingSignals from "./pages/CodingSignals";
+import MNCsInterview from "./pages/MNCsInterview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,22 +63,27 @@ const AppContent = () => {
         onComplete={handleCompleteProfile}
         userName={profile?.full_name?.split(" ")[0] || "there"}
       />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/build" element={<BuildGenome />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/interview" element={<Interview />} />
-        <Route path="/interview/technical" element={<TechnicalInterview />} />
-        <Route path="/tasks" element={<Tasks />} />
-        <Route path="/tasks/:taskId" element={<TaskDetail />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/complete-profile" element={<CompleteProfile />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/build" element={<BuildGenome />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/interview" element={<Interview />} />
+          <Route path="/interview/technical" element={<TechnicalInterview />} />
+          <Route path="/tasks" element={<Tasks />} />
+          <Route path="/tasks/:taskId" element={<TaskDetail />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/complete-profile" element={<CompleteProfile />} />
+          <Route path="/coding-signals" element={<CodingSignals />} />
+          <Route path="/mncs-interview" element={<MNCsInterview />} />
+          <Route path="/technical-interview" element={<TechnicalInterview />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Layout>
     </>
   );
 };

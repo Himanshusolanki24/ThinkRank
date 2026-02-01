@@ -9,9 +9,9 @@ import {
 } from "recharts";
 
 const skillData = [
-  { skill: "JavaScript", value: 85, fullMark: 100 },
-  { skill: "React", value: 78, fullMark: 100 },
-  { skill: "TypeScript", value: 72, fullMark: 100 },
+  { skill: "JavaScript", value: 90, fullMark: 100 },
+  { skill: "React", value: 85, fullMark: 100 },
+  { skill: "TypeScript", value: 75, fullMark: 100 },
   { skill: "Node.js", value: 65, fullMark: 100 },
   { skill: "Python", value: 58, fullMark: 100 },
   { skill: "SQL", value: 70, fullMark: 100 },
@@ -116,9 +116,30 @@ export const SkillGenomePreview = () => {
             <p className="text-sm text-muted-foreground">Skills Tracked</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-display font-bold text-skill-beginner">3</p>
             <p className="text-sm text-muted-foreground">Need Focus</p>
           </div>
+        </div>
+
+        {/* Decorative Holographic Elements */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+          {/* Rotating Rings */}
+          <motion.div
+            className="absolute inset-[10%] border border-cyan-500/20 rounded-full border-dashed"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.div
+            className="absolute inset-[15%] border border-purple-500/20 rounded-full"
+            animate={{ rotate: -360 }}
+            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            style={{ borderTopColor: "transparent", borderBottomColor: "transparent" }}
+          />
+
+          {/* Corner Brackets */}
+          <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-cyan-500/50 rounded-tl-lg" />
+          <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-cyan-500/50 rounded-tr-lg" />
+          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-cyan-500/50 rounded-bl-lg" />
+          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-cyan-500/50 rounded-br-lg" />
         </div>
       </div>
     </motion.div>
