@@ -399,11 +399,11 @@ const ActivityHeatmap = ({ data, loading = false, year: propYear }: ActivityHeat
                     const future = isFuture(date);
 
                     return (
-                      <motion.div
+                      <div
                         key={`${colIdx}-${rowIdx}`}
-                        whileHover={!future ? { scale: 1.3, zIndex: 10 } : {}}
                         onMouseEnter={(e) => !future && showTooltip(e, count, date)}
                         onMouseLeave={hideTooltip}
+                        className="hover:scale-125 hover:z-10"
                         style={{
                           width: CELL_SIZE,
                           height: CELL_SIZE,
@@ -416,7 +416,7 @@ const ActivityHeatmap = ({ data, loading = false, year: propYear }: ActivityHeat
                               : "1px solid rgba(255,255,255,0.05)",
                           opacity: future ? 0.3 : 1,
                           cursor: future ? "default" : "pointer",
-                          transition: "all 150ms ease",
+                          transition: "transform 100ms ease",
                         }}
                       />
                     );

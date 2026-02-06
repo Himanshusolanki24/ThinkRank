@@ -14,6 +14,7 @@ import {
     Brain,
     Code2,
     Building2,
+    Map,
 } from "lucide-react";
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
     { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/coding-signals", label: "Coding Signals", icon: Code2 },
     { path: "/mncs-interview", label: "MNCs Interview", icon: Building2 },
+    { path: "/learning-roadmap", label: "Learning Roadmap", icon: Map },
     { path: "/tasks", label: "Daily Tasks", icon: Target },
     { path: "/analytics", label: "Analytics", icon: BarChart3 },
     { path: "/profile", label: "Profile", icon: User },

@@ -22,6 +22,7 @@ import CompleteProfile from "./pages/CompleteProfile";
 import TaskDetail from "./pages/TaskDetail";
 import CodingSignals from "./pages/CodingSignals";
 import MNCsInterview from "./pages/MNCsInterview";
+import LearningRoadmap from "./pages/LearningRoadmap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -80,6 +81,7 @@ const AppContent = () => {
           <Route path="/coding-signals" element={<CodingSignals />} />
           <Route path="/mncs-interview" element={<MNCsInterview />} />
           <Route path="/technical-interview" element={<TechnicalInterview />} />
+          <Route path="/learning-roadmap" element={<LearningRoadmap />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
