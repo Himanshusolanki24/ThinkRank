@@ -1,178 +1,133 @@
-# 🧬 Skill Genome
+# 🚀 ThinkRank
 
-**Visualize Your Skills. Evolve Your Future.**
+<div align="center">
 
-Skill Genome is an AI-powered platform that maps your skills as a living genome, identifies weaknesses with precision, and accelerates your growth through personalized daily micro-tasks.
+**Map Your Skills. Chart Your Path. Rank Higher.**
 
-![Skill Genome Preview](https://via.placeholder.com/1200x600/1a1a1a/00d4ff?text=Skill+Genome+Platform)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+
+*An AI-powered platform that creates a living genome map of your skills, provides personalized learning roadmaps, and accelerates your career growth.*
+
+</div>
+
+---
 
 ## ✨ Features
 
-### 🎯 Core Capabilities
-- **AI Skill Mapping**: Advanced AI creates a living genome map of your skills with real-time connections and proficiency levels
-- **Multi-Source Analysis**: Extract skills from GitHub repositories or resume uploads
+### 🧬 Skill Genome Mapping
+- **AI-Powered Analysis**: Extract and analyze skills from GitHub profiles or resume uploads
+- **Interactive Visualizations**: D3.js-powered skill network graphs and heatmaps
 - **Weakness Detection**: Identify skill gaps with AI precision and priority ranking
-- **Personalized Tasks**: Daily 15-30 minute micro-tasks tailored to your skill gaps
-- **Live Visualizations**: Interactive skill network graphs and heatmaps
-- **Coding Signals**: Scrape and analyze coding activity from multiple platforms (LeetCode, CodeChef, Codeforces, HackerRank)
-
-### 🚀 Advanced Features
-- **Skill DNA Visualization**: Unique genetic-style representation of your skill profile
 - **Industry Benchmarks**: Compare your skills against industry standards
-- **Growth Tracking**: Monitor your skill evolution over time
-- **Interview Mode**: AI-powered interview preparation with skill-based questions
-- **Activity Heatmap**: GitHub-style contribution tracking for skill development
+
+### 🗺️ Personalized Learning Roadmaps
+- **Curated Learning Paths**: Structured roadmaps for different tech stacks (Frontend, Backend, AI/ML, etc.)
+- **Progress Tracking**: Visual progress indicators with node-based milestones
+- **Topic-Based Learning**: Organized topics with estimated completion times
+- **Status Management**: Track completed, active, and locked learning nodes
+
+### 📊 Coding Signals
+- **Multi-Platform Integration**: LeetCode, CodeChef, Codeforces, HackerRank
+- **Performance Analytics**: Track ratings, submissions, and problem-solving stats
+- **Activity Heatmaps**: GitHub-style contribution tracking
+
+### 🎯 Daily Tasks & Growth
+- **Personalized Micro-Tasks**: 15-30 minute daily exercises tailored to your gaps
+- **Streak Tracking**: Gamified consistency with streak rewards
+- **Progress Dashboard**: Monitor your skill evolution over time
+
+### 💼 Interview Prep
+- **MNC Interview Mode**: Practice with company-specific question patterns
+- **AI-Powered Feedback**: Get real-time feedback on your responses
+- **Skill-Based Questions**: Questions tailored to your skill profile
+
+---
 
 ## 🏗️ Architecture
 
-This is a full-stack application built with modern technologies:
-
 ```
-skill-genome/
+ThinkRank/
 ├── 🌐 frontend/          # React + Vite + TypeScript
+│   ├── src/
+│   │   ├── components/   # Reusable UI components
+│   │   │   ├── roadmap/  # Learning roadmap components
+│   │   │   ├── ui/       # shadcn/ui base components
+│   │   │   └── ...
+│   │   ├── pages/        # Route components
+│   │   ├── contexts/     # React contexts (Auth, Theme)
+│   │   ├── hooks/        # Custom React hooks
+│   │   ├── data/         # Static data (roadmaps, etc.)
+│   │   └── lib/          # Utilities & configurations
+│   └── public/           # Static assets
+│
 ├── ⚙️ backend/           # Node.js + Express API
+│   ├── src/
+│   │   ├── routes/       # API endpoints
+│   │   ├── services/     # Business logic
+│   │   └── config/       # Configuration
+│   └── sql/              # Database schemas
+│
 └── 🐍 coding_signals/    # Python FastAPI Microservice
+    ├── scrapers/         # Platform-specific scrapers
+    ├── normalization/    # Data processing
+    └── utils/            # Shared utilities
 ```
 
-### Tech Stack
+---
 
-#### Frontend
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS + shadcn/ui components
-- **Animations**: Framer Motion
-- **Charts**: Recharts, D3.js, Cytoscape.js
-- **State Management**: React Context + Hooks
+## � Quick Start
 
-#### Backend
-- **Runtime**: Node.js 18+
-- **Framework**: Express.js
-- **Database**: Supabase (PostgreSQL)
-- **AI Services**: Google Generative AI, Mistral AI
-- **File Processing**: PDF parsing, GitHub API integration
+### Prerequisites
+- **Node.js** 18+
+- **Python** 3.9+
+- **npm** or **yarn**
 
-#### Coding Signals Engine
-- **Framework**: FastAPI
-- **Web Scraping**: Playwright, httpx
-- **Data Processing**: Python 3.9+
-- **Platforms**: LeetCode, CodeChef, Codeforces, HackerRank
-
-## 🚀 Quick Start
-
-Run each service in a **separate terminal window**:
-
-### 1. Backend Service
+### 1️⃣ Clone the Repository
 ```bash
-cd backend
-npm install
-npm run dev
-# Runs on http://localhost:3001
+git clone https://github.com/Himanshusolanki24/ThinkRank.git
+cd ThinkRank
 ```
 
-### 2. Frontend Application
+### 2️⃣ Start the Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
-# Runs on http://localhost:3000
+# → http://localhost:5173
 ```
 
-### 3. Coding Signals Engine
+### 3️⃣ Start the Backend
+```bash
+cd backend
+npm install
+npm run dev
+# → http://localhost:3001
+```
+
+### 4️⃣ Start Coding Signals Engine (Optional)
 ```bash
 cd coding_signals
 pip3 install -r requirements.txt
 playwright install chromium
 python3 -m uvicorn main:app --reload --port 8000
-# Runs on http://localhost:8000
+# → http://localhost:8000
 ```
 
-### ✅ Verification
+---
 
-Once all services are running:
-- **Frontend**: Visit [http://localhost:3000](http://localhost:3000)
-- **Backend Health**: Visit [http://localhost:3001/api/health](http://localhost:3001/api/health)
-- **Coding Signals Health**: Visit [http://localhost:8000/health](http://localhost:8000/health)
+## 🔧 Environment Variables
 
-## 🌟 Getting Started
-
-1. **Build Your Skill Genome**
-   - Connect your GitHub profile or upload your resume
-   - Let AI analyze and map your skills
-
-2. **Explore Your Skills**
-   - View your skill network visualization
-   - Check proficiency scores and connections
-   - Identify skill gaps and improvement areas
-
-3. **Start Daily Tasks**
-   - Receive personalized micro-tasks
-   - Complete 15-30 minute focused exercises
-   - Track your progress and skill evolution
-
-4. **Monitor Growth**
-   - View activity heatmaps
-   - Track skill development over time
-   - Compare against industry benchmarks
-
-## 📁 Project Structure
-
-```
-skill-genome/
-├── backend/
-│   ├── src/
-│   │   ├── routes/          # API endpoints
-│   │   ├── services/        # Business logic
-│   │   ├── config/          # Configuration
-│   │   └── data/           # Static data & utilities
-│   └── sql/                # Database schemas
-├── frontend/
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Route components
-│   │   ├── contexts/       # React contexts
-│   │   ├── hooks/          # Custom React hooks
-│   │   └── lib/           # Utilities & configurations
-│   └── public/            # Static assets
-└── coding_signals/
-    ├── scrapers/          # Platform-specific scrapers
-    ├── normalization/     # Data processing
-    └── utils/            # Shared utilities
+### Frontend (`frontend/.env`)
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_API_URL=http://localhost:3001
 ```
 
-## 🔌 API Endpoints
-
-### Backend (Node.js) - Port 3001
-- `GET /api/health` - Health check
-- `POST /api/auth/login` - User authentication
-- `POST /api/extract-skills/github` - Extract skills from GitHub
-- `POST /api/extract-skills/resume` - Extract skills from resume
-- `GET /api/daily-tasks` - Get personalized daily tasks
-- `POST /api/interview/start` - Start interview session
-
-### Coding Signals (Python) - Port 8000
-- `GET /health` - Health check
-- `POST /coding-signals/fetch` - Fetch coding platform data
-- `GET /platforms` - List supported platforms
-
-## 🎨 Key Components
-
-### Skill Visualization
-- **D3SkillNetwork**: Interactive network graph of skill connections
-- **CytoscapeSkillGraph**: Advanced graph visualization
-- **ActivityHeatmap**: GitHub-style activity tracking
-- **SkillDNA**: Genetic-style skill representation
-
-### User Experience
-- **Glassmorphism Design**: Modern glass-effect UI
-- **Neural Background**: Animated background effects
-- **Responsive Layout**: Mobile-first design approach
-- **Dark Theme**: Optimized for developer workflows
-
-## 🔧 Configuration
-
-### Environment Variables
-
-#### Backend (.env)
+### Backend (`backend/.env`)
 ```env
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_key
@@ -180,94 +135,90 @@ GOOGLE_AI_API_KEY=your_google_ai_key
 MISTRAL_API_KEY=your_mistral_api_key
 ```
 
-#### Coding Signals (.env)
-```env
-LEETCODE_SESSION=your_leetcode_session
-CODEFORCES_API_KEY=your_codeforces_key
-```
+---
 
-## 🚧 Development
+## 🎨 Tech Stack
 
-### Prerequisites
-- Node.js 18+
-- Python 3.9+
-- npm or yarn
-- pip
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui, Framer Motion |
+| **Visualization** | D3.js, Cytoscape.js, Recharts |
+| **Backend** | Node.js, Express.js |
+| **Database** | Supabase (PostgreSQL) |
+| **AI Services** | Google Generative AI, Mistral AI |
+| **Coding Signals** | Python, FastAPI, Playwright |
 
-### Development Commands
-```bash
-# Frontend development
-npm run dev          # Start dev server
-npm run build        # Build for production
-npm run lint         # Run ESLint
+---
 
-# Backend development
-npm run dev          # Start with watch mode
-npm start            # Start production
+## 📱 Key Pages
 
-# Coding Signals
-uvicorn main:app --reload --port 8000  # Start FastAPI server
-```
+| Page | Description |
+|------|-------------|
+| **Dashboard** | Overview of skills, daily tasks, and progress |
+| **Build Genome** | Upload resume or connect GitHub to build skill profile |
+| **Roadmap** | Interactive learning paths with progress tracking |
+| **Coding Signals** | View coding platform stats and rankings |
+| **MNC Interview** | Practice interviews for top tech companies |
+| **Analytics** | Deep dive into skill analytics and trends |
 
-## 📊 Database Schema
+---
 
-The application uses Supabase (PostgreSQL) with the following key tables:
-- `users` - User profiles and authentication
-- `user_skills` - Skill assignments and proficiency scores
-- `daily_tasks` - Personalized task assignments
-- `task_completions` - Task completion tracking
-- `interview_results` - Interview session data
-- `user_streaks` - Streak and activity tracking
+## 🔌 API Endpoints
+
+### Backend (Port 3001)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/health` | Health check |
+| `POST` | `/api/auth/login` | User authentication |
+| `POST` | `/api/extract-skills/github` | Extract skills from GitHub |
+| `POST` | `/api/extract-skills/resume` | Extract skills from resume |
+| `GET` | `/api/daily-tasks` | Get personalized daily tasks |
+| `POST` | `/api/interview/start` | Start interview session |
+
+### Coding Signals (Port 8000)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/health` | Health check |
+| `POST` | `/coding-signals/fetch` | Fetch coding platform data |
+| `GET` | `/platforms` | List supported platforms |
+
+---
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create your feature branch: `git checkout -b feature/AmazingFeature`
+3. Commit your changes: `git commit -m 'Add AmazingFeature'`
+4. Push to the branch: `git push origin feature/AmazingFeature`
 5. Open a Pull Request
 
-### Development Guidelines
-- Follow TypeScript best practices
-- Use conventional commit messages
-- Ensure all tests pass
-- Update documentation for new features
+---
 
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🌐 Deployment
+---
 
-### Frontend (Vercel)
-- Automatic deployment from main branch
-- Environment variables configured in Vercel dashboard
+## � Roadmap
 
-### Backend (Vercel Serverless)
-- Serverless functions deployment
-- Environment variables in Vercel settings
-
-### Coding Signals (Python Hosting)
-- Deploy to platforms supporting FastAPI
-- Ensure Playwright browser dependencies are available
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/skill-genome/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/skill-genome/discussions)
-- **Email**: support@skillgenome.dev
-
-## 🎯 Roadmap
-
-- [ ] Mobile app development
-- [ ] Integration with more coding platforms
-- [ ] Team skill analysis features
-- [ ] Advanced AI coaching
-- [ ] Skill certification system
-- [ ] API marketplace for skill data
+- [x] Skill Genome Mapping
+- [x] Personalized Learning Roadmaps
+- [x] Coding Signals Integration
+- [x] MNC Interview Mode
+- [ ] Mobile App Development
+- [ ] Team Skill Analysis
+- [ ] Skill Certification System
+- [ ] AI Career Coaching
 
 ---
+
+<div align="center">
 
 **Built with ❤️ for developers who want to evolve their skills continuously.**
 
 *"Your skill evolution engine powered by AI"*
+
+[⬆ Back to Top](#-thinkrank)
+
+</div>

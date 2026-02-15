@@ -277,7 +277,7 @@ const TechnicalInterview = () => {
     const saveResults = async (avgScore: number, totalQs: number) => {
         const skillNames = skills.map(s => s.name);
         try {
-            await fetch(`${API_BASE_URL}/api/interview/save-results`, {
+            const response = await fetch(`${API_BASE_URL}/api/interview/save-results`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -290,8 +290,16 @@ const TechnicalInterview = () => {
                     xpEarned: Math.round(avgScore * 10),
                 }),
             });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error("Failed to save interview results:", response.status, errorData);
+            } else {
+                const data = await response.json();
+                console.log("Interview results saved successfully:", data);
+            }
         } catch (saveErr) {
-            console.error("Failed to save interview results:", saveErr);
+            console.error("Failed to save interview results (network error):", saveErr);
         }
     };
 

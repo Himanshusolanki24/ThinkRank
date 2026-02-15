@@ -30,8 +30,9 @@ import {
 interface TopicAnalysis {
     topic: string;
     attempts: number;
-    strength: "Weak" | "Average" | "Strong";
+    strength: "Weak" | "Average" | "Strong" | "Not Assessed";
     score: number;
+    tested?: boolean;
 }
 
 interface InterviewReportProps {
@@ -74,61 +75,59 @@ export const InterviewReport = ({ report, onRestart, onDashboard }: InterviewRep
     // Safely get topicAnalysis with defaults
     const safeTopicAnalysis: TopicAnalysis[] = (report.topicAnalysis || []).map(topic => ({
         topic: topic.topic || "Unknown",
-        attempts: topic.attempts || 1,
+        attempts: topic.attempts || 0,
         strength: topic.strength || "Average",
-        score: typeof topic.score === 'number' ? topic.score : (report.summary?.averageScore || 5)
+        score: typeof topic.score === 'number' ? topic.score : (report.summary?.averageScore || 5),
+        tested: topic.tested !== false // Default to true if not specified
     }));
 
-    // Prepare data for Radar Chart - need at least 3 points for a good radar
-    // Prepare data for Radar Chart - need at least 3 points for a good radar
+    // Separate tested and untested topics for better visualization
+    const testedTopics = safeTopicAnalysis.filter(t => t.tested !== false && t.score > 0);
+    const untestedTopics = safeTopicAnalysis.filter(t => t.tested === false || t.score === 0);
+
+    // Prepare data for Radar Chart - Show ALL skills (tested get actual scores, untested get minimal visibility)
     let radarData = safeTopicAnalysis.map((topic) => ({
         topic: topic.topic.length > 12 ? topic.topic.slice(0, 10) + "..." : topic.topic,
         fullName: topic.topic,
-        score: topic.score,
+        score: topic.tested !== false && topic.score > 0 ? topic.score : 0.5, // Minimal score for untested
         max: 10,
+        tested: topic.tested !== false && topic.score > 0
     }));
 
-    // Pad with pending skills if less than 3 to ensure chart renders
-    if (radarData.length < 3) {
-        const existingTopics = new Set(radarData.map(r => r.fullName));
-        // Use provided skills or defaults from skills prop
-        const availableSkills = (report.skills || ["Problem Solving", "System Design", "Communication"])
-            .filter(s => !existingTopics.has(s) && !existingTopics.has(s.length > 12 ? s.slice(0, 10) + "..." : s));
+    // Ensure minimum 3 data points for radar chart (recharts requirement)
+    if (radarData.length > 0 && radarData.length < 3) {
+        const fillers = ["Problem Solving", "Communication", "Design"][radarData.length - 1]
+            ? ["Problem Solving", "Communication", "Design"].slice(radarData.length - 1)
+            : ["Topic 1", "Topic 2", "Topic 3"].slice(radarData.length - 1);
 
-        // Take needed amount
-        const needed = 3 - radarData.length;
-        availableSkills.slice(0, needed).forEach(skill => {
-            radarData.push({
-                topic: skill.length > 12 ? skill.slice(0, 10) + "..." : skill,
-                fullName: skill,
-                score: 2, // Low score to indicate unchecked
-                max: 10
-            });
-        });
-
-        // Final fallback if still less than 3
         while (radarData.length < 3) {
-            const filler = ["Logic", "Debug", "Design"][radarData.length] || `Topic ${radarData.length + 1}`;
+            const filler = fillers.shift() || `Topic ${radarData.length + 1}`;
             radarData.push({
                 topic: filler,
                 fullName: filler,
-                score: 3,
-                max: 10
+                score: 0.5,
+                max: 10,
+                tested: false
             });
         }
     }
 
-    // Prepare data for Bar Chart
-    const barData = safeTopicAnalysis.map((topic) => ({
-        name: topic.topic.length > 8 ? topic.topic.slice(0, 6) + "..." : topic.topic,
-        fullName: topic.topic,
-        score: topic.score,
-        strength: topic.strength,
-        attempts: topic.attempts,
-        fill: topic.strength === "Strong" ? CHART_COLORS.strong :
-            topic.strength === "Weak" ? CHART_COLORS.weak :
-                CHART_COLORS.average,
-    }));
+    // Prepare data for Bar Chart - Show ALL topics (tested and untested)
+    const barData = safeTopicAnalysis.map((topic) => {
+        const isTested = topic.tested !== false && topic.score > 0;
+        return {
+            name: topic.topic.length > 8 ? topic.topic.slice(0, 6) + "..." : topic.topic,
+            fullName: topic.topic,
+            score: topic.score,
+            strength: topic.strength,
+            attempts: topic.attempts,
+            tested: isTested,
+            fill: !isTested ? "#4A4A4A" : // Dark gray for untested
+                topic.strength === "Strong" ? CHART_COLORS.strong :
+                    topic.strength === "Weak" ? CHART_COLORS.weak :
+                        CHART_COLORS.average,
+        };
+    });
 
     // Check if we have enough data for charts
     const hasChartData = safeTopicAnalysis.length > 0;
@@ -138,12 +137,19 @@ export const InterviewReport = ({ report, onRestart, onDashboard }: InterviewRep
     const CustomTooltip = ({ active, payload }: any) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
+            const isTested = data.tested !== false;
             return (
                 <div className="bg-[#1A1A23] border border-white/10 rounded-lg p-3 shadow-xl">
                     <p className="text-white font-medium">{data.fullName || data.name}</p>
                     <p className="text-cyan-400 text-sm">Score: {data.score}/10</p>
-
-                    {data.attempts && <p className="text-gray-400 text-xs">{data.attempts} questions</p>}
+                    {data.attempts !== undefined && (
+                        <p className="text-gray-400 text-xs">
+                            {isTested ? `${data.attempts} questions` : 'Not assessed'}
+                        </p>
+                    )}
+                    {!isTested && (
+                        <p className="text-yellow-400 text-xs mt-1">⚠ Not tested in interview</p>
+                    )}
                 </div>
             );
         }
@@ -212,7 +218,7 @@ export const InterviewReport = ({ report, onRestart, onDashboard }: InterviewRep
                                 <p className="text-xs text-gray-400">Performance across topics</p>
                             </div>
                         </div>
-                        <div className="h-[280px]">
+                        <div className="h-[280px] min-h-[280px]">
                             {hasRadarData ? (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <RadarChart data={radarData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
@@ -268,7 +274,7 @@ export const InterviewReport = ({ report, onRestart, onDashboard }: InterviewRep
                                 <p className="text-xs text-gray-400">Score by topic area</p>
                             </div>
                         </div>
-                        <div className="h-[280px]">
+                        <div className="h-[280px] min-h-[280px]">
                             {barData.length > 0 ? (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart
@@ -311,7 +317,7 @@ export const InterviewReport = ({ report, onRestart, onDashboard }: InterviewRep
                             )}
                         </div>
                         {/* Legend */}
-                        <div className="flex items-center justify-center gap-6 mt-2">
+                        <div className="flex items-center justify-center gap-4 mt-2 flex-wrap">
                             <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS.strong }} />
                                 <span className="text-xs text-gray-400">Strong</span>
@@ -323,6 +329,10 @@ export const InterviewReport = ({ report, onRestart, onDashboard }: InterviewRep
                             <div className="flex items-center gap-2">
                                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS.weak }} />
                                 <span className="text-xs text-gray-400">Weak</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-[#4A4A4A]" />
+                                <span className="text-xs text-gray-400">Not Assessed</span>
                             </div>
                         </div>
                     </motion.div>

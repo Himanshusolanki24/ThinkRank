@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
 import { NeuralBackground } from "@/components/NeuralBackground";
+import { SkillGenomeDisplay } from "@/components/SkillGenomeDisplay";
 import {
     Github,
     FileText,
@@ -22,7 +23,7 @@ import {
 } from "lucide-react";
 import { API_BASE_URL, parseApiResponse } from "@/lib/api";
 
-type InputMode = "github" | "resume";
+type InputMode = "github" | "resume" | "skill-genome";
 
 interface Skill {
     name: string;
@@ -50,6 +51,7 @@ const BuildGenome = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [extractedSkills, setExtractedSkills] = useState<ExtractionResult | null>(null);
+    const [skillGenomeData, setSkillGenomeData] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
@@ -188,8 +190,44 @@ const BuildGenome = () => {
         }
     };
 
+    // Extract Skill Genome
+    const extractSkillGenome = async () => {
+        setIsLoading(true);
+        setError(null);
+        setSkillGenomeData(null);
+
+        try {
+            // Start loading animation
+            const loadingPromise = runLoadingAnimation();
+
+            // Fetch skill genome from API
+            const response = await fetch(`${API_BASE_URL}/api/github/skill-genome`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: githubUsername }),
+            });
+
+            const data = await parseApiResponse(response);
+
+            // Wait for loading animation to complete
+            await loadingPromise;
+
+            if (!data.success) {
+                throw new Error(data.error || "Failed to analyze skill genome");
+            }
+
+            setSkillGenomeData(data.data);
+        } catch (err: any) {
+            setError(err.message || "Failed to analyze skill genome");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleSubmit = () => {
-        if (inputMode === "github" && isValid) {
+        if (inputMode === "skill-genome" && isValid) {
+            extractSkillGenome();
+        } else if (inputMode === "github" && isValid) {
             extractGitHubSkills();
         } else if (inputMode === "resume" && resumeFile) {
             extractResumeSkills();
@@ -206,6 +244,7 @@ const BuildGenome = () => {
 
     const handleReset = () => {
         setExtractedSkills(null);
+        setSkillGenomeData(null);
         setError(null);
         setGithubUsername("");
         setResumeFile(null);
@@ -215,7 +254,8 @@ const BuildGenome = () => {
     const canSubmit =
         !isLoading &&
         !extractedSkills &&
-        ((inputMode === "github" && isValid) || (inputMode === "resume" && resumeFile));
+        !skillGenomeData &&
+        ((inputMode === "skill-genome" && isValid) || (inputMode === "github" && isValid) || (inputMode === "resume" && resumeFile));
 
     return (
         <div className="min-h-screen bg-background">
@@ -329,6 +369,41 @@ const BuildGenome = () => {
                                                 <p className="text-sm text-muted-foreground mt-2">
                                                     {Math.round(loadingProgress)}%
                                                 </p>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {/* Skill Genome Results */}
+                                    {!isLoading && skillGenomeData && (
+                                        <motion.div
+                                            key="skill-genome"
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -20 }}
+                                        >
+                                            <SkillGenomeDisplay data={skillGenomeData} />
+
+                                            {/* Action Buttons */}
+                                            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                                                <Button
+                                                    variant="genome-outline"
+                                                    size="lg"
+                                                    className="flex-1"
+                                                    onClick={handleReset}
+                                                >
+                                                    <RefreshCw className="w-4 h-4" />
+                                                    Analyze Another Profile
+                                                </Button>
+                                                <Button
+                                                    variant="genome"
+                                                    size="lg"
+                                                    className="flex-1 group"
+                                                    onClick={handleProceed}
+                                                >
+                                                    <Dna className="w-5 h-5" />
+                                                    Continue to Interview
+                                                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                                                </Button>
                                             </div>
                                         </motion.div>
                                     )}
@@ -454,23 +529,36 @@ const BuildGenome = () => {
                                                 <div className="inline-flex bg-background/50 rounded-xl p-1.5 border border-border">
                                                     <button
                                                         onClick={() => {
+                                                            setInputMode("skill-genome");
+                                                            setError(null);
+                                                        }}
+                                                        className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 ${inputMode === "skill-genome"
+                                                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                                                            : "text-muted-foreground hover:text-foreground"
+                                                            }`}
+                                                    >
+                                                        <Brain className="w-5 h-5" />
+                                                        Deep Analysis
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
                                                             setInputMode("github");
                                                             setError(null);
                                                         }}
-                                                        className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${inputMode === "github"
+                                                        className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 ${inputMode === "github"
                                                             ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
                                                             : "text-muted-foreground hover:text-foreground"
                                                             }`}
                                                     >
                                                         <Github className="w-5 h-5" />
-                                                        GitHub
+                                                        Quick Scan
                                                     </button>
                                                     <button
                                                         onClick={() => {
                                                             setInputMode("resume");
                                                             setError(null);
                                                         }}
-                                                        className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-300 ${inputMode === "resume"
+                                                        className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 ${inputMode === "resume"
                                                             ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
                                                             : "text-muted-foreground hover:text-foreground"
                                                             }`}
@@ -481,7 +569,7 @@ const BuildGenome = () => {
                                                 </div>
                                             </div>
 
-                                            {inputMode === "github" ? (
+                                            {inputMode === "skill-genome" || inputMode === "github" ? (
                                                 <div>
                                                     <label className="block text-sm font-medium text-foreground mb-3">
                                                         GitHub Username
@@ -513,7 +601,9 @@ const BuildGenome = () => {
                                                         </div>
                                                     </div>
                                                     <p className="mt-3 text-sm text-muted-foreground">
-                                                        We'll analyze your public repositories to extract your skills
+                                                        {inputMode === "skill-genome"
+                                                            ? "Deep behavioral analysis of your GitHub profile (20-40 seconds)"
+                                                            : "We'll analyze your public repositories to extract your skills"}
                                                     </p>
                                                 </div>
                                             ) : (
@@ -601,7 +691,7 @@ const BuildGenome = () => {
                                                     onClick={handleSubmit}
                                                 >
                                                     <Dna className="w-5 h-5" />
-                                                    Generate My Skill Genome
+                                                    {inputMode === "skill-genome" ? "Analyze My Skill Genome" : "Generate My Skill Genome"}
                                                     <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                                                 </Button>
                                             </motion.div>

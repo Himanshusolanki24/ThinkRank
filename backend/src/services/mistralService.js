@@ -385,11 +385,13 @@ const generateInterviewReport = async (sessionData) => {
 
     // Analyze answers by topic to build proper topicAnalysis
     const topicScores = new Map();
+    const testedTopics = new Set();
 
     // Process each answer to group by topic
     if (answers && answers.length > 0) {
         answers.forEach(answer => {
             const topic = answer.topic || "General";
+            testedTopics.add(topic);
             const existing = topicScores.get(topic) || { scores: [], attempts: 0 };
             existing.scores.push(Number(answer.score) || 0);
             existing.attempts += 1;
@@ -397,35 +399,68 @@ const generateInterviewReport = async (sessionData) => {
         });
     }
 
-    // Build topicAnalysis from the grouped data
+    // Build topicAnalysis including ALL user skills (whether tested or not)
     const topicAnalysis = [];
-    topicScores.forEach((data, topic) => {
-        const avgTopicScore = data.scores.length > 0
-            ? data.scores.reduce((a, b) => a + b, 0) / data.scores.length
-            : 0;
 
-        // Determine strength based on score
-        let strength = "Average";
-        if (avgTopicScore >= 7) strength = "Strong";
-        else if (avgTopicScore < 5) strength = "Weak";
+    // First, add all user skills
+    if (skills && skills.length > 0) {
+        skills.forEach(skill => {
+            if (topicScores.has(skill)) {
+                // Skill was tested - use actual performance data
+                const data = topicScores.get(skill);
+                const avgTopicScore = data.scores.reduce((a, b) => a + b, 0) / data.scores.length;
 
-        topicAnalysis.push({
-            topic,
-            attempts: data.attempts,
-            strength,
-            score: Math.round(avgTopicScore * 10) / 10
+                let strength = "Average";
+                if (avgTopicScore >= 7) strength = "Strong";
+                else if (avgTopicScore < 5) strength = "Weak";
+
+                topicAnalysis.push({
+                    topic: skill,
+                    attempts: data.attempts,
+                    strength,
+                    score: Math.round(avgTopicScore * 10) / 10,
+                    tested: true
+                });
+            } else {
+                // Skill was NOT tested - mark as not assessed
+                topicAnalysis.push({
+                    topic: skill,
+                    attempts: 0,
+                    strength: "Not Assessed",
+                    score: 0,
+                    tested: false
+                });
+            }
         });
+    }
+
+    // Then, add any extra topics from answers that aren't in the user's skills list
+    topicScores.forEach((data, topic) => {
+        if (!skills || !skills.includes(topic)) {
+            const avgTopicScore = data.scores.reduce((a, b) => a + b, 0) / data.scores.length;
+
+            let strength = "Average";
+            if (avgTopicScore >= 7) strength = "Strong";
+            else if (avgTopicScore < 5) strength = "Weak";
+
+            topicAnalysis.push({
+                topic,
+                attempts: data.attempts,
+                strength,
+                score: Math.round(avgTopicScore * 10) / 10,
+                tested: true
+            });
+        }
     });
 
-    // If no topics were extracted from answers, use skills as fallback
-    if (topicAnalysis.length === 0 && skills && skills.length > 0) {
-        skills.forEach(skill => {
-            topicAnalysis.push({
-                topic: skill,
-                attempts: Math.ceil(totalQuestions / skills.length),
-                strength: averageScore >= 7 ? "Strong" : averageScore >= 5 ? "Average" : "Weak",
-                score: Math.round(averageScore * 10) / 10
-            });
+    // Fallback: If still no topic analysis and no skills, create a generic one
+    if (topicAnalysis.length === 0) {
+        topicAnalysis.push({
+            topic: "General",
+            attempts: totalQuestions,
+            strength: averageScore >= 7 ? "Strong" : averageScore >= 5 ? "Average" : "Weak",
+            score: Math.round(averageScore * 10) / 10,
+            tested: true
         });
     }
 

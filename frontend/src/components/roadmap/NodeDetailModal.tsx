@@ -47,15 +47,16 @@ export const NodeDetailModal: React.FC<NodeDetailModalProps> = ({
                         className="fixed inset-0 bg-black/70 backdrop-blur-md z-50"
                     />
 
-                    {/* Modal */}
+                    {/* Modal Container - Centered with Flexbox */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-                        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] md:w-full md:max-w-xl z-50"
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                        onClick={(e) => e.target === e.currentTarget && onClose()}
                     >
-                        <div className="relative max-h-[75vh] overflow-y-auto bg-[#0a0a0f] rounded-2xl border border-white/[0.08] shadow-2xl">
+                        <div className="relative w-full max-w-xl max-h-[80vh] overflow-y-auto bg-[#0a0a0f] rounded-2xl border border-white/[0.08] shadow-2xl">
                             {/* Header Background */}
                             <div
                                 className="absolute top-0 left-0 right-0 h-40 pointer-events-none"

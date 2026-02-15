@@ -153,4 +153,115 @@ function calculateProficiency(count, totalRepos) {
     return "Beginner";
 }
 
-module.exports = { extractSkillsFromGitHub };
+/**
+ * Fetch detailed repository information
+ */
+async function fetchRepositoryDetails(owner, repo) {
+    try {
+        const response = await axios.get(
+            `${GITHUB_API}/repos/${owner}/${repo}`,
+            { headers: getGitHubHeaders() }
+        );
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch details for ${owner}/${repo}:`, error.message);
+        return null;
+    }
+}
+
+/**
+ * Fetch commit history for a repository
+ */
+async function fetchCommitHistory(owner, repo, maxCommits = 100) {
+    try {
+        const response = await axios.get(
+            `${GITHUB_API}/repos/${owner}/${repo}/commits`,
+            {
+                params: { per_page: Math.min(maxCommits, 100) },
+                headers: getGitHubHeaders()
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error(`Failed to fetch commits for ${owner}/${repo}:`, error.message);
+        return [];
+    }
+}
+
+/**
+ * Fetch file tree for a repository
+ */
+async function fetchFileTree(owner, repo) {
+    try {
+        // Get default branch first
+        const repoDetails = await fetchRepositoryDetails(owner, repo);
+        if (!repoDetails) return [];
+
+        const defaultBranch = repoDetails.default_branch || 'main';
+
+        const response = await axios.get(
+            `${GITHUB_API}/repos/${owner}/${repo}/git/trees/${defaultBranch}`,
+            {
+                params: { recursive: 1 },
+                headers: getGitHubHeaders()
+            }
+        );
+        return response.data.tree || [];
+    } catch (error) {
+        console.error(`Failed to fetch file tree for ${owner}/${repo}:`, error.message);
+        return [];
+    }
+}
+
+/**
+ * Fetch content of a specific file
+ */
+async function fetchFileContent(owner, repo, path) {
+    try {
+        const response = await axios.get(
+            `${GITHUB_API}/repos/${owner}/${repo}/contents/${path}`,
+            { headers: getGitHubHeaders() }
+        );
+
+        if (response.data.content) {
+            // Decode base64 content
+            return Buffer.from(response.data.content, 'base64').toString('utf8');
+        }
+        return '';
+    } catch (error) {
+        console.error(`Failed to fetch file ${path} from ${owner}/${repo}:`, error.message);
+        return '';
+    }
+}
+
+/**
+ * Fetch README.md content
+ */
+async function fetchReadme(owner, repo) {
+    try {
+        const response = await axios.get(
+            `${GITHUB_API}/repos/${owner}/${repo}/readme`,
+            { headers: getGitHubHeaders() }
+        );
+
+        if (response.data.content) {
+            return Buffer.from(response.data.content, 'base64').toString('utf8');
+        }
+        return '';
+    } catch (error) {
+        // README might not exist, which is fine
+        return '';
+    }
+}
+
+module.exports = {
+    extractSkillsFromGitHub,
+    fetchUserRepos,
+    fetchRepoLanguages,
+    fetchRepositoryDetails,
+    fetchCommitHistory,
+    fetchFileTree,
+    fetchFileContent,
+    fetchReadme,
+    getGitHubHeaders
+};

@@ -511,7 +511,7 @@ const Analytics = () => {
                             ))}
                           </div>
                         </div>
-                        <div className="h-[160px]">
+                        <div className="h-[160px] min-h-[160px]">
                           <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={scoreTrend}>
                               <defs>
@@ -585,7 +585,7 @@ const Analytics = () => {
                     <p className="text-sm text-gray-400">Success rate per skill</p>
                   </div>
                 </div>
-                <div className="h-[280px]">
+                <div className="h-[280px] min-h-[280px]">
                   {skillGrowth.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={skillGrowth} layout="vertical">

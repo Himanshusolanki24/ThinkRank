@@ -1,11 +1,9 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Lock, Check, Play, Clock, ChevronRight, Zap } from 'lucide-react';
-import { RoadmapNode as RoadmapNodeType } from '@/data/roadmapData';
+import React from 'react'; import { motion } from 'framer-motion'; 
+import { Lock, Check, Play, Clock, ChevronRight, Zap } from 'lucide-react'; 
+import { RoadmapNode as RoadmapNodeType } from '@/data/roadmapData'; 
 import { TechLogo } from './TechLogo';
 
-interface RoadmapNodeProps {
-    node: RoadmapNodeType;
+interface RoadmapNodeProps { node: RoadmapNodeType;
     index: number;
     isLeft: boolean;
     pathColor: string;

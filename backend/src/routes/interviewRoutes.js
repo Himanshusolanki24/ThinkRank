@@ -473,8 +473,10 @@ router.get("/history/:userId", async (req, res) => {
 
 // Save interview results for dashboard analytics
 router.post("/save-results", async (req, res) => {
+    console.log("📊 [SAVE-RESULTS] Received request:", JSON.stringify(req.body, null, 2));
     try {
         const { userId, skill, skillsArray, averageScore, totalQuestions, correctAnswers, xpEarned } = req.body;
+        console.log("📊 [SAVE-RESULTS] Parsed - userId:", userId, "skill:", skill, "avgScore:", averageScore);
 
         if (!userId) {
             return res.status(400).json({
@@ -484,10 +486,40 @@ router.post("/save-results", async (req, res) => {
         }
 
         if (!isSupabaseConfigured() || !supabaseAdmin) {
+            console.log("❌ [SAVE-RESULTS] Supabase not configured");
             return res.status(503).json({
                 success: false,
                 error: "Database not configured",
             });
+        }
+
+        // CRITICAL FIX: Ensure user exists in 'users' table before inserting (FK constraint)
+        // Auth users from auth.users may not automatically exist in custom 'users' table
+        const { data: existingUser, error: userCheckError } = await supabaseAdmin
+            .from("users")
+            .select("id")
+            .eq("id", userId)
+            .single();
+
+        if (!existingUser) {
+            console.log("📊 [SAVE-RESULTS] User not found in users table, creating:", userId);
+            // Try to insert the user if they don't exist
+            const { error: insertUserError } = await supabaseAdmin
+                .from("users")
+                .insert({
+                    id: userId,
+                    email: `user_${userId.substring(0, 8)}@thinkrank.app`,
+                    created_at: new Date().toISOString()
+                })
+                .select()
+                .single();
+
+            if (insertUserError) {
+                console.error("❌ [SAVE-RESULTS] Failed to create user:", insertUserError);
+                // Continue anyway - might be a race condition
+            } else {
+                console.log("✅ [SAVE-RESULTS] Created user:", userId);
+            }
         }
 
         // Calculate correct answers based on average score
@@ -510,12 +542,14 @@ router.post("/save-results", async (req, res) => {
             .single();
 
         if (error) {
-            console.error("Error saving interview results:", error);
+            console.error("❌ [SAVE-RESULTS] Error saving interview results:", error);
             return res.status(500).json({
                 success: false,
                 error: "Failed to save interview results",
             });
         }
+
+        console.log("✅ [SAVE-RESULTS] Successfully saved interview results:", data);
 
         // If skillsArray provided, also save individual skill progress records
         // This allows each skill to be tracked for focus area progress

@@ -9,12 +9,27 @@ const interviewRoutes = require("./routes/interviewRoutes");
 const dailyTasksRoutes = require("./routes/dailyTasksRoutes");
 const codingSignalsRoutes = require("./routes/codingSignalsRoutes");
 const practiceRoutes = require("./routes/practiceRoutes");
+const githubRoutes = require("./routes/githubRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
+// Middleware - Enhanced CORS configuration
+const corsOptions = {
+    origin: [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:5173'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Configure multer for file uploads
@@ -51,6 +66,9 @@ app.use("/api/coding-signals", codingSignalsRoutes);
 
 // Practice recommendation routes
 app.use("/api/practice", practiceRoutes);
+
+// GitHub Skill Genome routes
+app.use("/api/github", githubRoutes);
 
 // GitHub skill extraction endpoint
 app.post("/api/github/skills", async (req, res) => {

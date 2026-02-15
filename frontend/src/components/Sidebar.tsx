@@ -15,6 +15,7 @@ import {
     Code2,
     Building2,
     Map,
+    Dna,
 } from "lucide-react";
 
 const navItems = [
@@ -85,7 +86,7 @@ export const Sidebar = ({ isExpanded, setIsExpanded, isMobileOpen, setIsMobileOp
                     <div className="relative shrink-0 w-10 h-10 flex items-center justify-center">
                         <div className="absolute inset-0 bg-gradient-to-br from-violet-600 to-purple-600 rounded-xl opacity-20 blur-lg" />
                         <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-600/25">
-                            <Home className="w-5 h-5 text-white" />
+                            <Dna className="w-5 h-5 text-white" />
                         </div>
                     </div>
                     <AnimatePresence>
