@@ -70,6 +70,8 @@ const Interview = () => {
         setTimeout(() => {
             if (typeId === 'technical') {
                 navigate("/interview/technical");
+            } else if (typeId === 'interview-os') {
+                navigate("/interview-os");
             } else {
                 // For now, other modes also route to technical or show a toast (simulated here by just routing)
                 // In a real app, these would have their own routes. 
@@ -81,6 +83,20 @@ const Interview = () => {
     };
 
     const interviewTypes = [
+        {
+            id: "interview-os",
+            title: "InterviewOS",
+            subtitle: "ADAPTIVE_LEETCODE_AI",
+            description: "Production-style adaptive coding interview engine with hidden problem metadata and integrity monitoring.",
+            icon: Brain,
+            duration: "LIVE",
+            difficulty: "HIDDEN",
+            gradient: "from-emerald-400 to-cyan-500",
+            bgGradient: "from-emerald-500/10 to-cyan-500/5",
+            border: "emerald",
+            available: true,
+            features: ["Hidden Metadata", "Adaptive Rounds", "Integrity Score"]
+        },
         {
             id: "technical",
             title: "Technical Protocol",

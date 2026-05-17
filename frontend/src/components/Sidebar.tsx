@@ -16,13 +16,17 @@ import {
     Building2,
     Map,
     Dna,
+    ShieldCheck,
+    Rocket,
 } from "lucide-react";
 
 const navItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/coding-signals", label: "Coding Signals", icon: Code2 },
+    { path: "/interview-os", label: "InterviewOS", icon: ShieldCheck },
     { path: "/mncs-interview", label: "MNCs Interview", icon: Building2 },
+    { path: "/placement-genome", label: "Placement Genome", icon: Rocket },
     { path: "/learning-roadmap", label: "Learning Roadmap", icon: Map },
     { path: "/tasks", label: "Daily Tasks", icon: Target },
     { path: "/analytics", label: "Analytics", icon: BarChart3 },

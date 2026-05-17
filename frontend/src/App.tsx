@@ -18,11 +18,13 @@ import HowItWorks from "./pages/HowItWorks";
 import Auth from "./pages/Auth";
 import Interview from "./pages/Interview";
 import TechnicalInterview from "./pages/TechnicalInterview";
+import InterviewOS from "./pages/InterviewOS";
 import CompleteProfile from "./pages/CompleteProfile";
 import TaskDetail from "./pages/TaskDetail";
 import CodingSignals from "./pages/CodingSignals";
 import MNCsInterview from "./pages/MNCsInterview";
 import LearningRoadmap from "./pages/LearningRoadmap";
+import PlacementGenome from "./pages/PlacementGenome";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -73,6 +75,7 @@ const AppContent = () => {
           <Route path="/auth" element={<Auth />} />
           <Route path="/interview" element={<Interview />} />
           <Route path="/interview/technical" element={<TechnicalInterview />} />
+          <Route path="/interview-os" element={<InterviewOS />} />
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/tasks/:taskId" element={<TaskDetail />} />
           <Route path="/analytics" element={<Analytics />} />
@@ -82,6 +85,7 @@ const AppContent = () => {
           <Route path="/mncs-interview" element={<MNCsInterview />} />
           <Route path="/technical-interview" element={<TechnicalInterview />} />
           <Route path="/learning-roadmap" element={<LearningRoadmap />} />
+          <Route path="/placement-genome" element={<PlacementGenome />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -107,5 +111,4 @@ const App = () => (
 );
 
 export default App;
-
 

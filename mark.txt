@@ -1,0 +1,425 @@
+================================================================================
+                    THINKRANK — COMPLETE PROJECT INFO
+              AI-Powered Skill Genome & Career Growth Platform
+================================================================================
+
+Generated: 2026-05-17
+Authors: Himanshu Solanki & Team
+Repo: https://github.com/Himanshusolanki24/ThinkRank
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+ 1. PROJECT OVERVIEW & PROBLEM STATEMENT
+ 2. SOLUTION & USP (Unique Selling Points)
+ 3. IMPACT & BENEFITS
+ 4. COMPLETE TECH STACK
+ 5. EXISTING CODEBASE ANALYSIS
+ 6. CORE CONCEPTS (Skill Genome, Coding Signals)
+ 7. COMPLETE DATA FLOW (Step-by-Step)
+ 8. RECOMMENDED BUILD ORDER
+ 9. FINAL CHECKLIST & SUMMARY
+10. ARCHITECTURE DIAGRAM
+11. CERTGENOME: AI CERTIFICATE INTELLIGENCE (NEW MODULE)
+12. CERTGENOME DATABASE & SYSTEM DESIGN
+13. CERTGENOME AI & API ARCHITECTURE
+14. CERTGENOME IMPLEMENTATION ROADMAP & DIFFERENTIATION
+
+================================================================================
+1. PROJECT OVERVIEW & PROBLEM STATEMENT
+================================================================================
+
+PROJECT NAME: ThinkRank
+TAGLINE: "Map Your Skills. Chart Your Path. Rank Higher."
+
+WHAT IS THINKRANK?
+ThinkRank is an AI-powered platform that creates a living genome map of your skills,
+provides personalized learning roadmaps, and accelerates your career growth. It 
+analyzes your resume, GitHub, and coding profiles (LeetCode, CodeChef, etc.) to
+generate a comprehensive, interactive visualization of your technical capabilities.
+
+THE PROBLEM WE SOLVE:
+ • Developers struggle to accurately assess their current skill levels and gaps.
+ • Learning paths are often generic and not tailored to an individual's unique strengths.
+ • Tracking progress across multiple platforms (GitHub, LeetCode) is fragmented.
+ • Interview preparation lacks personalization and company-specific focus based on
+   the candidate's actual skill profile.
+ • Certificates are treated as static PDFs instead of dynamic career boosters.
+
+WHO IS IT FOR?
+ • Software developers looking to upskill and track their career growth
+ • Job seekers preparing for MNC interviews
+ • Students wanting structured learning roadmaps
+ • Tech leads and recruiters evaluating skill profiles
+
+================================================================================
+2. SOLUTION & USP (Unique Selling Points)
+================================================================================
+
+OUR SOLUTION:
+A platform that:
+ 1. Extracts skills from GitHub profiles or resume uploads using AI.
+ 2. Generates interactive D3.js-powered skill network graphs and heatmaps.
+ 3. Creates personalized learning roadmaps based on identified skill gaps.
+ 4. Aggregates performance analytics from multiple coding platforms.
+ 5. Validates and integrates certifications into a living skill graph (CertGenome).
+ 6. Provides 15-30 minute daily micro-tasks tailored to the user's weaknesses.
+ 7. Offers AI-powered mock interviews tailored to MNC patterns and user skills.
+
+USPs (What Makes Us Different):
+
+ USP 1: Skill Genome Mapping
+   → Not just a list of skills, but a deeply interconnected AI-analyzed map
+     identifying strengths, weaknesses, and industry benchmarks.
+
+ USP 2: CertGenome Integration
+   → AI validation of credentials that mathematically updates placement readiness
+     and skill proficiency based on the rigor of the certification.
+
+ USP 3: Multi-Platform Coding Signals
+   → Unified tracking of LeetCode, CodeChef, Codeforces, and HackerRank in
+     one dashboard with GitHub-style contribution heatmaps.
+
+ USP 4: Dynamic Personalized Roadmaps
+   → Roadmaps are not static. They evolve based on your current skill genome
+     and adjust as you complete daily tasks and milestones.
+
+ USP 5: AI-Powered MNC Interview Mode
+   → Real-time feedback on interview responses tailored specifically to
+     top tech company patterns and the user's unique skill profile.
+
+================================================================================
+3. IMPACT & BENEFITS
+================================================================================
+
+USER IMPACT:
+ • Provides absolute clarity on what to learn next to achieve career goals.
+ • Saves hundreds of hours of manual curriculum planning.
+ • Validates skill growth through intelligent certificate analysis.
+ • Gamifies the learning process with daily streaks and micro-tasks.
+
+INDUSTRY IMPACT:
+ • Standardizes skill measurement across different tech stacks.
+ • Bridges the gap between academic learning and industry requirements.
+ • Helps identify true talent beyond traditional resumes by verifying credentials.
+
+================================================================================
+4. COMPLETE TECH STACK
+================================================================================
+
+LAYER              | TECHNOLOGY                    | PURPOSE
+-------------------|-------------------------------|----------------------------------
+Frontend           | React 18, TypeScript, Vite    | Single-page application UI
+Styling            | Tailwind CSS, shadcn/ui       | Responsive, accessible design
+Animations         | Framer Motion                 | Fluid UI transitions
+Visualization      | D3.js, Cytoscape.js, Recharts | Skill graphs and analytics
+Backend API        | Node.js, Express.js           | Core business logic, auth, routes
+Database           | Supabase (PostgreSQL)         | User data, roadmaps, stats
+Vector Database    | pgvector (PostgreSQL)         | Embeddings for semantic matching
+Caching & Queues   | Redis, BullMQ                 | Fast retrieval, async processing
+AI Services        | OpenAI, Google Gen AI         | Skill extraction, Cert validation
+Microservice       | Python 3.9+, FastAPI          | Coding signals, OCR, AI pipelines
+Web Scraping       | Playwright                    | Fetching data from platforms
+
+PYTHON DEPENDENCIES (coding_signals & cert_ai/requirements.txt):
+ • fastapi, uvicorn            — Web framework & ASGI server
+ • playwright                  — Headless browser automation for scraping
+ • pydantic, langchain         — Data validation & LLM chaining
+ • openai, sentence-transformers — Embeddings & AI generation
+ • pytesseract, pdf2image      — OCR pipeline for certificate extraction
+ • redis, celery               — Async task processing
+
+NODE DEPENDENCIES (backend/package.json):
+ • express                     — Web framework
+ • @supabase/supabase-js       — Supabase client
+ • cors, dotenv                — Middleware & configuration
+ • @google/generative-ai       — Google AI integration
+ • openai                      — OpenAI API integration
+ • bullmq                      — Redis-based job queues
+
+FRONTEND DEPENDENCIES (frontend/package.json):
+ • react, react-dom            — UI library
+ • react-router-dom            — Routing
+ • d3, cytoscape, recharts     — Data visualization
+ • framer-motion               — Animation library
+ • tailwindcss                 — Styling framework
+
+================================================================================
+5. EXISTING CODEBASE ANALYSIS
+================================================================================
+
+PROJECT STRUCTURE:
+  ThinkRank/
+  ├── frontend/                 ← React + Vite + TypeScript (Port 3000/5173)
+  │   ├── src/
+  │   │   ├── components/       ← Reusable UI components
+  │   │   │   ├── roadmap/      ← Learning roadmap visualizers
+  │   │   │   ├── certgenome/   ← Certificate UI, uploads, analytics
+  │   │   │   └── ui/           ← shadcn/ui primitives
+  │   │   ├── pages/            ← Dashboard, Genome, Roadmap, Analytics
+  │   │   ├── contexts/         ← Auth, Theme state
+  │   │   ├── hooks/            ← Custom React hooks
+  │   │   ├── data/             ← Static roadmap data
+  │   │   └── lib/              ← Utils & configs
+  │   └── public/               ← Static assets
+  │
+  ├── backend/                  ← Node.js + Express API (Port 3001)
+  │   ├── src/
+  │   │   ├── routes/           ← API endpoints (auth, skills, tasks, certs)
+  │   │   ├── services/         ← Business logic & AI integration
+  │   │   └── config/           ← Env configuration
+  │   └── sql/                  ← Supabase DB schemas & pgvector configs
+  │
+  └── services/                 ← Python FastAPI Microservices (Port 8000)
+      ├── coding_signals/       ← Playwright logic for LeetCode, Codeforces, etc.
+      ├── cert_ai/              ← OCR, Validation, Embeddings, RAG pipelines
+      └── utils/                ← Shared utilities
+
+================================================================================
+6. CORE CONCEPTS (Skill Genome, Coding Signals, CertGenome)
+================================================================================
+
+THE SKILL GENOME:
+Think of the Skill Genome as an RPG character stat sheet, but for real-world
+software engineering. Instead of just saying "I know Python," the genome maps:
+ • Core Language (Python)
+ • Frameworks (FastAPI, Django)
+ • Concepts (AsyncIO, ORMs)
+ • Proficiency Level (0-100)
+This creates a living, interconnected web of skills.
+
+CODING SIGNALS:
+A dedicated Python microservice that acts as an aggregator. It takes a user's
+handles for LeetCode, CodeChef, HackerRank, etc., and uses Playwright to scrape
+their real-time stats, submission history, and ratings. This data is normalized
+into a single activity heatmap.
+
+CERTGENOME:
+The AI layer mapping certificates to career placement. It validates uploaded
+credentials, extracts metadata via OCR/LLMs, scores their industry credibility,
+and mathematically propagates skill proficiency points to the user's Skill Genome.
+
+================================================================================
+7. COMPLETE DATA FLOW (Step-by-Step)
+================================================================================
+
+SCENARIO: User uploads an AWS Certificate to improve their Cloud Engineer readiness.
+
+STEP 1: UPLOAD & QUEUE
+ → User uploads PDF in Frontend.
+ → Backend stores PDF in Supabase Storage.
+ → Job enqueued in Redis (BullMQ).
+
+STEP 2: OCR & EXTRACTION
+ → Python microservice (cert_ai) picks up job.
+ → PDF converted to text via OCR.
+ → LLM extracts: Issuer, Dates, Topic, Name.
+
+STEP 3: VALIDATION & SCORING
+ → Certificate validated against known issuer patterns.
+ → Fraud heuristics applied.
+ → AI Credibility Engine assigns a score (e.g., 92/100).
+
+STEP 4: GRAPH UPDATE
+ → Backend recalculates Skill Genome.
+ → AWS nodes get boosted; confidence score increases.
+ → Placement ROI Engine recalculates overall readiness score.
+
+STEP 5: NEXT ACTIONS
+ → User UI updates in real-time via WebSockets.
+ → AI Next Action Engine suggests next logical cert (e.g., AWS SAA) or a 
+   specific micro-project to cement knowledge.
+
+================================================================================
+8. RECOMMENDED BUILD ORDER
+================================================================================
+
+ PHASE 1: FOUNDATION & AUTHENTICATION
+  1. Setup Supabase project (Auth, basic Tables).
+  2. Setup Node.js/Express Backend and React/Vite Frontend.
+  3. Implement Login/Signup flows.
+
+ PHASE 2: AI SKILL EXTRACTION
+  1. Integrate Generative AI in Backend.
+  2. Build resume parsing and GitHub API fetching logic.
+
+ PHASE 3: VISUALIZATION & UI
+  1. Integrate D3.js / Cytoscape.js in Frontend.
+  2. Build the Dashboard and Skill Map views.
+
+ PHASE 4: CODING SIGNALS MICROSERVICE
+  1. Setup Python FastAPI project.
+  2. Write scrapers and normalization engine.
+
+ PHASE 5: CERTGENOME MVP
+  1. Certificate upload pipeline & Redis queue.
+  2. OCR and basic LLM extraction.
+  3. Graph mutation logic (linking certs to skills).
+
+ PHASE 6: ADVANCED AI & PLACEMENT
+  1. RAG-based Certificate Recommendation Engine.
+  2. AI Career ROI Engine.
+
+================================================================================
+9. FINAL CHECKLIST & SUMMARY
+================================================================================
+
+ARCHITECTURE CHECKLIST:
+ ✅ React/Vite Frontend with rich visualizations
+ ✅ Node.js/Express main backend API
+ ✅ Python/FastAPI microservices (Scraping & CertAI)
+ ✅ Redis implementation for Async processing
+ ✅ Supabase for Auth & PostgreSQL Database (with pgvector)
+ ✅ AI integration for extraction and RAG
+ ✅ UI/UX focused on futuristic, recruiter-grade dashboards
+
+DEPLOYMENT READINESS:
+ ⚠️ Environment variables securely managed across 3 services.
+ ⚠️ GPU/High-memory nodes required for Python OCR/Embedding microservices.
+ ⚠️ Rate limiting needed on AI extraction endpoints.
+
+================================================================================
+10. ARCHITECTURE DIAGRAM
+================================================================================
+
+                    ┌─────────────────────────┐
+                    │     USER (Browser)       │
+                    │   React 18 + Vite SPA    │
+                    │ D3.js Genome Visuals     │
+                    └──────────┬──────────────┘
+                               │ REST / WS
+                    ┌──────────▼──────────────┐
+                    │   BACKEND (Node.js)      │
+                    │  Express.js API Server   │
+                    │  Redis + BullMQ          │
+                    └──────────┬──────────────┘
+             ┌─────────────────┼─────────────────────────┐
+             │                 │                         │
+      ┌──────▼──────┐   ┌──────▼──────┐           ┌──────▼──────┐
+      │  SUPABASE   │   │  AI MODELS  │           │PYTHON SERVICES│
+      │ PostgreSQL  │   │ OpenAI/GenAI│           │  (FastAPI)  │
+      │  pgvector   │   │             │           │             │
+      └─────────────┘   └─────────────┘           └──────┬──────┘
+                                          ┌──────────────┴──────────────┐
+                                          │                             │
+                                  ┌───────▼───────┐             ┌───────▼───────┐
+                                  │ Coding Signals│             │   CertGenome  │
+                                  │  (Playwright) │             │ (OCR, Vectors)│
+                                  └───────────────┘             └───────────────┘
+
+================================================================================
+11. CERTGENOME: AI CERTIFICATE INTELLIGENCE (NEW MODULE)
+================================================================================
+
+VISION:
+Deep integration with Skill Genome to evaluate, recommend, and validate 
+certifications, computing exact ROI for career placement and skill graph progression.
+This is not a generic course catalog; it's an intelligent validation engine.
+
+MODULES OVERVIEW:
+
+1. AI CERTIFICATE RECOMMENDATION ENGINE
+   - Evaluates: target companies, skill gaps, budget, placement goals, coding performance.
+   - Output: Highly ranked, industry-recognized certificates (AWS, Meta, Google, Kubernetes).
+   - Algorithm: Collaborative filtering mixed with Vector Similarity (mapping user 
+     skill-gap embeddings to certificate outcome embeddings).
+
+2. CERTIFICATE CREDIBILITY ENGINE
+   - Generates: Credibility Score (0-100), Placement Impact Score, Recruiter Trust Index.
+   - Differentiates strong certifications from low-value random ones using an AI-weighted
+     scoring heuristic based on market demand and assessment rigor.
+
+3. AI CERTIFICATE VALIDATION ENGINE
+   - Input: PDFs, URLs, badge links, screenshots.
+   - Processing: OCR pipeline (Tesseract/Textract) -> AI Parsing -> Verification API.
+   - Fraud Detection: Heuristics to detect duplicate hashes, manipulated dates, or fake issuers.
+
+4. SKILL GENOME & PLACEMENT GENOME INTEGRATION
+   - Dynamic Skill Graphs: Completing an AWS cert propagates weighted confidence 
+     scores through the graph (e.g., +20% Cloud Engineering, +10% Backend).
+   - Placement Readiness: Recalculates ATS compatibility and company readiness.
+
+5. AI CAREER ROI ENGINE & SMART LEARNING PATHWAYS
+   - Predictive AI estimates salary impact, role eligibility, and recruiter visibility.
+   - Generates DAG-based certification ladders (e.g., AWS CCP → AWS SAA → Kubernetes).
+
+6. AI NEXT ACTION ENGINE
+   - Continuous career loops: recommends next project, GitHub contributions, or LeetCode 
+     topics based on newly acquired certificate knowledge.
+
+7. FRONTEND EXPERIENCE
+   - Futuristic UI, recruiter-grade dashboards, graph visualizations, animated 
+     intelligence panels (Framer Motion, D3.js).
+
+================================================================================
+12. CERTGENOME DATABASE & SYSTEM DESIGN
+================================================================================
+
+DATABASE SCHEMA (PostgreSQL / Supabase):
+- Users: user_id, placement_score, current_role, target_role
+- Certificates: cert_id, issuer, name, difficulty_level, credibility_score, vector_embedding
+- User_Certificates: id, user_id, cert_id, status, verified, verification_url, extracted_data (JSONB)
+- Skill_Nodes: node_id, skill_name, category
+- Cert_Skill_Edges: cert_id, skill_id, weight (impact factor)
+- Verification_Logs: log_id, user_cert_id, ocr_hash, fraud_flag (boolean)
+
+EVENT-DRIVEN ARCHITECTURE & ASYNC JOBS:
+1. Certificate Upload -> S3/Supabase Storage -> Trigger Webhook.
+2. Webhook -> Redis Queue (BullMQ/Celery) -> Worker picks up file.
+3. Worker -> OCR Pipeline -> LLM Extraction -> Fraud Check -> DB Update.
+4. DB Update Trigger -> Async Recalculation of Skill Genome -> Broadcast UI update via WebSockets.
+
+================================================================================
+13. CERTGENOME AI & API ARCHITECTURE
+================================================================================
+
+AI SYSTEM DESIGN:
+- Embedding Pipeline: Use OpenAI `text-embedding-3-small` or SentenceTransformers to embed
+  certificate descriptions and user skill gaps.
+- RAG Architecture: Vector search in pgvector to find certificates that maximally 
+  cover the user's missing "target_role" skills.
+- Certificate Similarity Engine: Cosine similarity on pgvector to recommend alternatives.
+- LLM Orchestration: LangChain pipelines to sequence OCR extraction -> JSON parsing -> Validation.
+- Guardrails: Strict Pydantic schemas for LLM output validation; fallback to human review 
+  if fraud_score > 0.8.
+
+API ARCHITECTURE (FastAPI Microservice):
+- POST /api/v1/certificates/upload
+  Handles multipart/form-data. Uploads to Supabase Storage, enqueues validation job.
+- GET /api/v1/certificates/recommendations?target_role={role}&budget={max}
+  Executes pgvector similarity search against user skill graph.
+- GET /api/v1/certificates/{id}/roi
+  Calculates predictive Placement Impact using heuristical models.
+- POST /api/v1/webhooks/validation-complete
+  Updates Postgres and triggers Socket.io event to frontend.
+
+================================================================================
+14. CERTGENOME IMPLEMENTATION ROADMAP & DIFFERENTIATION
+================================================================================
+
+PHASE 1: MVP VALIDATION & GRAPH INTEGRATION (Weeks 1-3)
+- Basic certificate upload & manual entry.
+- Hardcoded weights linking major certs (AWS, Google) to skill nodes.
+
+PHASE 2: AI INTELLIGENCE & OCR PIPELINE (Weeks 4-6)
+- FastAPI OCR pipeline. LLM extraction of credentials.
+- AI Credibility Engine scoring based on standard rules.
+
+PHASE 3: ADVANCED ANALYTICS & RAG RECOMMENDATIONS (Weeks 7-9)
+- pgvector implementation for semantic recommendation.
+- AI Career ROI predictive models.
+
+PHASE 4: SCALING ARCHITECTURE (Weeks 10+)
+- Redis caching for graph recalculations.
+- Complete event-driven worker scaling for high-throughput uploads.
+
+STARTUP-LEVEL DIFFERENTIATION:
+Unlike Coursera or LinkedIn Learning, which act as static content catalogs, ThinkRank's 
+CertGenome acts as a placement intelligence engine. It doesn't just list courses; 
+it mathematically maps out how a specific certificate alters a candidate's probability 
+of clearing a specific company's ATS and interview process. It treats learning not as 
+content consumption, but as a dynamic graph optimization problem.
+
+================================================================================
+END OF THINKRANK PROJECT INFO
+================================================================================

@@ -10,6 +10,7 @@ const dailyTasksRoutes = require("./routes/dailyTasksRoutes");
 const codingSignalsRoutes = require("./routes/codingSignalsRoutes");
 const practiceRoutes = require("./routes/practiceRoutes");
 const githubRoutes = require("./routes/githubRoutes");
+const interviewOSRoutes = require("./routes/interviewOSRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -69,6 +70,9 @@ app.use("/api/practice", practiceRoutes);
 
 // GitHub Skill Genome routes
 app.use("/api/github", githubRoutes);
+
+// InterviewOS production scaffolding routes
+app.use("/api/interview-os", interviewOSRoutes);
 
 // GitHub skill extraction endpoint
 app.post("/api/github/skills", async (req, res) => {
