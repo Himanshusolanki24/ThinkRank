@@ -9,7 +9,7 @@ import {
     LogOut,
     User,
     Menu,
-    Sparkles,
+    LayoutDashboard,
     Command
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -44,6 +44,7 @@ export const DashboardHeader = ({ onMobileMenuClick }: DashboardHeaderProps) => 
         if (path === "/profile") return "Profile";
         if (path === "/settings") return "Settings";
         if (path === "/interview") return "AI Interview";
+        if (path === "/recruiter") return "Recruiter Dashboard";
         return "Skill Genome";
     };
 
@@ -92,15 +93,15 @@ export const DashboardHeader = ({ onMobileMenuClick }: DashboardHeaderProps) => 
 
             {/* Right: Actions & Profile */}
             <div className="flex items-center gap-4">
-                {/* AI Interview CTA */}
-                <Link to="/interview" className="hidden sm:block">
+                {/* Recruiter Dashboard CTA */}
+                <Link to="/recruiter" className="hidden sm:block">
                     <Button
                         size="sm"
                         variant="ghost"
-                        className="bg-gradient-to-r from-violet-600/10 to-purple-600/10 hover:from-violet-600/20 hover:to-purple-600/20 text-violet-300 border border-violet-500/20 rounded-xl"
+                        className="bg-gradient-to-r from-violet-600/10 to-cyan-600/10 hover:from-violet-600/20 hover:to-cyan-600/20 text-violet-300 border border-violet-500/20 rounded-xl"
                     >
-                        <Sparkles className="w-3.5 h-3.5 mr-2" />
-                        AI Interview
+                        <LayoutDashboard className="w-3.5 h-3.5 mr-2" />
+                        Recruiter Dashboard
                     </Button>
                 </Link>
 
@@ -121,7 +122,7 @@ export const DashboardHeader = ({ onMobileMenuClick }: DashboardHeaderProps) => 
                     >
                         <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center border border-white/10 overflow-hidden">
                             {profile?.avatar_url ? (
-                                <img src={profile.avatar_url} alt="User" className="w-full h-full object-cover" />
+                                <img src={profile.avatar_url} alt="User" className="w-full h-full object-cover" loading="lazy" decoding="async" width={36} height={36} />
                             ) : (
                                 <User className="w-5 h-5 text-white/80" />
                             )}

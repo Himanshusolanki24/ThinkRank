@@ -14,6 +14,8 @@ const PATH_ICONS: Record<string, React.ReactNode> = {
     'dsa': <BrainCircuit className="w-8 h-8" />,
     'system-design': <Server className="w-8 h-8" />,
     'data-science': <Database className="w-8 h-8" />,
+    'ai-ml-engineering': <BrainCircuit className="w-8 h-8" />,
+    'generative-ai': <Sparkles className="w-8 h-8" />,
 };
 
 const PATH_STATS: Record<string, { learners: string; rating: number }> = {
@@ -22,6 +24,8 @@ const PATH_STATS: Record<string, { learners: string; rating: number }> = {
     'dsa': { learners: '180K+', rating: 4.9 },
     'system-design': { learners: '85K+', rating: 4.7 },
     'data-science': { learners: '95K+', rating: 4.8 },
+    'ai-ml-engineering': { learners: '45K+', rating: 4.8 },
+    'generative-ai': { learners: '65K+', rating: 4.9 },
 };
 
 export const PathSelectionScreen: React.FC<PathSelectionScreenProps> = ({

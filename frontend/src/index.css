@@ -372,4 +372,165 @@
   .aurora-glow:hover::before {
     opacity: 1;
   }
+
+  /* ═══════════════════════════════════════════════════════
+     MOCK INTERVIEW ROOM — Cinematic Animations
+     ═══════════════════════════════════════════════════════ */
+
+  /* AI Orb — Breathing / Pulse */
+  .animate-orb-breathe {
+    animation: orb-breathe 4s ease-in-out infinite;
+  }
+
+  @keyframes orb-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+
+  /* AI Orb — Speaking Glow */
+  .animate-orb-speak {
+    animation: orb-speak 1.2s ease-in-out infinite;
+  }
+
+  @keyframes orb-speak {
+    0%, 100% {
+      box-shadow: 0 0 40px rgba(0, 229, 255, 0.3), 0 0 80px rgba(139, 92, 246, 0.15);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 60px rgba(0, 229, 255, 0.5), 0 0 120px rgba(139, 92, 246, 0.25);
+      transform: scale(1.08);
+    }
+  }
+
+  /* AI Orb — Thinking */
+  .animate-orb-think {
+    animation: orb-think 2s ease-in-out infinite;
+  }
+
+  @keyframes orb-think {
+    0%, 100% {
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.2), 0 0 60px rgba(139, 92, 246, 0.1);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 50px rgba(245, 158, 11, 0.4), 0 0 100px rgba(139, 92, 246, 0.2);
+      transform: scale(1.04);
+    }
+  }
+
+  /* Wave Ring — Expanding outward from orb */
+  .animate-wave-ring {
+    animation: wave-ring 2.5s ease-out infinite;
+  }
+
+  @keyframes wave-ring {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  /* Floating Particles */
+  .animate-particle-float {
+    animation: particle-float 8s ease-in-out infinite;
+  }
+
+  @keyframes particle-float {
+    0%, 100% {
+      transform: translateY(0) translateX(0);
+      opacity: 0.3;
+    }
+    25% {
+      transform: translateY(-20px) translateX(10px);
+      opacity: 0.6;
+    }
+    50% {
+      transform: translateY(-10px) translateX(-8px);
+      opacity: 0.4;
+    }
+    75% {
+      transform: translateY(-25px) translateX(5px);
+      opacity: 0.5;
+    }
+  }
+
+  /* Gradient Mesh — Animated background */
+  .animate-gradient-mesh {
+    animation: gradient-mesh 12s ease-in-out infinite;
+    background-size: 400% 400%;
+  }
+
+  @keyframes gradient-mesh {
+    0%, 100% { background-position: 0% 50%; }
+    25% { background-position: 100% 0%; }
+    50% { background-position: 100% 100%; }
+    75% { background-position: 0% 100%; }
+  }
+
+  /* Message slide-in */
+  .animate-msg-in {
+    animation: msg-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes msg-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Interview Room Glass Styles */
+  .glass-dark {
+    background: rgba(10, 10, 15, 0.7);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .glass-transcript {
+    background: rgba(10, 10, 15, 0.85);
+    backdrop-filter: blur(32px) saturate(1.2);
+    -webkit-backdrop-filter: blur(32px) saturate(1.2);
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .glass-control {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Interview scrollbar */
+  .scrollbar-interview::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-interview::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-interview::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+  }
+
+  .scrollbar-interview::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  /* Transcript top blur fade */
+  .transcript-fade-top {
+    mask-image: linear-gradient(to bottom, transparent 0%, black 48px);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 48px);
+  }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -258,10 +258,11 @@ const Tasks = () => {
     }
   };
 
-  const filteredTasks = tasks.map(task => ({
+  const completedSet = useMemo(() => new Set(completedTaskIds), [completedTaskIds]);
+  const filteredTasks = useMemo(() => tasks.map(task => ({
     ...task,
-    completed: completedTaskIds.includes(task.id)
-  }));
+    completed: completedSet.has(task.id)
+  })), [tasks, completedSet]);
 
   const completedCount = completedTaskIds.length;
   const progressPercent = tasks.length > 0 ? Math.round((completedCount / Math.min(tasks.length, 10)) * 100) : 0;

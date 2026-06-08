@@ -45,7 +45,7 @@ router.get("/blueprint", (req, res) => {
             realtimeStack: {
                 transport: "Socket.IO / WebSocket",
                 stt: ["Deepgram", "Whisper"],
-                tts: ["ElevenLabs Conversational AI"],
+                tts: ["Chatterbox TTS"],
                 analytics: ["MediaPipe", "behavioral scoring", "coding telemetry"]
             },
             websocketEvents,

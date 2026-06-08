@@ -50,17 +50,8 @@ class CodeChefScraper:
         """Initialize Playwright browser if not already running"""
         if self._browser is None:
             self._playwright = await async_playwright().start()
-            self._browser = await self._playwright.chromium.launch(
-                headless=True,
-                args=[
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-accelerated-2d-canvas',
-                    '--no-first-run',
-                    '--no-zygote',
-                    '--disable-gpu'
-                ]
+            self._browser = await self._playwright.firefox.launch(
+                headless=True
             )
     
     async def _rate_limit(self):

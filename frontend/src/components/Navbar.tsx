@@ -113,6 +113,10 @@ export const Navbar = () => {
                       src={getAvatarUrl()!}
                       alt="Profile"
                       className="w-9 h-9 rounded-full border-2 border-primary/50 object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      width={36}
+                      height={36}
                     />
                   ) : (
                     <div className="w-9 h-9 rounded-full bg-gradient-to-r from-primary to-purple-500 flex items-center justify-center text-white font-semibold text-sm border-2 border-primary/30">

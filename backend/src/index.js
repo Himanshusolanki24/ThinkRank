@@ -10,9 +10,25 @@ const dailyTasksRoutes = require("./routes/dailyTasksRoutes");
 const codingSignalsRoutes = require("./routes/codingSignalsRoutes");
 const practiceRoutes = require("./routes/practiceRoutes");
 const githubRoutes = require("./routes/githubRoutes");
-const interviewOSRoutes = require("./routes/interviewOSRoutes");
+const mockInterviewRoutes = require("./routes/mockInterviewRoutes");
+const voiceRoutes = require("./routes/voiceRoutes");
+const recruitOSRoutes = require("./recruitos/routes/recruitOSRoutes");
 
 const app = express();
+const http = require("http");
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
+// Setup RecruitOS Sockets
+const { setupInterviewSocket } = require("./recruitos/sockets/interviewSocket");
+setupInterviewSocket(io);
+
 const PORT = process.env.PORT || 3001;
 
 // Middleware - Enhanced CORS configuration
@@ -71,8 +87,14 @@ app.use("/api/practice", practiceRoutes);
 // GitHub Skill Genome routes
 app.use("/api/github", githubRoutes);
 
-// InterviewOS production scaffolding routes
-app.use("/api/interview-os", interviewOSRoutes);
+// Mock Interview Platform routes
+app.use("/api/mock-interview", mockInterviewRoutes);
+
+// Voice generation routes
+app.use("/api/voice", voiceRoutes);
+
+// RecruitOS AI Hiring Operating System routes
+app.use("/api/recruit-os", recruitOSRoutes);
 
 // GitHub skill extraction endpoint
 app.post("/api/github/skills", async (req, res) => {
@@ -148,8 +170,7 @@ app.use((error, req, res, next) => {
 });
 
 // Start server
-// Start server
-app.listen(PORT, async () => {
+server.listen(PORT, async () => {
     console.log(`🧬 Skill Genome API running on port ${PORT}`);
     console.log(`📊 Health check: http://0.0.0.0:${PORT}/api/health`);
 

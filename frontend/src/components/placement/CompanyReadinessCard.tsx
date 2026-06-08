@@ -4,6 +4,7 @@
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { CompanyLogo } from "@/components/placement/CompanyLogos";
 import type { CompanyReadinessScore, CompanyProfile } from "@/data/placementGenomeData";
 
 interface Props {
@@ -42,10 +43,10 @@ export const CompanyReadinessCard = ({ score, company, index, onSelect, isSelect
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold"
-            style={{ background: `${company.accentColor}15`, color: company.accentColor }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden"
+            style={{ background: `${company.accentColor}15` }}
           >
-            {company.name[0]}
+            <CompanyLogo companyId={company.id} className="w-6 h-6" />
           </div>
           <div>
             <h3 className="font-semibold text-white text-sm">{company.name}</h3>

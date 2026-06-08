@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { SiAmazonwebservices, SiNodedotjs, SiPython, SiReact } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
 import {
@@ -28,6 +29,49 @@ import {
   GraduationCap,
   MessageSquare,
 } from "lucide-react";
+
+const HERO_SKILLS = [
+  {
+    name: "React",
+    Icon: SiReact,
+    iconClassName: "text-cyan-400",
+    left: "10%",
+    top: "16%",
+    duration: 3.4,
+    rotate: -8,
+    glowClassName: "from-cyan-500/25 to-cyan-400/5",
+  },
+  {
+    name: "AWS",
+    Icon: SiAmazonwebservices,
+    iconClassName: "text-orange-400",
+    left: "72%",
+    top: "10%",
+    duration: 4.1,
+    rotate: 7,
+    glowClassName: "from-orange-500/25 to-orange-400/5",
+  },
+  {
+    name: "Python",
+    Icon: SiPython,
+    iconClassName: "text-[#FFD43B]",
+    left: "66%",
+    top: "77%",
+    duration: 3.8,
+    rotate: -6,
+    glowClassName: "from-yellow-500/25 to-blue-400/5",
+  },
+  {
+    name: "Node.js",
+    Icon: SiNodedotjs,
+    iconClassName: "text-green-400",
+    left: "82%",
+    top: "84%",
+    duration: 4.5,
+    rotate: 9,
+    glowClassName: "from-green-500/25 to-emerald-400/5",
+  },
+] as const;
 
 // Animated gradient orbs for background
 const GradientOrbs = () => (
@@ -67,8 +111,21 @@ const FloatingParticles = () => {
 // DNA Helix Animation for Hero
 const DNAHelix = () => {
   return (
-    <div className="relative w-full h-[500px] flex items-center justify-center">
-      <svg viewBox="0 0 200 400" className="w-48 h-96">
+    <div className="relative w-full h-[540px] flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute h-[430px] w-[430px] rounded-full border border-white/[0.05]" />
+        <div className="absolute h-[320px] w-[320px] rounded-full border border-white/[0.04]" />
+        <div className="absolute h-[220px] w-[220px] rounded-full border border-white/[0.03]" />
+        <motion.div
+          className="absolute h-[430px] w-[430px] rounded-full border border-violet-400/10"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+        />
+      </div>
+
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.12),transparent_55%)]" />
+
+      <svg viewBox="0 0 200 400" className="relative z-10 w-48 h-96">
         {/* DNA Strand Animation */}
         {Array.from({ length: 12 }).map((_, i) => {
           const y = 30 + i * 30;
@@ -119,18 +176,29 @@ const DNAHelix = () => {
       </svg>
 
       {/* Floating skill badges */}
-      {['React', 'Python', 'AWS', 'Node.js'].map((skill, i) => (
+      {HERO_SKILLS.map((skill, i) => (
         <motion.div
-          key={skill}
-          className="absolute px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-sm text-white/70"
+          key={skill.name}
+          className={`absolute z-20 flex items-center gap-2 rounded-2xl border border-white/10 bg-gradient-to-br ${skill.glowClassName} px-3 py-2.5 text-sm text-white shadow-[0_18px_50px_rgba(0,0,0,0.32)] backdrop-blur-xl`}
           style={{
-            left: `${20 + i * 20}%`,
-            top: `${20 + (i % 2) * 60}%`,
+            left: skill.left,
+            top: skill.top,
+            rotate: `${skill.rotate}deg`,
           }}
-          animate={{ y: [-10, 10, -10], rotate: [-2, 2, -2] }}
-          transition={{ duration: 3 + i, repeat: Infinity, ease: "easeInOut" }}
+          animate={{
+            y: [-12, 10, -12],
+            x: [0, i % 2 === 0 ? 8 : -8, 0],
+            rotate: [`${skill.rotate - 2}deg`, `${skill.rotate + 2}deg`, `${skill.rotate - 2}deg`],
+          }}
+          transition={{ duration: skill.duration, repeat: Infinity, ease: "easeInOut" }}
         >
-          {skill}
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/35 ring-1 ring-white/10">
+            <skill.Icon className={`h-5 w-5 ${skill.iconClassName}`} />
+          </div>
+          <div className="pr-1">
+            <span className="block text-[15px] font-semibold tracking-wide">{skill.name}</span>
+            <span className="block text-[10px] uppercase tracking-[0.24em] text-white/45">Skill</span>
+          </div>
         </motion.div>
       ))}
     </div>
@@ -251,6 +319,283 @@ const stats = [
   { value: 98, suffix: "%", label: "User Satisfaction" },
   { value: 24, suffix: "/7", label: "AI Available" },
 ];
+
+const thinkRankFlow = [
+  {
+    title: "Structured\nRoadmap",
+    subtitle: "Personalized Path",
+    description: "Build a plan from your time, level, and target role.",
+    icon: Brain,
+    tone: "violet",
+    positionClassName: "left-[8%] top-[20%]",
+  },
+  {
+    title: "Focused\nPractice",
+    subtitle: "Daily Tasks",
+    description: "Turn weak areas into targeted coding sessions.",
+    icon: Zap,
+    tone: "cyan",
+    positionClassName: "left-[42%] top-[16%]",
+  },
+  {
+    title: "Expert\nFeedback",
+    subtitle: "AI Review",
+    description: "Practice with company-style interviewers and code review.",
+    icon: MessageSquare,
+    tone: "emerald",
+    positionClassName: "left-[40%] top-[54%]",
+  },
+  {
+    title: "Dream\nOffer",
+    subtitle: "Placement Targeting",
+    description: "Convert consistency into real company readiness.",
+    icon: Target,
+    tone: "amber",
+    positionClassName: "left-[75%] top-[54%]",
+  },
+] as const;
+
+const toneClasses: Record<string, { border: string; glow: string; iconBg: string; iconColor: string; dot: string }> = {
+  violet: {
+    border: "border-violet-500/30",
+    glow: "from-violet-500/20 to-fuchsia-500/5",
+    iconBg: "bg-violet-500/15",
+    iconColor: "text-violet-300",
+    dot: "bg-violet-400",
+  },
+  cyan: {
+    border: "border-cyan-500/30",
+    glow: "from-cyan-500/20 to-sky-500/5",
+    iconBg: "bg-cyan-500/15",
+    iconColor: "text-cyan-300",
+    dot: "bg-cyan-400",
+  },
+  amber: {
+    border: "border-amber-500/30",
+    glow: "from-amber-500/20 to-orange-500/5",
+    iconBg: "bg-amber-500/15",
+    iconColor: "text-amber-300",
+    dot: "bg-amber-400",
+  },
+  emerald: {
+    border: "border-emerald-500/30",
+    glow: "from-emerald-500/20 to-teal-500/5",
+    iconBg: "bg-emerald-500/15",
+    iconColor: "text-emerald-300",
+    dot: "bg-emerald-400",
+  },
+};
+
+const ThinkRankCapabilityAnimation = () => {
+  const [activeFlowIndex, setActiveFlowIndex] = useState(0);
+  const activeFlowItem = thinkRankFlow[activeFlowIndex];
+  const backgroundCells = Array.from({ length: 30 }, (_, i) => i);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveFlowIndex((current) => (current + 1) % thinkRankFlow.length);
+    }, 1800);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[32px] border border-white/[0.08] bg-[#09090D] px-5 py-8 sm:px-8 sm:py-10">
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:72px_72px]" />
+      <div className="absolute -top-28 left-1/3 h-64 w-64 rounded-full bg-violet-600/10 blur-[120px]" />
+      <div className="absolute bottom-0 right-1/4 h-56 w-56 rounded-full bg-cyan-600/10 blur-[120px]" />
+
+      <div className="relative z-10 grid gap-10 lg:grid-cols-[1.05fr_1.15fr] lg:items-center">
+        <div className="max-w-xl">
+          <motion.span
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-300"
+          >
+            <Rocket className="h-4 w-4" />
+            What ThinkRank Can Do
+          </motion.span>
+
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-3xl font-bold leading-tight text-white sm:text-4xl"
+          >
+            From raw skills to{" "}
+            <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              interview-ready momentum
+            </span>
+            .
+          </motion.h3>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.08 }}
+            className="mt-5 text-lg leading-relaxed text-gray-400"
+          >
+            ThinkRank turns your resume, GitHub, and practice history into a living system: skill genome, smart roadmap, daily tasks, AI interviews, and placement targeting.
+          </motion.p>
+
+          <div className="mt-8 space-y-3">
+            {[
+              "Pinpoints real weaknesses instead of generic advice",
+              "Builds a roadmap around your time and target company",
+              "Connects practice directly to interview outcomes",
+            ].map((point, idx) => (
+              <motion.div
+                key={point}
+                initial={{ opacity: 0, x: -18 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: 0.12 + idx * 0.08 }}
+                className="flex items-center gap-3 text-sm text-gray-300"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.03]">
+                  <CheckCircle className="h-4 w-4 text-emerald-400" />
+                </span>
+                <span>{point}</span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="relative min-h-[520px] overflow-hidden rounded-[28px] border border-white/[0.08] bg-black/40 p-4 backdrop-blur-xl"
+          >
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.08),transparent_55%)]" />
+              <div className="grid grid-cols-6 gap-3 px-4 py-8">
+                {backgroundCells.map((cell) => (
+                  <motion.div
+                    key={cell}
+                    className="h-[84px] rounded-[18px] border border-dashed border-white/[0.06] bg-white/[0.01]"
+                    animate={{ opacity: [0.24, 0.36, 0.24] }}
+                    transition={{ duration: 2.8 + (cell % 5) * 0.2, repeat: Infinity, delay: cell * 0.03 }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="pointer-events-none absolute inset-0 rounded-[28px] border border-white/[0.04]" />
+            <div className="pointer-events-none absolute inset-0">
+              <motion.div
+                className="absolute left-[28%] top-[33%] h-[2px] w-[16%] border-t border-dashed border-cyan-400/70"
+                animate={{ opacity: activeFlowIndex >= 1 ? [0.25, 1, 0.5] : 0.18 }}
+                transition={{ duration: 0.8, repeat: Infinity }}
+              />
+              <motion.div
+                className="absolute left-[52%] top-[33%] h-[2px] w-[10%] bg-gradient-to-r from-violet-400 to-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.45)]"
+                animate={{ x: activeFlowIndex === 1 ? ["-100%", "100%"] : "-100%", opacity: activeFlowIndex === 1 ? [0, 1, 0] : 0 }}
+                transition={{ duration: 1, ease: "easeInOut" }}
+              />
+
+              <motion.div
+                className="absolute left-[52%] top-[41%] h-[18%] w-[2px] border-l border-dashed border-violet-400/70"
+                animate={{ opacity: activeFlowIndex >= 2 ? [0.25, 1, 0.5] : 0.18 }}
+                transition={{ duration: 0.8, repeat: Infinity }}
+              />
+              <motion.div
+                className="absolute left-[52%] top-[47%] h-[10%] w-[2px] bg-gradient-to-b from-cyan-300 to-violet-400 shadow-[0_0_20px_rgba(168,85,247,0.45)]"
+                animate={{ y: activeFlowIndex === 2 ? ["-90%", "120%"] : "-90%", opacity: activeFlowIndex === 2 ? [0, 1, 0] : 0 }}
+                transition={{ duration: 1, ease: "easeInOut" }}
+              />
+
+              <motion.div
+                className="absolute left-[60%] top-[69%] h-[2px] w-[14%] border-t border-dashed border-amber-400/70"
+                animate={{ opacity: activeFlowIndex >= 3 ? [0.25, 1, 0.5] : 0.18 }}
+                transition={{ duration: 0.8, repeat: Infinity }}
+              />
+              <motion.div
+                className="absolute left-[64%] top-[69%] h-[2px] w-[10%] bg-gradient-to-r from-emerald-300 to-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.45)]"
+                animate={{ x: activeFlowIndex === 3 ? ["-100%", "100%"] : "-100%", opacity: activeFlowIndex === 3 ? [0, 1, 0] : 0 }}
+                transition={{ duration: 1, ease: "easeInOut" }}
+              />
+            </div>
+
+            <div className="relative h-[520px]">
+              {thinkRankFlow.map((item, index) => {
+                const tone = toneClasses[item.tone];
+                const isActive = index === activeFlowIndex;
+                return (
+                  <motion.div
+                    key={item.title}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.45, delay: index * 0.08 }}
+                    className={`group absolute h-[150px] w-[170px] overflow-hidden rounded-[22px] border bg-gradient-to-br ${tone.glow} ${tone.border} ${item.positionClassName}`}
+                  >
+                    <motion.div
+                      className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.06),transparent_45%)]"
+                      animate={{ opacity: isActive ? 1 : 0.5 }}
+                      transition={{ duration: 0.4 }}
+                    />
+                    <motion.div
+                      className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/15 to-transparent"
+                      animate={{ x: isActive ? ["0%", "420%"] : "0%", opacity: isActive ? [0, 0.8, 0] : 0 }}
+                      transition={{ duration: 1, ease: "easeInOut" }}
+                    />
+                    <motion.div
+                      animate={{
+                        scale: isActive ? 1.06 : 0.96,
+                        opacity: isActive ? 1 : 0.78,
+                        y: isActive ? [0, -8, 0] : [0, index % 2 === 0 ? -3 : 3, 0],
+                        boxShadow: [
+                          "0 0 0 rgba(0,0,0,0)",
+                          isActive ? "0 22px 55px rgba(0,0,0,0.38)" : "0 10px 24px rgba(0,0,0,0.16)",
+                          "0 0 0 rgba(0,0,0,0)",
+                        ],
+                      }}
+                      transition={{
+                        scale: { duration: 0.45, ease: "easeOut" },
+                        opacity: { duration: 0.45, ease: "easeOut" },
+                        y: { duration: isActive ? 1.2 : 3.8 + index * 0.2, repeat: Infinity, ease: "easeInOut" },
+                        boxShadow: { duration: isActive ? 1.2 : 3.8 + index * 0.2, repeat: Infinity, ease: "easeInOut" },
+                      }}
+                      className="relative flex h-full flex-col justify-between p-4"
+                    >
+                      <div className="flex items-start justify-between">
+                        <motion.div
+                          className={`flex h-11 w-11 items-center justify-center rounded-2xl ${tone.iconBg} ring-1 ring-white/10`}
+                          animate={isActive ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+                          transition={{ duration: 1, repeat: isActive ? Infinity : 0 }}
+                        >
+                          <item.icon className={`h-5 w-5 ${tone.iconColor}`} />
+                        </motion.div>
+                        <motion.span
+                          className={`mt-1 h-2.5 w-2.5 rounded-full ${tone.dot}`}
+                          animate={isActive ? { opacity: [0.5, 1, 0.5], scale: [1, 1.35, 1] } : { opacity: [0.2, 0.45, 0.2], scale: [1, 1.05, 1] }}
+                          transition={{ duration: isActive ? 0.9 : 2.2, repeat: Infinity, delay: index * 0.15 }}
+                        />
+                      </div>
+
+                      <div>
+                        <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-white/45">
+                          {item.subtitle}
+                        </div>
+                        <h4 className={`whitespace-pre-line text-[18px] font-semibold leading-tight ${isActive ? "text-white" : "text-white/80"}`}>{item.title}</h4>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Index = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -486,6 +831,36 @@ const Index = () => {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ============================================
+          THINKRANK FLOW SECTION
+          ============================================ */}
+      <section className="py-32 relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <span className="inline-block px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-6">
+              ThinkRank In Action
+            </span>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+              One system for{" "}
+              <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
+                roadmap, practice, and placement
+              </span>
+            </h2>
+            <p className="text-gray-400 text-lg max-w-3xl mx-auto">
+              Instead of scattered tools, ThinkRank connects skill discovery, learning plans, interviews, and company readiness into one animated workflow.
+            </p>
+          </motion.div>
+
+          <ThinkRankCapabilityAnimation />
         </div>
       </section>
 

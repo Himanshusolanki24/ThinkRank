@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabaseClient";
 import type { User, Session, AuthError } from "@supabase/supabase-js";
 
@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const isConfigured = isSupabaseConfigured();
 
     // Fetch user profile from database
-    const fetchProfile = async (userId: string) => {
+    const fetchProfile = useCallback(async (userId: string) => {
         try {
             const { data, error } = await supabase
                 .from("users")
@@ -83,20 +83,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.error("Profile fetch error:", err);
             return null;
         }
-    };
+    }, []);
 
     // Refresh profile data
-    const refreshProfile = async () => {
+    const refreshProfile = useCallback(async () => {
         if (user?.id) {
             setProfileLoading(true);
             const profileData = await fetchProfile(user.id);
             setProfile(profileData);
             setProfileLoading(false);
         }
-    };
+    }, [user?.id, fetchProfile]);
 
     // Ensure profile exists - create one if it doesn't (fallback for OAuth users)
-    const ensureProfileExists = async (userId: string, authUser: User): Promise<UserProfile | null> => {
+    const ensureProfileExists = useCallback(async (userId: string, authUser: User): Promise<UserProfile | null> => {
         try {
             // First try to fetch existing profile
             let profileData = await fetchProfile(userId);
@@ -134,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             console.error("Error ensuring profile exists:", err);
             return null;
         }
-    };
+    }, [fetchProfile]);
 
     useEffect(() => {
         if (!isConfigured) {
@@ -186,9 +186,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
 
         return () => subscription.unsubscribe();
-    }, [isConfigured]);
+    }, [isConfigured, ensureProfileExists]);
 
-    const signInWithGoogle = async () => {
+    const signInWithGoogle = useCallback(async () => {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
@@ -196,9 +196,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             },
         });
         return { error };
-    };
+    }, []);
 
-    const signInWithLinkedIn = async () => {
+    const signInWithLinkedIn = useCallback(async () => {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: "linkedin_oidc",
             options: {
@@ -206,28 +206,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             },
         });
         return { error };
-    };
+    }, []);
 
-    const signOut = async () => {
+    const signOut = useCallback(async () => {
         await supabase.auth.signOut();
         setUser(null);
         setSession(null);
         setProfile(null);
-    };
+    }, []);
 
-    const value: AuthContextType = {
+    const isProfileComplete = useMemo(() => profile?.profile_completed ?? false, [profile]);
+
+    const value = useMemo(() => ({
         user,
         profile,
         session,
         loading,
         profileLoading,
         isConfigured,
-        isProfileComplete: profile?.profile_completed ?? false,
+        isProfileComplete,
         signInWithGoogle,
         signInWithLinkedIn,
         signOut,
         refreshProfile,
-    };
+    }), [
+        user,
+        profile,
+        session,
+        loading,
+        profileLoading,
+        isConfigured,
+        isProfileComplete,
+        signInWithGoogle,
+        signInWithLinkedIn,
+        signOut,
+        refreshProfile,
+    ]);
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -298,30 +298,34 @@ const Dashboard = () => {
   };
 
   // Prepare data for D3 and Cytoscape graphs
-  const graphSkillData = skillData.map((s, i) => {
-    const interviews = interviewResults.filter(ir => ir.skill === s.skill);
-    const totalXp = interviews.reduce((sum, ir) => sum + (ir.xp_earned || 0), 0);
-    return {
-      id: `skill-${i}`,
-      name: s.skill,
-      level: s.value >= 70 ? 3 : s.value >= 40 ? 2 : 1,
-      score: s.value,
-      category: "",
-      interviews: interviews.length,
-      xp: totalXp,
-    };
-  });
+  const graphSkillData = useMemo(() => {
+    return skillData.map((s, i) => {
+      const interviews = interviewResults.filter(ir => ir.skill === s.skill);
+      const totalXp = interviews.reduce((sum, ir) => sum + (ir.xp_earned || 0), 0);
+      return {
+        id: `skill-${i}`,
+        name: s.skill,
+        level: s.value >= 70 ? 3 : s.value >= 40 ? 2 : 1,
+        score: s.value,
+        category: "",
+        interviews: interviews.length,
+        xp: totalXp,
+      };
+    });
+  }, [skillData, interviewResults]);
 
-  const cytoscapeData = skillData.map((s) => {
-    const interviews = interviewResults.filter(ir => ir.skill === s.skill);
-    const totalXp = interviews.reduce((sum, ir) => sum + (ir.xp_earned || 0), 0);
-    return {
-      name: s.skill,
-      score: s.value,
-      interviews: interviews.length,
-      xp: totalXp,
-    };
-  });
+  const cytoscapeData = useMemo(() => {
+    return skillData.map((s) => {
+      const interviews = interviewResults.filter(ir => ir.skill === s.skill);
+      const totalXp = interviews.reduce((sum, ir) => sum + (ir.xp_earned || 0), 0);
+      return {
+        name: s.skill,
+        score: s.value,
+        interviews: interviews.length,
+        xp: totalXp,
+      };
+    });
+  }, [skillData, interviewResults]);
 
   const defaultWeeklyProgress: WeeklyData[] = [
     { day: "Mon", xp: 0 },

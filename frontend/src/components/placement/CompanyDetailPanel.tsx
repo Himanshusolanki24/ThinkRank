@@ -8,12 +8,14 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CompanyLogo } from "@/components/placement/CompanyLogos";
 import type { CompanyProfile, CompanyReadinessScore } from "@/data/placementGenomeData";
 
 interface Props {
   company: CompanyProfile;
   score: CompanyReadinessScore;
   onClose: () => void;
+  onGenerateRoadmap?: () => void;
 }
 
 const ROUND_COLORS: Record<string, string> = {
@@ -25,7 +27,7 @@ const ROUND_COLORS: Record<string, string> = {
   domain: "#6366F1",
 };
 
-export const CompanyDetailPanel = ({ company, score, onClose }: Props) => {
+export const CompanyDetailPanel = ({ company, score, onClose, onGenerateRoadmap }: Props) => {
   return (
     <motion.div
       initial={{ opacity: 0, x: 40 }}
@@ -38,10 +40,10 @@ export const CompanyDetailPanel = ({ company, score, onClose }: Props) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold"
-            style={{ background: `${company.accentColor}15`, color: company.accentColor }}
+            className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden"
+            style={{ background: `${company.accentColor}15` }}
           >
-            {company.name[0]}
+            <CompanyLogo companyId={company.id} className="w-7 h-7" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-white">{company.name}</h2>
@@ -186,6 +188,7 @@ export const CompanyDetailPanel = ({ company, score, onClose }: Props) => {
       {/* CTA */}
       <Button
         className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white border-0 font-medium"
+        onClick={onGenerateRoadmap}
       >
         Generate {company.name} Roadmap
         <ArrowRight className="w-4 h-4 ml-2" />

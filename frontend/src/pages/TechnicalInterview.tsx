@@ -305,85 +305,182 @@ const TechnicalInterview = () => {
 
     // Render: Start Screen (Immersive Mode)
     if (currentQuestionNumber === 0 && !isComplete) {
+        const BOOT_LINES = [
+            "Initializing neural assessment engine...",
+            "Loading adaptive question bank...",
+            "Calibrating difficulty matrix...",
+            "Connecting to evaluation pipeline...",
+            "System ready.",
+        ];
+
+        const BootSequence = () => {
+            const [lines, setLines] = useState<string[]>([]);
+            const [idx, setIdx] = useState(0);
+            useEffect(() => {
+                if (idx >= BOOT_LINES.length) {
+                    const t = setTimeout(() => { setLines([]); setIdx(0); }, 3000);
+                    return () => clearTimeout(t);
+                }
+                const t = setTimeout(() => {
+                    setLines((p) => [...p, BOOT_LINES[idx]]);
+                    setIdx((i) => i + 1);
+                }, 600);
+                return () => clearTimeout(t);
+            }, [idx]);
+
+            return (
+                <div className="rounded-xl border border-white/[0.06] bg-[#08080C] font-mono text-sm p-5 min-h-[170px]">
+                    <div className="flex items-center gap-1.5 mb-4">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/70" />
+                        <span className="ml-3 text-gray-600 text-xs">skill-genome — boot</span>
+                    </div>
+                    <div className="space-y-1.5">
+                        {lines.map((line, i) => (
+                            <motion.div key={`${i}-${line}`} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2">
+                                <span className="text-emerald-400 text-xs">✓</span>
+                                <span className="text-gray-400 text-xs">{line}</span>
+                            </motion.div>
+                        ))}
+                        {idx < BOOT_LINES.length && lines.length > 0 && (
+                            <motion.span animate={{ opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 0.7 }} className="inline-block w-2 h-4 bg-cyan-400 ml-5" />
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const FEATURES = [
+            { icon: Terminal, title: "Adaptive Engine", desc: "Questions scale with your performance", color: "#06B6D4" },
+            { icon: ShieldCheck, title: "Follow-up Logic", desc: "Wrong answers trigger deeper probing", color: "#8B5CF6" },
+            { icon: Cpu, title: "AI Evaluation", desc: "Real-time scoring & classification", color: "#10B981" },
+            { icon: Play, title: "10 Rounds", desc: "Comprehensive skill coverage", color: "#F59E0B" },
+        ];
+
         return (
-            <div className="min-h-screen bg-[#050505] font-sans text-gray-100 relative overflow-hidden flex flex-col items-center justify-center">
-                <NeuralBackground />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black pointer-events-none" />
+            <div className="min-h-screen bg-[#050507] text-white relative overflow-hidden">
+                {/* Ambient effects */}
+                <div className="fixed inset-0 pointer-events-none overflow-hidden">
+                    <div className="absolute -top-32 left-1/4 w-[600px] h-[600px] bg-cyan-500/[0.04] rounded-full blur-[150px]" />
+                    <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-violet-500/[0.04] rounded-full blur-[130px]" />
+                    <div className="absolute top-1/2 right-0 w-[300px] h-[300px] bg-emerald-500/[0.03] rounded-full blur-[100px]" />
+                </div>
 
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="relative z-10 max-w-4xl w-full p-4"
-                >
-                    <div className="bg-[#0A0A0B]/80 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl relative">
-                        {/* Decorative Top Bar */}
-                        <div className="h-1 bg-gradient-to-r from-violet-600 via-cyan-500 to-indigo-600 w-full" />
+                {/* Grid pattern */}
+                <div
+                    className="fixed inset-0 pointer-events-none opacity-[0.02]"
+                    style={{
+                        backgroundImage: "linear-gradient(rgba(255,255,255,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.15) 1px,transparent 1px)",
+                        backgroundSize: "48px 48px",
+                    }}
+                />
 
-                        <div className="grid md:grid-cols-2">
-                            {/* Left Content */}
-                            <div className="p-12 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-32 bg-violet-500/10 blur-3xl rounded-full pointer-events-none" />
-                                <div className="relative z-10">
-                                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-8 border border-white/10 shadow-lg">
-                                        <Cpu className="w-8 h-8 text-cyan-400" />
-                                    </div>
-                                    <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-                                        Skill Genome <span className="text-cyan-400">Interview</span>
-                                    </h1>
-                                    <p className="text-lg text-gray-400 mb-8 leading-relaxed">
-                                        Enter the adaptive neural assessment chamber. The system will analyze your technical depth and critical thinking in real-time.
-                                    </p>
-                                    <Button
-                                        onClick={startInterview}
-                                        disabled={isLoading || skills.length === 0}
-                                        className="h-14 px-8 bg-white hover:bg-gray-100 text-black font-bold text-lg rounded-xl tracking-wide transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <Loader2 className="w-5 h-5 animate-spin mr-3" />
-                                                {loadingMessage}
-                                            </>
-                                        ) : (
-                                            <>
-                                                INITIALIZE SESSION
-                                                <ArrowRight className="w-5 h-5 ml-3" />
-                                            </>
-                                        )}
-                                    </Button>
+                <div className="container mx-auto px-4 lg:px-6 pt-14 pb-24 relative z-10">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="max-w-6xl mx-auto">
+
+                        {/* Accent line */}
+                        <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent mb-14" />
+
+                        <div className="grid lg:grid-cols-2 gap-14 items-start">
+                            {/* LEFT */}
+                            <div>
+                                {/* Badge */}
+                                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/[0.06] px-4 py-1.5 mb-7">
+                                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                                    <span className="text-xs font-medium text-cyan-300 tracking-wide">Skill Genome — Assessment Mode</span>
                                 </div>
-                            </div>
 
-                            {/* Right Content (Skill Grid) */}
-                            <div className="bg-[#0F0F16] p-12 flex flex-col border-l border-white/5 relative">
-                                <div className="flex-1 flex flex-col justify-center">
-                                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-6 font-mono">
-                                        Detected Skill Matrix
-                                    </h3>
+                                {/* Headline */}
+                                <h1 className="text-5xl md:text-[3.4rem] font-bold tracking-tight leading-[1.1] mb-4 font-display">
+                                    Technical
+                                    <span className="block bg-gradient-to-r from-cyan-400 via-violet-400 to-emerald-400 bg-clip-text text-transparent">
+                                        Interview
+                                    </span>
+                                </h1>
+                                <p className="text-gray-400 text-base leading-relaxed mb-8 max-w-md">
+                                    Adaptive neural assessment that analyzes your technical depth, follows up on weak areas, and scores you in real-time against industry benchmarks.
+                                </p>
+
+                                {/* Skill Matrix */}
+                                <div className="mb-8">
+                                    <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-3">Detected Skill Matrix</p>
                                     {skills.length > 0 ? (
-                                        <div className="flex flex-wrap gap-2">
+                                        <div className="flex flex-wrap gap-1.5">
                                             {skills.map((skill) => (
-                                                <div key={skill.name} className="px-4 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-sm font-medium text-gray-300">
+                                                <span
+                                                    key={skill.name}
+                                                    className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06] text-xs text-gray-300 flex items-center gap-2 hover:bg-white/[0.08] transition-colors"
+                                                >
+                                                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: skill.color }} />
                                                     {skill.name}
-                                                </div>
+                                                </span>
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="p-6 border border-dashed border-red-500/30 rounded-xl bg-red-500/5">
-                                            <p className="text-red-400 text-sm flex items-center gap-2">
+                                        <div className="p-4 border border-dashed border-amber-500/25 rounded-xl bg-amber-500/[0.04]">
+                                            <p className="text-amber-400 text-sm flex items-center gap-2">
                                                 <ShieldCheck className="w-4 h-4" />
-                                                NO SKILLS SYNCED
+                                                No skills synced — build your genome first
                                             </p>
                                         </div>
                                     )}
                                 </div>
-                                <div className="mt-8 pt-8 border-t border-white/5 flex justify-between text-xs font-mono text-gray-600">
-                                    <span>V2.4.0 STABLE</span>
-                                    <span>LATENCY: 12ms</span>
+
+                                {/* CTA */}
+                                <Button
+                                    onClick={startInterview}
+                                    disabled={isLoading || skills.length === 0}
+                                    className="h-14 px-8 rounded-2xl bg-white text-black hover:bg-gray-100 font-bold text-base transition-all duration-200 hover:scale-[1.02] shadow-[0_0_40px_rgba(255,255,255,0.15)]"
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin mr-3" />
+                                            {loadingMessage}
+                                        </>
+                                    ) : (
+                                        <>
+                                            Launch Assessment
+                                            <ArrowRight className="w-5 h-5 ml-3" />
+                                        </>
+                                    )}
+                                </Button>
+                                {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+                            </div>
+
+                            {/* RIGHT */}
+                            <div className="space-y-5">
+                                <BootSequence />
+
+                                {/* Feature grid */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    {FEATURES.map(({ icon: Icon, title, desc, color }) => (
+                                        <div key={title} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 hover:bg-white/[0.04] transition-all duration-200">
+                                            <div
+                                                className="inline-flex items-center justify-center w-9 h-9 rounded-xl mb-3"
+                                                style={{ backgroundColor: `${color}15` }}
+                                            >
+                                                <Icon className="w-4 h-4" style={{ color }} />
+                                            </div>
+                                            <div className="font-semibold text-sm text-white mb-1">{title}</div>
+                                            <div className="text-xs text-gray-500 leading-snug">{desc}</div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Stats strip */}
+                                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 flex items-center justify-between text-center">
+                                    {[["10", "Rounds"], ["AI", "Scoring"], ["Adaptive", "Difficulty"], ["Real-time", "Follow-ups"]].map(([val, label]) => (
+                                        <div key={label}>
+                                            <div className="text-lg font-bold text-white">{val}</div>
+                                            <div className="text-[10px] text-gray-500 uppercase tracking-wider">{label}</div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </motion.div>
+                    </motion.div>
+                </div>
             </div>
         );
     }
@@ -422,11 +519,10 @@ const TechnicalInterview = () => {
 
     // Render: Main Console Interface (Immersive Mode)
     return (
-        <div className="h-screen bg-[#050505] font-sans text-gray-100 flex flex-col overflow-hidden relative selection:bg-cyan-500/30">
-            <NeuralBackground />
+        <div className="h-screen bg-[#050507] font-sans text-gray-100 flex flex-col overflow-hidden relative selection:bg-cyan-500/30">
 
             {/* Top HUD */}
-            <header className="h-16 border-b border-white/5 bg-[#0A0A0B]/80 backdrop-blur-md flex items-center justify-between px-4 md:px-6 sticky top-0 z-30 shrink-0">
+            <header className="h-14 border-b border-white/[0.06] bg-[#0A0A0F]/95 backdrop-blur-xl flex items-center justify-between px-4 md:px-6 sticky top-0 z-30 shrink-0">
                 <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-cyan-500 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shrink-0">
                         SG
@@ -464,7 +560,7 @@ const TechnicalInterview = () => {
                 {/* Left Panel: Recruiter Comms */}
                 <aside className={`
                     w-full md:w-[300px] lg:w-[380px] 
-                    flex flex-col border-r border-white/5 relative z-30 h-full bg-[#050505]
+                    flex flex-col border-r border-white/[0.06] relative z-30 h-full bg-[#0A0A0F]
                     absolute md:relative inset-0
                     transition-transform duration-300 ease-in-out
                     ${mobileTab === 'recruiter' ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
@@ -483,7 +579,7 @@ const TechnicalInterview = () => {
 
                 {/* Right Panel: Workspace */}
                 <main className={`
-                    flex-1 h-full relative overflow-hidden bg-[#0A0A0B]
+                    flex-1 h-full relative overflow-hidden bg-[#0C0C10]
                     transition-transform duration-300 ease-in-out
                     absolute md:relative inset-0 md:translate-x-0
                     ${mobileTab === 'workspace' ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import * as d3 from "d3";
 
 interface SkillNode {
@@ -91,13 +91,13 @@ export const D3SkillNetwork = ({ skills, onNodeClick }: D3SkillNetworkProps) => 
     const [dimensions, setDimensions] = useState({ width: 600, height: 500 });
     const [hoveredNode, setHoveredNode] = useState<SkillNode | null>(null);
 
-    // Add categories to skills
-    const nodesWithCategories: SkillNode[] = skills.map(skill => ({
+    // Add categories to skills — memoized to prevent simulation restarts on hover
+    const nodesWithCategories: SkillNode[] = useMemo(() => skills.map(skill => ({
         ...skill,
         category: skill.category || getSkillCategory(skill.name),
-    }));
+    })), [skills]);
 
-    const links = generateLinks(nodesWithCategories);
+    const links = useMemo(() => generateLinks(nodesWithCategories), [nodesWithCategories]);
 
     useEffect(() => {
         const updateDimensions = () => {

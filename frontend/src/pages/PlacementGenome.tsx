@@ -183,6 +183,10 @@ export default function PlacementGenome() {
                         company={selectedCompany}
                         score={selectedScore}
                         onClose={() => setSelectedCompanyId(null)}
+                        onGenerateRoadmap={() => {
+                          setActiveTab("roadmap");
+                          setSelectedCompanyId(null);
+                        }}
                       />
                     </motion.div>
                   )}
