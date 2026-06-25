@@ -64,9 +64,9 @@ export const LiveTranscriptPanel = ({
   };
 
   return (
-    <div className="h-full flex flex-col glass-transcript">
+    <div className="h-full flex flex-col glass-transcript border border-white/[0.08] shadow-2xl shadow-black/20">
       {/* ── Header ─────────────────────────────────────── */}
-      <div className="shrink-0 px-5 py-4 border-b border-white/[0.06]">
+      <div className="shrink-0 px-5 py-4 border-b border-white/[0.06] bg-[#07080e]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 flex items-center justify-center border border-white/[0.06]">
@@ -239,7 +239,7 @@ export const LiveTranscriptPanel = ({
       </div>
 
       {/* ── Message Input ──────────────────────────────── */}
-      <div className="shrink-0 p-4 border-t border-white/[0.06]">
+      <div className="shrink-0 p-4 border-t border-white/[0.06] bg-[#07080e]">
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <textarea
@@ -249,10 +249,10 @@ export const LiveTranscriptPanel = ({
               placeholder="Type a message to the interviewer..."
               rows={1}
               className="
-                w-full px-4 py-2.5 rounded-2xl
-                bg-white/[0.04] border border-white/[0.06]
-                text-xs text-white placeholder-gray-600
-                focus:outline-none focus:border-cyan-500/30 focus:bg-white/[0.06]
+                w-full px-4 py-3 rounded-[24px]
+                bg-white/[0.05] border border-white/[0.08]
+                text-xs text-white placeholder-gray-500
+                focus:outline-none focus:border-cyan-500/40 focus:bg-white/[0.08]
                 resize-none transition-all duration-300
               "
             />

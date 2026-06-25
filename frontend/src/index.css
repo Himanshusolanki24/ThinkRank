@@ -533,4 +533,35 @@
     mask-image: linear-gradient(to bottom, transparent 0%, black 48px);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 48px);
   }
+
+  /* Lobby CTA — sweeping shimmer */
+  .animate-btn-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      110deg,
+      transparent 25%,
+      rgba(0, 229, 255, 0.18) 45%,
+      rgba(139, 92, 246, 0.14) 55%,
+      transparent 75%
+    );
+    transform: translateX(-100%);
+    animation: btn-shimmer 3.6s ease-in-out infinite;
+  }
+
+  @keyframes btn-shimmer {
+    0% { transform: translateX(-120%); }
+    55%, 100% { transform: translateX(120%); }
+  }
+
+  /* Lobby — soft conic ring sweep on selected option */
+  .animate-ring-sweep {
+    animation: ring-sweep 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes ring-sweep {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
 }

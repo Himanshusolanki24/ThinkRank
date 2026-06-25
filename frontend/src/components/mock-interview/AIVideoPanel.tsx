@@ -84,7 +84,7 @@ export const AIVideoPanel = ({
   }, [phase, isAiThinking]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#050507]">
+    <div className="relative h-full w-full overflow-hidden bg-[#050507] text-white">
       {/* ── Background Layers ────────────────────────────── */}
 
       {/* Animated gradient mesh */}
@@ -92,9 +92,9 @@ export const AIVideoPanel = ({
         className="absolute inset-0 animate-gradient-mesh opacity-60"
         style={{
           background:
-            "radial-gradient(ellipse at 20% 50%, rgba(0, 229, 255, 0.06) 0%, transparent 50%), " +
-            "radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.05) 0%, transparent 50%), " +
-            "radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.04) 0%, transparent 50%)",
+            "radial-gradient(ellipse at 20% 50%, rgba(0, 229, 255, 0.08) 0%, transparent 45%), " +
+            "radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 45%), " +
+            "radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 45%)",
         }}
       />
 
@@ -169,7 +169,7 @@ export const AIVideoPanel = ({
       </div>
 
       <motion.div
-        className="absolute top-24 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-full glass-control border border-white/[0.06]"
+        className="absolute top-24 left-1/2 -translate-x-1/2 z-20 px-3 py-1.5 rounded-full glass-control border border-white/[0.06] shadow-sm"
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -196,7 +196,7 @@ export const AIVideoPanel = ({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
       >
-        <div className="px-4 py-2 rounded-2xl glass-control">
+        <div className="px-4 py-2 rounded-3xl glass-control border border-white/[0.08] shadow-lg shadow-cyan-500/5">
           <InterviewMetrics
             phase={phase}
             questionIndex={questionIndex}

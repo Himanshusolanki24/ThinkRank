@@ -11,6 +11,7 @@ import { FaJava } from "react-icons/fa";
 import {
   ArrowRight, Loader2, Shield, Brain, Zap, Target, Bot, Rocket,
   Sparkles, Star, ChevronRight, Code2, Clock, Users, Video, VideoOff, Mic, MicOff,
+  CheckCircle2, ShieldCheck, Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CompanyLogo } from "@/components/placement/CompanyLogos";
@@ -469,9 +470,9 @@ const MockInterview = () => {
   // ══════════════════════════════════════════════════════════
   if (screen === "lobby") {
     return (
-      <div className="min-h-screen bg-[#050507] text-white relative overflow-hidden">
+      <div className="relative w-full min-h-[calc(100vh-73px)] bg-[#050507] text-white overflow-hidden">
         {/* ── Background ──────────────────────────── */}
-        <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute inset-0 pointer-events-none">
           <div
             className="absolute inset-0 animate-gradient-mesh opacity-50"
             style={{
@@ -503,212 +504,313 @@ const MockInterview = () => {
           />
         </div>
 
-        {/* ── Content ─────────────────────────────── */}
-        <div className="container mx-auto px-4 lg:px-6 pt-14 pb-24 relative z-10">
+        {/* ── Content grid (fills area below header) ── */}
+        <div className="relative z-10 grid grid-cols-1 xl:grid-cols-[1.12fr_1fr] gap-7 lg:gap-10 p-5 sm:p-7 lg:p-9 xl:p-11 min-h-[calc(100vh-73px)]">
+
+          {/* ══ LEFT · Hero ════════════════════════ */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="max-w-5xl mx-auto"
+            className="relative flex flex-col"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
           >
-            {/* Top gradient line */}
-            <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent mb-14" />
+            {/* Brand badge */}
+            <motion.div
+              className="inline-flex w-fit items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/[0.05] px-4 py-2"
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="text-xs font-medium text-cyan-300 tracking-wide">AI Mock Interview Platform</span>
+            </motion.div>
 
-            {/* Header */}
-            <div className="text-center mb-14">
-              <motion.div
-                className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/[0.05] px-5 py-2 mb-7"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                <motion.span
-                  className="w-2 h-2 rounded-full bg-cyan-400"
-                  animate={{ scale: [1, 1.3, 1], opacity: [1, 0.6, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                />
-                <span className="text-xs font-medium text-cyan-300 tracking-wide">AI Mock Interview Platform</span>
-              </motion.div>
-
-              <motion.h1
-                className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.08] mb-5 font-display"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.6 }}
-              >
-                Real Interview
-                <span className="block mt-1">
-                  <span className="bg-gradient-to-r from-cyan-400 via-violet-400 to-emerald-400 bg-clip-text text-transparent">
+            {/* Headline · features (left)  +  orb (right) */}
+            <div className="flex-1 flex flex-col xl:flex-row xl:items-center gap-8 xl:gap-10 py-8">
+              {/* Text block */}
+              <div className="flex-1 min-w-0">
+                <motion.h1
+                  className="text-5xl sm:text-6xl 2xl:text-7xl font-bold tracking-tight leading-[1.03] font-display"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35, duration: 0.6 }}
+                >
+                  Real Interview
+                  <span className="block mt-1.5 bg-gradient-to-r from-cyan-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">
                     Experience
                   </span>
-                </span>
-              </motion.h1>
+                </motion.h1>
 
-              <motion.p
-                className="text-gray-400 text-base md:text-lg max-w-xl mx-auto leading-relaxed"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.45 }}
+                <motion.p
+                  className="mt-6 text-gray-400 text-base lg:text-lg max-w-lg leading-relaxed"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.45 }}
+                >
+                  AI-powered mock interviews with real-time feedback to help you prepare better and build confidence.
+                </motion.p>
+
+                {/* Features row */}
+                <motion.div
+                  className="mt-9 flex flex-wrap gap-x-8 gap-y-5"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.55 }}
+                >
+                  {[
+                    { Icon: Zap, l1: "Real-time", l2: "AI Feedback", color: "#00E5FF" },
+                    { Icon: Brain, l1: "Smart", l2: "Evaluation", color: "#8B5CF6" },
+                    { Icon: Target, l1: "Personalized", l2: "Experience", color: "#10B981" },
+                  ].map(({ Icon, l1, l2, color }) => (
+                    <div key={l1} className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border border-white/[0.06]" style={{ backgroundColor: `${color}14` }}>
+                        <Icon className="w-5 h-5" style={{ color }} />
+                      </div>
+                      <div className="leading-tight">
+                        <p className="text-sm font-semibold text-white">{l1}</p>
+                        <p className="text-xs text-gray-500">{l2}</p>
+                      </div>
+                    </div>
+                  ))}
+                </motion.div>
+              </div>
+
+              {/* Animated AI Orb — sibling, never overlaps */}
+              <motion.div
+                className="pointer-events-none relative shrink-0 mx-auto hidden xl:block w-[240px] h-[240px] 2xl:w-[300px] 2xl:h-[300px]"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               >
-                Practice with AI interviewers that mimic Google, Amazon, Microsoft, and more.
-                Full coding environment with real-time AI feedback.
-              </motion.p>
+                <div className="absolute inset-0 rounded-full border border-white/[0.05]" />
+                <div className="absolute inset-[8%] rounded-full border border-white/[0.04]" />
+                <span className="absolute inset-[6%] rounded-full border border-cyan-400/20 animate-wave-ring" />
+                <span className="absolute inset-[6%] rounded-full border border-violet-400/20 animate-wave-ring" style={{ animationDelay: "1.3s" }} />
+                <motion.div
+                  className="absolute inset-[14%] rounded-full"
+                  style={{
+                    background: "conic-gradient(from 210deg, rgba(0,229,255,0.65), rgba(139,92,246,0.65), rgba(16,185,129,0.55), rgba(0,229,255,0.65))",
+                    WebkitMask: "radial-gradient(circle, transparent 62%, black 64%)",
+                    mask: "radial-gradient(circle, transparent 62%, black 64%)",
+                    filter: "drop-shadow(0 0 24px rgba(0,229,255,0.25))",
+                  }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+                />
+                <div className="absolute inset-[26%] rounded-full bg-gradient-to-br from-[#0c1622] to-[#070709] border border-white/10 animate-orb-breathe flex items-center justify-center shadow-[0_0_70px_rgba(0,229,255,0.25)]">
+                  <Bot className="w-14 h-14 2xl:w-20 2xl:h-20 text-cyan-300/90" />
+                </div>
+                {[
+                  { top: "6%", left: "30%", c: "#00E5FF" },
+                  { top: "20%", right: "8%", c: "#8B5CF6" },
+                  { bottom: "14%", right: "20%", c: "#10B981" },
+                  { bottom: "8%", left: "22%", c: "#00E5FF" },
+                ].map((p, i) => (
+                  <motion.span
+                    key={i}
+                    className="absolute w-1.5 h-1.5 rounded-full"
+                    style={{ ...p, backgroundColor: p.c, boxShadow: `0 0 8px ${p.c}` }}
+                    animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.4, 1] }}
+                    transition={{ duration: 2.6, repeat: Infinity, delay: i * 0.5 }}
+                  />
+                ))}
+              </motion.div>
             </div>
 
-            {/* Config Grid */}
+            {/* Stats card */}
             <motion.div
-              className="grid md:grid-cols-3 gap-6 mb-10"
+              className="relative z-10 rounded-[28px] border border-white/[0.07] bg-white/[0.02] backdrop-blur-sm p-5 lg:p-6 grid grid-cols-2 sm:grid-cols-4 gap-5"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
+              transition={{ delay: 0.65 }}
             >
-              {/* Company Style */}
-              <div>
-                <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-3">Interviewer Style</p>
-                <div className="space-y-2">
-                  {COMPANY_STYLES.map((c) => (
+              {[
+                { Icon: Users, value: "12.4K+", label: "Interviews Conducted", color: "#8B5CF6" },
+                { Icon: CheckCircle2, value: "98.2%", label: "Success Rate", color: "#10B981" },
+                { Icon: Star, value: "4.9/5", label: "User Rating", color: "#F59E0B" },
+                { Icon: Clock, value: "45 min", label: "Avg. Interview Time", color: "#00E5FF" },
+              ].map(({ Icon, value, label, color }) => (
+                <div key={label} className="flex flex-col gap-2">
+                  <Icon className="w-5 h-5" style={{ color }} />
+                  <p className="text-2xl font-bold text-white leading-none font-display">{value}</p>
+                  <p className="text-[11px] text-gray-500 leading-tight">{label}</p>
+                </div>
+              ))}
+            </motion.div>
+          </motion.div>
+
+          {/* ══ RIGHT · Config card ════════════════ */}
+          <motion.div
+            className="relative flex flex-col rounded-[28px] border border-white/[0.07] bg-[#0a0a12]/70 backdrop-blur-xl p-6 lg:p-7 xl:p-8 shadow-[0_30px_90px_-50px_rgba(0,229,255,0.2)]"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* 01 — Platform */}
+            <div className="mb-7">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xs font-mono text-cyan-400 tabular-nums">01</span>
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.2em]">Choose Platform</p>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+                {COMPANY_STYLES.map((c) => {
+                  const active = config.companyStyle === c.id;
+                  return (
                     <motion.button
                       key={c.id}
                       onClick={() => setConfig({ ...config, companyStyle: c.id })}
-                      className={`w-full flex items-center gap-3 p-3.5 rounded-2xl border transition-all duration-300 ${
-                        config.companyStyle === c.id
-                          ? "border-white/15 bg-white/[0.06] shadow-lg shadow-black/20"
-                          : "border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.08]"
+                      title={c.desc}
+                      className={`relative flex flex-col items-center justify-center gap-2.5 px-2 py-4 rounded-2xl border transition-all duration-300 overflow-hidden ${
+                        active
+                          ? "border-cyan-400/50 bg-cyan-400/[0.04]"
+                          : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12]"
                       }`}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
+                      style={active ? { boxShadow: "0 0 0 1px rgba(0,229,255,0.35), 0 16px 40px -20px rgba(0,229,255,0.6)" } : undefined}
+                      whileHover={{ y: -3 }}
+                      whileTap={{ scale: 0.97 }}
                     >
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center transition-all" style={{ backgroundColor: `${c.color}18` }}>
-                        <CompanyStyleLogo companyId={c.id} color={c.color} />
-                      </div>
-                      <div className="text-left flex-1">
-                        <p className="text-sm font-medium text-white">{c.label}</p>
-                        <p className="text-[10px] text-gray-500">{c.desc}</p>
-                      </div>
-                      {config.companyStyle === c.id && (
-                        <motion.div
-                          className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: c.color, boxShadow: `0 0 8px ${c.color}60` }}
+                      {c.id === "startup"
+                        ? <Rocket className="w-7 h-7" style={{ color: c.color }} />
+                        : <CompanyLogo companyId={c.id} className="w-7 h-7" />}
+                      <span className="text-xs font-medium text-white">{c.label}</span>
+                      {active && (
+                        <motion.span
                           layoutId="company-indicator"
+                          className="absolute bottom-0 left-1/2 -translate-x-1/2 h-1 w-9 rounded-t-full bg-cyan-400"
+                          style={{ boxShadow: "0 0 12px #00E5FF" }}
                         />
                       )}
                     </motion.button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
+            </div>
 
-              {/* Difficulty + Language */}
-              <div>
-                <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-3">Difficulty</p>
-                <div className="space-y-2">
-                  {DIFFICULTIES.map((d) => (
+            {/* 02 — Difficulty */}
+            <div className="mb-7">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xs font-mono text-cyan-400 tabular-nums">02</span>
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.2em]">Select Difficulty</p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {DIFFICULTIES.map((d) => {
+                  const active = config.difficulty === d.id;
+                  return (
                     <motion.button
                       key={d.id}
                       onClick={() => setConfig({ ...config, difficulty: d.id })}
-                      className={`w-full flex items-center gap-3 p-3.5 rounded-2xl border transition-all duration-300 ${
-                        config.difficulty === d.id
-                          ? "border-white/15 bg-white/[0.06] shadow-lg shadow-black/20"
-                          : "border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.08]"
+                      className={`flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl border transition-all duration-300 ${
+                        active ? "" : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12]"
                       }`}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
+                      style={active
+                        ? { borderColor: `${d.color}80`, backgroundColor: `${d.color}12`, boxShadow: `0 0 0 1px ${d.color}40, 0 16px 40px -20px ${d.color}` }
+                        : undefined}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.97 }}
                     >
-                      <div
-                        className="w-3 h-3 rounded-full transition-all"
-                        style={{
-                          backgroundColor: d.color,
-                          boxShadow: config.difficulty === d.id ? `0 0 10px ${d.color}50` : "none",
-                        }}
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        style={{ backgroundColor: d.color, boxShadow: active ? `0 0 10px ${d.color}` : "none" }}
                       />
                       <span className="text-sm font-medium text-white">{d.label}</span>
                     </motion.button>
-                  ))}
-                </div>
+                  );
+                })}
+              </div>
+            </div>
 
-                <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest mb-3 mt-7">Language</p>
-                <div className="space-y-2">
-                  {LANGUAGES_OPT.map((l) => (
+            {/* 03 — Language */}
+            <div className="mb-7">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xs font-mono text-cyan-400 tabular-nums">03</span>
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.2em]">Select Language</p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {LANGUAGES_OPT.map((l) => {
+                  const active = config.language === l.id;
+                  return (
                     <motion.button
                       key={l.id}
                       onClick={() => setConfig({ ...config, language: l.id })}
-                      className={`w-full flex items-center gap-3 p-3.5 rounded-2xl border transition-all duration-300 ${
-                        config.language === l.id
-                          ? "border-white/15 bg-white/[0.06] shadow-lg shadow-black/20"
-                          : "border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.08]"
+                      className={`flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl border transition-all duration-300 ${
+                        active
+                          ? "border-cyan-400/50 bg-cyan-400/[0.04]"
+                          : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12]"
                       }`}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
+                      style={active ? { boxShadow: "0 0 0 1px rgba(0,229,255,0.35), 0 16px 40px -20px rgba(0,229,255,0.6)" } : undefined}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.97 }}
                     >
-                      <l.Icon className={`w-5 h-5 ${l.iconClassName}`} />
+                      <l.Icon className={`w-5 h-5 shrink-0 ${l.iconClassName}`} />
                       <span className="text-sm font-medium text-white">{l.label}</span>
                     </motion.button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
+            </div>
 
-              {/* Preview + CTA */}
-              <div className="flex flex-col">
-                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 mb-4 flex-1 backdrop-blur-sm">
-                  <h3 className="text-sm font-semibold text-white mb-5 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-cyan-400" />
-                    Session Preview
-                  </h3>
-                  <div className="space-y-3.5">
-                    {[
-                      { label: "Interviewer", value: COMPANY_STYLES.find((c) => c.id === config.companyStyle)?.label },
-                      { label: "Difficulty", value: DIFFICULTIES.find((d) => d.id === config.difficulty)?.label },
-                      { label: "Language", value: LANGUAGES_OPT.find((l) => l.id === config.language)?.label },
-                      { label: "Duration", value: "~45 min" },
-                      { label: "Questions", value: "2-3 problems" },
-                    ].map(({ label, value }) => (
-                      <div key={label} className="flex justify-between text-xs">
-                        <span className="text-gray-500">{label}</span>
-                        <span className="text-white font-medium">{value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5 mb-5">
-                  {LOBBY_FEATURES.map(({ icon: Icon, label, desc, color }) => (
-                    <motion.div
-                      key={label}
-                      className="p-3 rounded-2xl border border-white/[0.04] bg-white/[0.02] text-center group hover:bg-white/[0.04] transition-all duration-300"
-                      whileHover={{ y: -2 }}
-                    >
-                      <Icon className="w-4 h-4 mx-auto mb-1.5" style={{ color }} />
-                      <p className="text-[10px] font-medium text-white">{label}</p>
-                      <p className="text-[9px] text-gray-600">{desc}</p>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    onClick={() => setScreen("permissions")}
-                    disabled={loading}
-                    className="h-14 rounded-2xl bg-white text-black hover:bg-gray-100 font-bold text-base w-full relative overflow-hidden group"
-                    style={{
-                      boxShadow: "0 0 40px rgba(255,255,255,0.12), 0 4px 20px rgba(0,0,0,0.3)",
-                    }}
-                  >
-                    <span className="relative z-10 flex items-center justify-center gap-3">
-                      Enter Setup Room <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            {/* Summary chips */}
+            <div className="mt-auto flex flex-wrap items-center gap-2 pt-2">
+              {(() => {
+                const c = COMPANY_STYLES.find((x) => x.id === config.companyStyle);
+                const d = DIFFICULTIES.find((x) => x.id === config.difficulty);
+                const l = LANGUAGES_OPT.find((x) => x.id === config.language);
+                return (
+                  <>
+                    <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[11px] text-gray-300">
+                      {config.companyStyle === "startup"
+                        ? <Rocket className="w-3.5 h-3.5" style={{ color: c?.color }} />
+                        : <CompanyLogo companyId={config.companyStyle} className="w-3.5 h-3.5" />}
+                      {c?.label}
                     </span>
-                  </Button>
-                </motion.div>
+                    <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[11px] text-gray-300">
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: d?.color, boxShadow: `0 0 8px ${d?.color}` }} />{d?.label}
+                    </span>
+                    <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[11px] text-gray-300">
+                      {l && <l.Icon className={`w-3.5 h-3.5 ${l.iconClassName}`} />}{l?.label}
+                    </span>
+                    <span className="flex items-center gap-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-[11px] text-gray-300">
+                      <Clock className="w-3.5 h-3.5 text-gray-500" />~45 min · 2–3 problems
+                    </span>
+                  </>
+                );
+              })()}
+            </div>
 
-                {error && (
-                  <motion.p
-                    className="mt-3 text-xs text-red-400 text-center"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    {error}
-                  </motion.p>
-                )}
-              </div>
+            {/* CTA */}
+            <motion.div className="mt-5" whileHover={{ scale: 1.005 }} whileTap={{ scale: 0.99 }}>
+              <Button
+                onClick={() => setScreen("permissions")}
+                disabled={loading}
+                className="animate-btn-shimmer h-16 rounded-2xl bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500 text-white hover:opacity-95 font-bold text-base w-full relative overflow-hidden group"
+                style={{ boxShadow: "0 24px 60px -20px rgba(99,102,241,0.7), 0 0 0 1px rgba(255,255,255,0.04)" }}
+              >
+                <span className="relative z-10 flex items-center justify-center gap-3">
+                  {loading
+                    ? <><Loader2 className="w-5 h-5 animate-spin" /> Initializing…</>
+                    : <>Enter Setup Room <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></>}
+                </span>
+              </Button>
             </motion.div>
+
+            {/* Footer trust line */}
+            <div className="mt-4 flex items-center justify-center gap-4 text-[11px] text-gray-500">
+              <span className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-gray-600" /> Secure</span>
+              <span className="w-px h-3 bg-white/10" />
+              <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-gray-600" /> Private</span>
+              <span className="w-px h-3 bg-white/10" />
+              <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-gray-600" /> AI-Powered</span>
+            </div>
+
+            {error && (
+              <motion.p
+                className="mt-3 text-xs text-red-400 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                {error}
+              </motion.p>
+            )}
           </motion.div>
         </div>
       </div>

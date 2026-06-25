@@ -97,9 +97,9 @@ export const CodeEditorPanel = ({
   }, [testResults]);
 
   return (
-    <div className="h-full flex flex-col bg-[#0C0C10]">
+    <div className="h-full flex flex-col bg-[#07080f] rounded-[32px] border border-white/[0.05] shadow-2xl shadow-black/20 overflow-hidden">
       {/* Toolbar */}
-      <div className="h-11 px-3 flex items-center justify-between border-b border-white/[0.06] bg-[#0A0A0F]/80 shrink-0">
+      <div className="h-12 px-4 flex items-center justify-between border-b border-white/[0.08] bg-[#0B0B11]/90 shrink-0">
         <div className="flex items-center gap-2">
           {/* Language Selector */}
           <div className="relative">
@@ -177,9 +177,9 @@ export const CodeEditorPanel = ({
         {activeTab === "editor" && (
           <div className="h-full flex flex-col">
             {/* Editor Area with Line Numbers */}
-            <div className="flex-1 flex overflow-hidden bg-[#0C0C10]">
+            <div className="flex-1 flex overflow-hidden bg-[#08090f]">
               {/* Line number strip */}
-              <div className="w-10 select-none py-4 text-right pr-3 font-mono text-[11px] text-gray-700 bg-[#0A0A0F]/50 border-r border-white/[0.03]">
+              <div className="w-12 select-none py-4 text-right pr-4 font-mono text-[11px] text-gray-600 bg-[#07080f]/90 border-r border-white/[0.04]">
                 {Array.from({ length: lineCount }).map((_, idx) => (
                   <div key={idx} className="h-6 leading-6">
                     {idx + 1}
@@ -192,19 +192,19 @@ export const CodeEditorPanel = ({
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 spellCheck={false}
-                className="flex-1 p-4 bg-transparent text-sm font-mono text-gray-200 resize-none focus:outline-none leading-6 border-none overflow-y-auto"
+                className="flex-1 p-4 bg-transparent text-sm font-mono text-gray-100 resize-none focus:outline-none leading-6 border-none overflow-y-auto"
                 style={{ tabSize: 4 }}
                 placeholder="// Write your solution here..."
               />
             </div>
 
             {/* Custom Input */}
-            <div className="border-t border-white/[0.06] p-3 bg-[#0A0A0F]/50">
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">Custom Input Arguments</p>
+            <div className="border-t border-white/[0.08] p-3 bg-[#07080f]/90">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1.5">Custom Input Arguments</p>
               <textarea
                 value={customInput}
                 onChange={(e) => setCustomInput(e.target.value)}
-                className="w-full h-16 p-2 rounded-lg bg-white/[0.03] border border-white/[0.06] text-xs font-mono text-gray-300 resize-none focus:outline-none focus:border-cyan-500/30"
+                className="w-full h-16 p-3 rounded-[22px] bg-white/[0.05] border border-white/[0.08] text-xs font-mono text-gray-200 resize-none focus:outline-none focus:border-cyan-500/40 focus:bg-white/[0.08]"
                 placeholder="Enter custom stdin arguments to pass to Judge0 Sandbox..."
               />
             </div>
