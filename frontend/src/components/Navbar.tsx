@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dna, LayoutDashboard, Target, BarChart3, User, LogOut, ChevronDown, Settings } from "lucide-react";
@@ -18,6 +18,15 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const { user, profile, signOut, loading } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -49,11 +58,10 @@ export const Navbar = () => {
   };
 
   return (
-    <motion.header
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border"
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 animate-msg-in ${
+        scrolled ? "bg-[#050505]/95 border-b border-border backdrop-blur-md" : "bg-transparent border-transparent"
+      }`}
     >
       <div className="container mx-auto px-4">
         <nav className="flex items-center justify-between h-16">
@@ -224,7 +232,7 @@ export const Navbar = () => {
           </div>
         </nav>
       </div>
-    </motion.header>
+    </header>
   );
 };
 

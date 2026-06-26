@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,28 +10,34 @@ import {
     User,
     Menu,
     LayoutDashboard,
-    Command
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 interface DashboardHeaderProps {
     onMobileMenuClick?: () => void;
 }
 
-export const DashboardHeader = ({ onMobileMenuClick }: DashboardHeaderProps) => {
+// PERFORMANCE: Wrapped in React.memo
+export const DashboardHeader = memo(({ onMobileMenuClick }: DashboardHeaderProps) => {
     const location = useLocation();
     const { user, profile, signOut } = useAuth();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
-    // Handle scroll effect for glassmorphism
+    // PERFORMANCE: Throttled scroll listener using requestAnimationFrame
     useEffect(() => {
+        let ticking = false;
         const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    setScrolled(window.scrollY > 20);
+                    ticking = false;
+                });
+                ticking = true;
+            }
         };
-        window.addEventListener("scroll", handleScroll);
+        window.addEventListener("scroll", handleScroll, { passive: true });
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
@@ -48,12 +54,15 @@ export const DashboardHeader = ({ onMobileMenuClick }: DashboardHeaderProps) => 
         return "Skill Genome";
     };
 
+    const isLandingPage = location.pathname === "/";
+
     return (
         <header
-            className={`sticky top-0 z-30 flex items-center justify-between px-6 py-4 transition-all duration-300 ${scrolled
-                ? "bg-[#0A0A0F]/80 backdrop-blur-xl border-b border-white/[0.05]"
-                : "bg-transparent"
-                }`}
+            className={`${isLandingPage ? "absolute w-full" : "sticky"} top-0 z-30 flex items-center justify-between px-6 py-4 transition-all duration-300 ${
+                scrolled
+                    ? "bg-[#050505]/95 border-b border-white/[0.05] backdrop-blur-md"
+                    : "bg-transparent border-transparent"
+            }`}
         >
             {/* Left: Page Title / Breadcrumbs */}
             <div className="flex items-center gap-4">
@@ -186,4 +195,5 @@ export const DashboardHeader = ({ onMobileMenuClick }: DashboardHeaderProps) => 
             </div>
         </header>
     );
-};
+});
+DashboardHeader.displayName = "DashboardHeader";

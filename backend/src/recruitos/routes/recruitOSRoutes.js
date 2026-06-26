@@ -18,6 +18,9 @@ const upload = multer({
 // Resume parsing and compatibility
 router.post("/resume", upload.single("resume"), recruitOSController.uploadResume);
 
+// JD to Profile/Resume matching
+router.post("/match-jd", upload.single("resume"), recruitOSController.analyzeJobMatch);
+
 // GitHub architecture analysis
 router.post("/github", recruitOSController.analyzeGithub);
 

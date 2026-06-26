@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSoundEffects } from "@/hooks/useSoundEffects";
 import {
     Home,
     LayoutDashboard,
@@ -10,14 +9,13 @@ import {
     BarChart3,
     User,
     LogOut,
-    Sparkles,
-    Brain,
     Code2,
     Building2,
     Map,
     Dna,
     Rocket,
     Bot,
+    Briefcase,
 } from "lucide-react";
 
 const navItems = [
@@ -30,6 +28,7 @@ const navItems = [
     { path: "/learning-roadmap", label: "Learning Roadmap", icon: Map },
     { path: "/tasks", label: "Daily Tasks", icon: Target },
     { path: "/analytics", label: "Analytics", icon: BarChart3 },
+    { path: "/job-analyzer", label: "Job Analyzer", icon: Briefcase },
     { path: "/profile", label: "Profile", icon: User },
 ];
 
@@ -40,24 +39,19 @@ interface SidebarProps {
     setIsMobileOpen?: (open: boolean) => void;
 }
 
-export const Sidebar = ({ isExpanded, setIsExpanded, isMobileOpen, setIsMobileOpen }: SidebarProps) => {
+// PERFORMANCE: Wrapped in React.memo to prevent unnecessary re-renders on layout state changes
+export const Sidebar = memo(({ isExpanded, setIsExpanded, isMobileOpen, setIsMobileOpen }: SidebarProps) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user, signOut } = useAuth();
-    const sounds = useSoundEffects();
-    const [hoveredPath, setHoveredPath] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
 
+    // PERFORMANCE: Use shared layout state for isMobile if possible, but keep basic check for standalone usage without resize listener overhead. (The resize listener was moved to Layout.tsx)
     useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 768);
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        sounds.initAudio();
-        return () => window.removeEventListener('resize', checkMobile);
+        setIsMobile(window.innerWidth < 768);
     }, []);
 
     const handleSignOut = async () => {
-        sounds.playClick();
         await signOut();
         navigate("/");
     };
@@ -67,15 +61,15 @@ export const Sidebar = ({ isExpanded, setIsExpanded, isMobileOpen, setIsMobileOp
         if (isMobile && setIsMobileOpen) {
             setIsMobileOpen(false);
         }
-    }, [location.pathname]);
+    }, [location.pathname, isMobile, setIsMobileOpen]);
 
     return (
         <motion.div
             className={`fixed left-0 top-0 h-screen z-50 flex flex-col transition-transform duration-300 md:translate-x-0 ${isMobile && !isMobileOpen ? '-translate-x-full' : 'translate-x-0'
                 }`}
             style={{
-                background: "linear-gradient(180deg, rgba(10, 10, 15, 0.95) 0%, rgba(15, 10, 25, 0.95) 100%)",
-                backdropFilter: "blur(20px)",
+                // PERFORMANCE: Replaced backdrop-filter: blur(20px) with solid background color
+                background: "#050505",
                 borderRight: "1px solid rgba(139, 92, 246, 0.1)",
                 width: isMobile ? 280 : (isExpanded ? 240 : 80)
             }}
@@ -113,18 +107,11 @@ export const Sidebar = ({ isExpanded, setIsExpanded, isMobileOpen, setIsMobileOp
             <div className="flex-1 py-6 flex flex-col gap-1.5 px-3 overflow-y-auto">
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
-                    const isHovered = hoveredPath === item.path;
 
                     return (
                         <Link
                             key={item.path}
                             to={item.path}
-                            onClick={() => sounds.playClick()}
-                            onMouseEnter={() => {
-                                setHoveredPath(item.path);
-                                sounds.playHover();
-                            }}
-                            onMouseLeave={() => setHoveredPath(null)}
                         >
                             <div className="relative flex items-center h-12 px-3 rounded-xl transition-all duration-300 group">
                                 {/* Active Background */}
@@ -140,15 +127,9 @@ export const Sidebar = ({ isExpanded, setIsExpanded, isMobileOpen, setIsMobileOp
                                     />
                                 )}
 
-                                {/* Hover Effect */}
-                                {!isActive && isHovered && (
-                                    <div
-                                        className="absolute inset-0 rounded-xl"
-                                        style={{
-                                            background: "rgba(255, 255, 255, 0.03)",
-                                            border: "1px solid rgba(255, 255, 255, 0.05)",
-                                        }}
-                                    />
+                                {/* Hover Effect (CSS-only) */}
+                                {!isActive && (
+                                    <div className="absolute inset-0 rounded-xl border border-transparent opacity-0 group-hover:opacity-100 transition-opacity bg-white/[0.03] group-hover:border-white/[0.05]" />
                                 )}
 
                                 <div className="relative z-10 flex items-center gap-4 w-full">
@@ -192,38 +173,6 @@ export const Sidebar = ({ isExpanded, setIsExpanded, isMobileOpen, setIsMobileOp
                     );
                 })}
             </div>
-
-            {/* Quick Actions */}
-            {/* <div className="px-3 py-4 border-t border-violet-500/10">
-                <Link to="/interview">
-                    <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer"
-                        style={{
-                            background: "linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%)",
-                            border: "1px solid rgba(139, 92, 246, 0.2)",
-                        }}
-                    >
-                        <div className="shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center">
-                            <Brain className="w-4 h-4 text-white" />
-                        </div>
-                        <AnimatePresence>
-                            {isExpanded && (
-                                <motion.div
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -10 }}
-                                    className="flex-1"
-                                >
-                                    <p className="text-sm font-medium text-white">AI Interview</p>
-                                    <p className="text-xs text-gray-500">Practice with AI</p>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </motion.div>
-                </Link>
-            </div> */}
 
             {/* User Section / Logout */}
             <div className="p-3 border-t border-violet-500/10">
@@ -272,4 +221,4 @@ export const Sidebar = ({ isExpanded, setIsExpanded, isMobileOpen, setIsMobileOp
             </div>
         </motion.div>
     );
-};
+});

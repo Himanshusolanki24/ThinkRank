@@ -7,12 +7,20 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
-    // Handle resize to determine mobile state
+    // Handle resize to determine mobile state (PERFORMANCE: debounced)
     useEffect(() => {
+        let timeoutId: NodeJS.Timeout;
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
         checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+        const handleResize = () => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(checkMobile, 150);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => {
+            clearTimeout(timeoutId);
+            window.removeEventListener('resize', handleResize);
+        };
     }, []);
 
     return (

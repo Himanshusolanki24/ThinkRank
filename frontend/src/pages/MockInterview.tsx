@@ -482,17 +482,13 @@ const MockInterview = () => {
                 "radial-gradient(ellipse at 50% 90%, rgba(16, 185, 129, 0.04) 0%, transparent 50%)",
             }}
           />
-          <motion.div
-            className="absolute w-[600px] h-[600px] rounded-full blur-[180px]"
+          <div
+            className="absolute w-[600px] h-[600px] rounded-full blur-[180px] animate-pulse-glow"
             style={{ background: "rgba(0, 229, 255, 0.04)", top: "-10%", left: "20%" }}
-            animate={{ x: [0, 40, -30, 0], y: [0, -30, 20, 0] }}
-            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
           />
-          <motion.div
-            className="absolute w-[500px] h-[500px] rounded-full blur-[150px]"
-            style={{ background: "rgba(139, 92, 246, 0.035)", bottom: "-5%", right: "15%" }}
-            animate={{ x: [0, -30, 35, 0], y: [0, 25, -20, 0] }}
-            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+          <div
+            className="absolute w-[500px] h-[500px] rounded-full blur-[150px] animate-pulse-glow"
+            style={{ background: "rgba(139, 92, 246, 0.035)", bottom: "-5%", right: "15%", animationDelay: "2s" }}
           />
           {/* Grid */}
           <div
@@ -586,16 +582,15 @@ const MockInterview = () => {
                 <div className="absolute inset-[8%] rounded-full border border-white/[0.04]" />
                 <span className="absolute inset-[6%] rounded-full border border-cyan-400/20 animate-wave-ring" />
                 <span className="absolute inset-[6%] rounded-full border border-violet-400/20 animate-wave-ring" style={{ animationDelay: "1.3s" }} />
-                <motion.div
-                  className="absolute inset-[14%] rounded-full"
+                <div
+                  className="absolute inset-[14%] rounded-full animate-spin-slow"
                   style={{
                     background: "conic-gradient(from 210deg, rgba(0,229,255,0.65), rgba(139,92,246,0.65), rgba(16,185,129,0.55), rgba(0,229,255,0.65))",
                     WebkitMask: "radial-gradient(circle, transparent 62%, black 64%)",
                     mask: "radial-gradient(circle, transparent 62%, black 64%)",
                     filter: "drop-shadow(0 0 24px rgba(0,229,255,0.25))",
+                    animationDuration: "18s"
                   }}
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
                 />
                 <div className="absolute inset-[26%] rounded-full bg-gradient-to-br from-[#0c1622] to-[#070709] border border-white/10 animate-orb-breathe flex items-center justify-center shadow-[0_0_70px_rgba(0,229,255,0.25)]">
                   <Bot className="w-14 h-14 2xl:w-20 2xl:h-20 text-cyan-300/90" />
@@ -606,12 +601,10 @@ const MockInterview = () => {
                   { bottom: "14%", right: "20%", c: "#10B981" },
                   { bottom: "8%", left: "22%", c: "#00E5FF" },
                 ].map((p, i) => (
-                  <motion.span
+                  <div
                     key={i}
-                    className="absolute w-1.5 h-1.5 rounded-full"
-                    style={{ ...p, backgroundColor: p.c, boxShadow: `0 0 8px ${p.c}` }}
-                    animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.4, 1] }}
-                    transition={{ duration: 2.6, repeat: Infinity, delay: i * 0.5 }}
+                    className="absolute w-1.5 h-1.5 rounded-full animate-pulse-glow"
+                    style={{ ...p, backgroundColor: p.c, boxShadow: `0 0 8px ${p.c}`, animationDelay: `${i * 0.5}s` }}
                   />
                 ))}
               </motion.div>
@@ -619,7 +612,7 @@ const MockInterview = () => {
 
             {/* Stats card */}
             <motion.div
-              className="relative z-10 rounded-[28px] border border-white/[0.07] bg-white/[0.02] backdrop-blur-sm p-5 lg:p-6 grid grid-cols-2 sm:grid-cols-4 gap-5"
+              className="relative z-10 rounded-[28px] border border-white/[0.07] bg-[rgba(20,20,25,0.9)] p-5 lg:p-6 grid grid-cols-2 sm:grid-cols-4 gap-5"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.65 }}
@@ -641,7 +634,7 @@ const MockInterview = () => {
 
           {/* ══ RIGHT · Config card ════════════════ */}
           <motion.div
-            className="relative flex flex-col rounded-[28px] border border-white/[0.07] bg-[#0a0a12]/70 backdrop-blur-xl p-6 lg:p-7 xl:p-8 shadow-[0_30px_90px_-50px_rgba(0,229,255,0.2)]"
+            className="relative flex flex-col rounded-[28px] border border-white/[0.07] bg-[#0a0a12] p-6 lg:p-7 xl:p-8 shadow-[0_30px_90px_-50px_rgba(0,229,255,0.2)]"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -838,17 +831,13 @@ const MockInterview = () => {
                 "radial-gradient(ellipse at 50% 90%, rgba(16, 185, 129, 0.04) 0%, transparent 50%)",
             }}
           />
-          <motion.div
-            className="absolute w-[600px] h-[600px] rounded-full blur-[180px]"
+          <div
+            className="absolute w-[600px] h-[600px] rounded-full blur-[180px] animate-pulse-glow"
             style={{ background: "rgba(0, 229, 255, 0.04)", top: "-10%", left: "20%" }}
-            animate={{ x: [0, 40, -30, 0], y: [0, -30, 20, 0] }}
-            transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
           />
-          <motion.div
-            className="absolute w-[500px] h-[500px] rounded-full blur-[150px]"
-            style={{ background: "rgba(139, 92, 246, 0.035)", bottom: "-5%", right: "15%" }}
-            animate={{ x: [0, -30, 35, 0], y: [0, 25, -20, 0] }}
-            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+          <div
+            className="absolute w-[500px] h-[500px] rounded-full blur-[150px] animate-pulse-glow"
+            style={{ background: "rgba(139, 92, 246, 0.035)", bottom: "-5%", right: "15%", animationDelay: "2s" }}
           />
         </div>
 

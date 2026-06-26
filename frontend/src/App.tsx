@@ -28,6 +28,7 @@ const LearningRoadmap = lazy(() => import("./pages/LearningRoadmap"));
 const PlacementGenome = lazy(() => import("./pages/PlacementGenome"));
 const MockInterview = lazy(() => import("./pages/MockInterview"));
 const RecruiterDashboard = lazy(() => import("./pages/RecruiterDashboard"));
+const JobAnalyzer = lazy(() => import("./pages/JobAnalyzer"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -109,6 +110,7 @@ const AppContent = () => {
             <Route path="/placement-genome" element={<PlacementGenome />} />
             <Route path="/mock-interview" element={<MockInterview />} />
             <Route path="/recruiter" element={<RecruiterDashboard />} />
+            <Route path="/job-analyzer" element={<JobAnalyzer />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

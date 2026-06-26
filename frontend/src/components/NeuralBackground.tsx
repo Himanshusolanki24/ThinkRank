@@ -35,9 +35,9 @@ export const NeuralBackground = () => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Initialize nodes
+    // Initialize nodes (PERFORMANCE: Cap at 25 instead of 50)
     const nodeCount = Math.floor((window.innerWidth * window.innerHeight) / 25000);
-    nodesRef.current = Array.from({ length: Math.min(nodeCount, 50) }, () => ({
+    nodesRef.current = Array.from({ length: Math.min(nodeCount, 25) }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       vx: (Math.random() - 0.5) * 0.3,
@@ -57,7 +57,15 @@ export const NeuralBackground = () => {
       }
     }
 
-    const animate = () => {
+    let lastTime = 0;
+    const animate = (time: number) => {
+      animationRef.current = requestAnimationFrame(animate);
+
+      // PERFORMANCE: Skip frame if document is hidden or if it's too soon (throttle to ~30fps)
+      if (document.hidden) return;
+      if (time - lastTime < 33) return;
+      lastTime = time;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Update node positions
@@ -72,47 +80,30 @@ export const NeuralBackground = () => {
       // Draw connections
       ctx.strokeStyle = "rgba(251, 125, 194, 0.08)";
       ctx.lineWidth = 1;
+      ctx.beginPath();
       connectionsRef.current.forEach((conn) => {
         const from = nodesRef.current[conn.from];
         const to = nodesRef.current[conn.to];
         const dist = Math.sqrt((to.x - from.x) ** 2 + (to.y - from.y) ** 2);
 
         if (dist < 200) {
-          ctx.beginPath();
           ctx.moveTo(from.x, from.y);
           ctx.lineTo(to.x, to.y);
-          ctx.stroke();
         }
       });
+      ctx.stroke();
 
-      // Draw nodes
+      // Draw nodes (PERFORMANCE: Removed per-node radial gradient glow, batched paths)
+      ctx.fillStyle = "rgba(251, 125, 194, 0.4)";
+      ctx.beginPath();
       nodesRef.current.forEach((node) => {
-        ctx.beginPath();
+        ctx.moveTo(node.x, node.y);
         ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(251, 125, 194, 0.4)";
-        ctx.fill();
-
-        // Glow effect
-        const gradient = ctx.createRadialGradient(
-          node.x,
-          node.y,
-          0,
-          node.x,
-          node.y,
-          node.radius * 4
-        );
-        gradient.addColorStop(0, "rgba(251, 125, 194, 0.2)");
-        gradient.addColorStop(1, "transparent");
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, node.radius * 4, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
-        ctx.fill();
       });
-
-      animationRef.current = requestAnimationFrame(animate);
+      ctx.fill();
     };
 
-    animate();
+    animationRef.current = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener("resize", resizeCanvas);
