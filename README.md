@@ -18,26 +18,6 @@
 
 </div>
 
----
-
-## 🌟 Sneak Peek
-
-> **Note:** Add your actual application screenshots here to showcase the beautiful UI!
-
-<div align="center">
-  <table>
-    <tr>
-      <td align="center"><b>Dashboard</b><br><img src="https://placehold.co/600x400/1e293b/ffffff?text=Dashboard+Screenshot" alt="Dashboard" width="100%"/></td>
-      <td align="center"><b>Skill Genome</b><br><img src="https://placehold.co/600x400/1e293b/ffffff?text=Skill+Genome+Screenshot" alt="Skill Genome" width="100%"/></td>
-    </tr>
-    <tr>
-      <td align="center"><b>Personalized Roadmap</b><br><img src="https://placehold.co/600x400/1e293b/ffffff?text=Roadmap+Screenshot" alt="Roadmap" width="100%"/></td>
-      <td align="center"><b>Coding Signals</b><br><img src="https://placehold.co/600x400/1e293b/ffffff?text=Coding+Signals+Screenshot" alt="Coding Signals" width="100%"/></td>
-    </tr>
-  </table>
-</div>
-
----
 
 ## ✨ Features
 
