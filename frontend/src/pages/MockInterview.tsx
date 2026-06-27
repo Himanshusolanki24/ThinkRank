@@ -505,11 +505,11 @@ const MockInterview = () => {
         </div>
 
         {/* ── Content grid (fills area below header) ── */}
-        <div className="relative z-10 grid grid-cols-1 xl:grid-cols-[1.12fr_1fr] gap-7 lg:gap-10 p-5 sm:p-7 lg:p-9 xl:p-11 min-h-[calc(100vh-73px)]">
+        <div className="relative z-10 grid grid-cols-1 xl:grid-cols-[1fr_1.08fr] gap-6 lg:gap-8 p-5 sm:p-6 lg:p-8 min-h-[calc(100vh-73px)] xl:h-[calc(100vh-73px)]">
 
           {/* ══ LEFT · Hero ════════════════════════ */}
           <motion.div
-            className="relative flex flex-col"
+            className="relative flex flex-col h-full min-h-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6 }}
@@ -526,11 +526,11 @@ const MockInterview = () => {
             </motion.div>
 
             {/* Headline · features (left)  +  orb (right) */}
-            <div className="flex-1 flex flex-col xl:flex-row xl:items-center gap-8 xl:gap-10 py-8">
+            <div className="flex-1 min-h-0 flex flex-col justify-center 2xl:flex-row 2xl:items-center gap-8 2xl:gap-10 py-6">
               {/* Text block */}
               <div className="flex-1 min-w-0">
                 <motion.h1
-                  className="text-5xl sm:text-6xl 2xl:text-7xl font-bold tracking-tight leading-[1.03] font-display"
+                  className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-tight leading-[1.04] font-display break-words"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.35, duration: 0.6 }}
@@ -542,7 +542,7 @@ const MockInterview = () => {
                 </motion.h1>
 
                 <motion.p
-                  className="mt-6 text-gray-400 text-base lg:text-lg max-w-lg leading-relaxed"
+                  className="mt-5 text-gray-400 text-base lg:text-lg max-w-lg leading-relaxed"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.45 }}
@@ -552,7 +552,7 @@ const MockInterview = () => {
 
                 {/* Features row */}
                 <motion.div
-                  className="mt-9 flex flex-wrap gap-x-8 gap-y-5"
+                  className="mt-7 flex flex-wrap gap-x-8 gap-y-4"
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.55 }}
@@ -577,7 +577,7 @@ const MockInterview = () => {
 
               {/* Animated AI Orb — sibling, never overlaps */}
               <motion.div
-                className="pointer-events-none relative shrink-0 mx-auto hidden xl:block w-[240px] h-[240px] 2xl:w-[300px] 2xl:h-[300px]"
+                className="pointer-events-none relative shrink-0 mx-auto hidden 2xl:block w-[280px] h-[280px]"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -619,7 +619,7 @@ const MockInterview = () => {
 
             {/* Stats card */}
             <motion.div
-              className="relative z-10 rounded-[28px] border border-white/[0.07] bg-white/[0.02] backdrop-blur-sm p-5 lg:p-6 grid grid-cols-2 sm:grid-cols-4 gap-5"
+              className="relative z-10 shrink-0 rounded-[24px] border border-white/[0.07] bg-white/[0.02] backdrop-blur-sm p-4 lg:p-5 grid grid-cols-2 sm:grid-cols-4 gap-4"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.65 }}
@@ -641,14 +641,16 @@ const MockInterview = () => {
 
           {/* ══ RIGHT · Config card ════════════════ */}
           <motion.div
-            className="relative flex flex-col rounded-[28px] border border-white/[0.07] bg-[#0a0a12]/70 backdrop-blur-xl p-6 lg:p-7 xl:p-8 shadow-[0_30px_90px_-50px_rgba(0,229,255,0.2)]"
+            className="relative flex flex-col h-full min-h-0 rounded-[28px] border border-white/[0.07] bg-[#0a0a12]/70 backdrop-blur-xl p-5 lg:p-6 shadow-[0_30px_90px_-50px_rgba(0,229,255,0.2)] overflow-hidden"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
+            {/* Scrollable selectors */}
+            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-interview -mr-2 pr-2">
             {/* 01 — Platform */}
-            <div className="mb-7">
-              <div className="flex items-center gap-2 mb-4">
+            <div className="mb-5">
+              <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-mono text-cyan-400 tabular-nums">01</span>
                 <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.2em]">Choose Platform</p>
               </div>
@@ -687,8 +689,8 @@ const MockInterview = () => {
             </div>
 
             {/* 02 — Difficulty */}
-            <div className="mb-7">
-              <div className="flex items-center gap-2 mb-4">
+            <div className="mb-5">
+              <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-mono text-cyan-400 tabular-nums">02</span>
                 <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.2em]">Select Difficulty</p>
               </div>
@@ -720,8 +722,8 @@ const MockInterview = () => {
             </div>
 
             {/* 03 — Language */}
-            <div className="mb-7">
-              <div className="flex items-center gap-2 mb-4">
+            <div className="mb-5">
+              <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-mono text-cyan-400 tabular-nums">03</span>
                 <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.2em]">Select Language</p>
               </div>
@@ -748,9 +750,12 @@ const MockInterview = () => {
                 })}
               </div>
             </div>
+            </div>{/* /scrollable selectors */}
 
+            {/* Pinned footer */}
+            <div className="shrink-0 pt-4 mt-4 border-t border-white/[0.06]">
             {/* Summary chips */}
-            <div className="mt-auto flex flex-wrap items-center gap-2 pt-2">
+            <div className="flex flex-wrap items-center gap-2">
               {(() => {
                 const c = COMPANY_STYLES.find((x) => x.id === config.companyStyle);
                 const d = DIFFICULTIES.find((x) => x.id === config.difficulty);
@@ -778,11 +783,11 @@ const MockInterview = () => {
             </div>
 
             {/* CTA */}
-            <motion.div className="mt-5" whileHover={{ scale: 1.005 }} whileTap={{ scale: 0.99 }}>
+            <motion.div className="mt-4" whileHover={{ scale: 1.005 }} whileTap={{ scale: 0.99 }}>
               <Button
                 onClick={() => setScreen("permissions")}
                 disabled={loading}
-                className="animate-btn-shimmer h-16 rounded-2xl bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500 text-white hover:opacity-95 font-bold text-base w-full relative overflow-hidden group"
+                className="animate-btn-shimmer h-14 rounded-2xl bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500 text-white hover:opacity-95 font-bold text-base w-full relative overflow-hidden group"
                 style={{ boxShadow: "0 24px 60px -20px rgba(99,102,241,0.7), 0 0 0 1px rgba(255,255,255,0.04)" }}
               >
                 <span className="relative z-10 flex items-center justify-center gap-3">
@@ -794,7 +799,7 @@ const MockInterview = () => {
             </motion.div>
 
             {/* Footer trust line */}
-            <div className="mt-4 flex items-center justify-center gap-4 text-[11px] text-gray-500">
+            <div className="mt-3 flex items-center justify-center gap-4 text-[11px] text-gray-500">
               <span className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-gray-600" /> Secure</span>
               <span className="w-px h-3 bg-white/10" />
               <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-gray-600" /> Private</span>
@@ -811,6 +816,7 @@ const MockInterview = () => {
                 {error}
               </motion.p>
             )}
+            </div>{/* /pinned footer */}
           </motion.div>
         </div>
       </div>

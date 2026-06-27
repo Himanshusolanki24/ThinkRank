@@ -73,9 +73,35 @@ interface ExtractedSkill {
 // Background component
 const DashboardBackground = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[120px]" />
-    <div className="absolute top-60 -left-40 w-[400px] h-[400px] bg-cyan-500/8 rounded-full blur-[100px]" />
-    <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-purple-600/8 rounded-full blur-[100px]" />
+    <div
+      className="absolute inset-0 animate-gradient-mesh opacity-60"
+      style={{
+        background:
+          "radial-gradient(ellipse at 20% 18%, rgba(139, 92, 246, 0.07) 0%, transparent 50%), " +
+          "radial-gradient(ellipse at 82% 30%, rgba(0, 229, 255, 0.05) 0%, transparent 50%), " +
+          "radial-gradient(ellipse at 50% 95%, rgba(16, 185, 129, 0.04) 0%, transparent 50%)",
+      }}
+    />
+    <motion.div
+      className="absolute w-[600px] h-[600px] rounded-full blur-[170px]"
+      style={{ background: "rgba(139, 92, 246, 0.05)", top: "-12%", right: "4%" }}
+      animate={{ x: [0, -30, 20, 0], y: [0, 25, -15, 0] }}
+      transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
+    />
+    <motion.div
+      className="absolute w-[500px] h-[500px] rounded-full blur-[150px]"
+      style={{ background: "rgba(0, 229, 255, 0.035)", bottom: "-5%", left: "8%" }}
+      animate={{ x: [0, 30, -20, 0], y: [0, -20, 15, 0] }}
+      transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+    />
+    <div
+      className="absolute inset-0 opacity-[0.015]"
+      style={{
+        backgroundImage:
+          "linear-gradient(rgba(255,255,255,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.15) 1px,transparent 1px)",
+        backgroundSize: "48px 48px",
+      }}
+    />
   </div>
 );
 
@@ -86,6 +112,7 @@ const StatCard = ({
   label,
   color,
   bgColor,
+  accent,
   trend,
   delay = 0
 }: {
@@ -94,6 +121,7 @@ const StatCard = ({
   label: string;
   color: string;
   bgColor: string;
+  accent: string;
   trend?: string;
   delay?: number;
 }) => (
@@ -101,13 +129,17 @@ const StatCard = ({
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, delay }}
-    whileHover={{ scale: 1.02, y: -2 }}
+    whileHover={{ y: -4 }}
     className="relative group"
   >
-    <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-purple-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-    <div className="relative p-5 rounded-2xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-sm hover:border-white/10 transition-all duration-300">
-      <div className="flex items-center justify-between mb-3">
-        <div className={`w-11 h-11 rounded-xl ${bgColor} flex items-center justify-center`}>
+    <div className="relative p-5 rounded-[22px] bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.06] backdrop-blur-sm overflow-hidden transition-all duration-300 group-hover:border-white/[0.12]">
+      {/* hover glow in accent color */}
+      <div
+        className="absolute -top-10 -right-10 w-28 h-28 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{ backgroundColor: `${accent}1f` }}
+      />
+      <div className="relative flex items-center justify-between mb-4">
+        <div className={`w-11 h-11 rounded-2xl ${bgColor} flex items-center justify-center`}>
           <Icon className={`w-5 h-5 ${color}`} />
         </div>
         {trend && (
@@ -117,8 +149,13 @@ const StatCard = ({
           </span>
         )}
       </div>
-      <p className="text-2xl font-bold text-white mb-1">{value}</p>
-      <p className="text-sm text-gray-400">{label}</p>
+      <p className="relative text-3xl font-bold text-white mb-1 font-display tracking-tight">{value}</p>
+      <p className="relative text-sm text-gray-400">{label}</p>
+      {/* bottom accent line */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-[2px] opacity-60"
+        style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
+      />
     </div>
   </motion.div>
 );
@@ -341,7 +378,7 @@ const Dashboard = () => {
   const hasData = interviewResults.length > 0;
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F] text-white">
+    <div className="relative min-h-screen bg-[#050507] text-white">
       <DashboardBackground />
 
       <main className="relative z-10 pt-8 pb-12">
@@ -354,10 +391,26 @@ const Dashboard = () => {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
               <div>
-                <h1 className="text-3xl font-bold mb-2">
-                  Welcome back, <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">{displayName}</span>
+                <motion.div
+                  className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/[0.06] px-4 py-1.5 mb-4"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <span className="relative flex w-2 h-2">
+                    <motion.span
+                      className="absolute inline-flex w-full h-full rounded-full bg-violet-400/70"
+                      animate={{ scale: [1, 2.4], opacity: [0.7, 0] }}
+                      transition={{ repeat: Infinity, duration: 2, ease: "easeOut" }}
+                    />
+                    <span className="relative inline-flex w-2 h-2 rounded-full bg-violet-400" />
+                  </span>
+                  <span className="text-xs font-medium text-violet-300 tracking-wide">Skill Genome Dashboard</span>
+                </motion.div>
+                <h1 className="text-3xl md:text-4xl font-bold mb-2 font-display tracking-tight">
+                  Welcome back, <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">{displayName}</span>
                 </h1>
                 <p className="text-gray-400">
                   {stats.skillsMastered > 0
@@ -367,28 +420,34 @@ const Dashboard = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20">
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
                   <Flame className="w-4 h-4 text-orange-400" />
                   <span className="text-sm font-medium">{profile?.streak_count || 0} Day Streak</span>
                 </div>
                 <Link to="/build">
-                  <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white rounded-xl">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Build Genome
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button
+                      className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white rounded-2xl h-11 px-5"
+                      style={{ boxShadow: "0 14px 40px -16px rgba(139,92,246,0.8)" }}
+                    >
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Build Genome
+                    </Button>
+                  </motion.div>
                 </Link>
               </div>
             </div>
           </motion.div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {/* Bento grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 grid-flow-dense [&>*]:h-full">
             <StatCard
               icon={Award}
               value={stats.skillsMastered}
               label="Skills Mastered"
               color="text-violet-400"
               bgColor="bg-violet-500/10"
+              accent="#8B5CF6"
               delay={0.1}
             />
             <StatCard
@@ -397,6 +456,7 @@ const Dashboard = () => {
               label="Total XP"
               color="text-amber-400"
               bgColor="bg-amber-500/10"
+              accent="#F59E0B"
               trend="+12%"
               delay={0.15}
             />
@@ -406,6 +466,7 @@ const Dashboard = () => {
               label="Interviews"
               color="text-cyan-400"
               bgColor="bg-cyan-500/10"
+              accent="#00E5FF"
               delay={0.2}
             />
             <StatCard
@@ -414,18 +475,17 @@ const Dashboard = () => {
               label="Overall Score"
               color="text-emerald-400"
               bgColor="bg-emerald-500/10"
+              accent="#10B981"
               delay={0.25}
             />
-          </div>
-
-          {/* Skill Genome Graph - D3 or Cytoscape */}
+          {/* Skill graph — big hero tile */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mb-8"
+            className="sm:col-span-2 lg:col-span-2 lg:row-span-2"
           >
-            <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-sm">
+            <div className="h-full flex flex-col p-6 rounded-[24px] bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.06] backdrop-blur-sm">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
@@ -436,7 +496,7 @@ const Dashboard = () => {
                     )}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white">
+                    <h3 className="font-semibold text-white font-display tracking-tight">
                       {graphView === "d3" ? "Skill Network" : "Skill Relationships"}
                     </h3>
                     <p className="text-sm text-gray-400">
@@ -469,7 +529,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="h-[450px]">
+              <div className="flex-1 min-h-[380px]">
                 {graphSkillData.length > 0 ? (
                   <AnimatePresence mode="wait">
                     {graphView === "d3" ? (
@@ -516,22 +576,20 @@ const Dashboard = () => {
             </div>
           </motion.div>
 
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Quick Actions & Focus Areas */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="lg:col-span-2 space-y-6"
-            >
-              {/* Weekly Progress */}
-              <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+          {/* Weekly Progress — wide tile */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="sm:col-span-2 lg:col-span-2"
+          >
+            <div className="h-full p-6 rounded-[24px] bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.06] backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-emerald-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white">Weekly Progress</h3>
+                    <h3 className="font-semibold text-white font-display tracking-tight">Weekly Progress</h3>
                     <p className="text-sm text-gray-400">
                       {hasData ? "XP earned this week" : "Your weekly XP will appear here"}
                     </p>
@@ -577,16 +635,23 @@ const Dashboard = () => {
                   </ResponsiveContainer>
                 </div>
               </div>
+          </motion.div>
 
-              {/* Recent Activity */}
-              <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+          {/* Recent Activity — full-width tile */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.45 }}
+            className="sm:col-span-2 lg:col-span-4"
+          >
+            <div className="h-full p-6 rounded-[24px] bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.06] backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
                       <Clock className="w-5 h-5 text-purple-400" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white">Recent Activity</h3>
+                      <h3 className="font-semibold text-white font-display tracking-tight">Recent Activity</h3>
                       <p className="text-sm text-gray-400">Your latest interviews</p>
                     </div>
                   </div>
@@ -651,22 +716,21 @@ const Dashboard = () => {
                   </div>
                 )}
               </div>
-            </motion.div>
+          </motion.div>
 
-            {/* Right Column */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="space-y-6"
-            >
-              {/* Quick Actions */}
-              <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+          {/* Quick Actions — tile */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="lg:col-span-1"
+          >
+            <div className="h-full p-6 rounded-[24px] bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.06] backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
                     <Activity className="w-5 h-5 text-cyan-400" />
                   </div>
-                  <h3 className="font-semibold text-white">Quick Actions</h3>
+                  <h3 className="font-semibold text-white font-display tracking-tight">Quick Actions</h3>
                 </div>
 
                 <div className="space-y-3">
@@ -686,15 +750,22 @@ const Dashboard = () => {
                   />
                 </div>
               </div>
+          </motion.div>
 
-              {/* Focus Areas */}
-              <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+          {/* Focus Areas — tile */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="lg:col-span-1"
+          >
+            <div className="h-full p-6 rounded-[24px] bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.06] backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
                     <Target className="w-5 h-5 text-orange-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white">Focus Areas</h3>
+                    <h3 className="font-semibold text-white font-display tracking-tight">Focus Areas</h3>
                     <p className="text-xs text-gray-400">Skills needing attention</p>
                   </div>
                 </div>

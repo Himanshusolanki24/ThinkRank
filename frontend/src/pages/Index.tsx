@@ -1,7 +1,7 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { SiAmazonwebservices, SiNodedotjs, SiPython, SiReact } from "react-icons/si";
+import { SiAmazonwebservices, SiNodedotjs, SiPython, SiReact, SiTypescript, SiDocker, SiGraphql } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
 import {
@@ -35,8 +35,8 @@ const HERO_SKILLS = [
     name: "React",
     Icon: SiReact,
     iconClassName: "text-cyan-400",
-    left: "10%",
-    top: "16%",
+    left: "2%",
+    top: "12%",
     duration: 3.4,
     rotate: -8,
     glowClassName: "from-cyan-500/25 to-cyan-400/5",
@@ -45,134 +45,239 @@ const HERO_SKILLS = [
     name: "AWS",
     Icon: SiAmazonwebservices,
     iconClassName: "text-orange-400",
-    left: "72%",
-    top: "10%",
+    left: "64%",
+    top: "6%",
     duration: 4.1,
     rotate: 7,
     glowClassName: "from-orange-500/25 to-orange-400/5",
   },
   {
+    name: "TypeScript",
+    Icon: SiTypescript,
+    iconClassName: "text-blue-400",
+    left: "82%",
+    top: "32%",
+    duration: 3.6,
+    rotate: 6,
+    glowClassName: "from-blue-500/25 to-indigo-400/5",
+  },
+  {
     name: "Python",
     Icon: SiPython,
     iconClassName: "text-[#FFD43B]",
-    left: "66%",
-    top: "77%",
+    left: "0%",
+    top: "46%",
     duration: 3.8,
     rotate: -6,
     glowClassName: "from-yellow-500/25 to-blue-400/5",
   },
   {
+    name: "GraphQL",
+    Icon: SiGraphql,
+    iconClassName: "text-pink-400",
+    left: "38%",
+    top: "42%",
+    duration: 4.3,
+    rotate: -5,
+    glowClassName: "from-pink-500/25 to-fuchsia-400/5",
+  },
+  {
+    name: "Docker",
+    Icon: SiDocker,
+    iconClassName: "text-sky-400",
+    left: "74%",
+    top: "62%",
+    duration: 4.0,
+    rotate: 8,
+    glowClassName: "from-sky-500/25 to-cyan-400/5",
+  },
+  {
     name: "Node.js",
     Icon: SiNodedotjs,
     iconClassName: "text-green-400",
-    left: "82%",
-    top: "84%",
+    left: "6%",
+    top: "80%",
     duration: 4.5,
     rotate: 9,
     glowClassName: "from-green-500/25 to-emerald-400/5",
   },
 ] as const;
 
-// Animated gradient orbs for background
-const GradientOrbs = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-violet-600/20 rounded-full blur-[120px] animate-pulse" />
-    <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-cyan-500/15 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: "1s" }} />
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-purple-600/10 rounded-full blur-[150px]" />
-  </div>
-);
+// ── Neon colour helpers for the DNA helix ──
+const hexToRgb = (hex: string): [number, number, number] => {
+  const h = hex.replace("#", "");
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+};
+const rgbToHex = (rgb: number[]) =>
+  "#" + rgb.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
+const mix = (c1: string, c2: string, t: number) => {
+  const a = hexToRgb(c1);
+  const b = hexToRgb(c2);
+  return rgbToHex([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]);
+};
+const lerpPalette = (stops: string[], t: number) => {
+  const c = Math.max(0, Math.min(1, t));
+  const seg = c * (stops.length - 1);
+  const i = Math.min(stops.length - 2, Math.floor(seg));
+  return mix(stops[i], stops[i + 1], seg - i);
+};
+const lighten = (c: string, a: number) => mix(c, "#ffffff", a);
+const darken = (c: string, a: number) => mix(c, "#000000", a);
 
-// Floating particles
-const FloatingParticles = () => {
-  const particles = Array.from({ length: 20 }, (_, i) => ({
+// DNA Helix — glossy neon double helix (glassy spheres, bloom, particles)
+const DNAHelix = () => {
+  const N = 13;
+  const CX = 100;
+  const AMP = 58;
+  const Y_TOP = 30;
+  const GAP = 26;
+  const ANGLE_STEP = 0.6;
+  const SAMPLES = 17;
+  const DURATION = 9;
+
+  const PAL_A = ["#3B82F6", "#22D3EE", "#8B5CF6"]; // blue → cyan → violet
+  const PAL_B = ["#22D3EE", "#8B5CF6", "#D946EF"]; // cyan → violet → magenta
+
+  const phases = Array.from({ length: SAMPLES }, (_, k) => (2 * Math.PI * k) / (SAMPLES - 1));
+  const depth = (a: number) => (Math.cos(a) + 1) / 2; // 0 (back) → 1 (front)
+
+  const rows = Array.from({ length: N }, (_, i) => {
+    const angle = i * ANGLE_STEP;
+    const t = i / (N - 1);
+    return {
+      i,
+      y: Y_TOP + i * GAP,
+      colorA: lerpPalette(PAL_A, t),
+      colorB: lerpPalette(PAL_B, t),
+      axK: phases.map((p) => CX + AMP * Math.sin(angle + p)),
+      bxK: phases.map((p) => CX - AMP * Math.sin(angle + p)),
+      aRK: phases.map((p) => 3.2 + 3.8 * depth(angle + p)),
+      bRK: phases.map((p) => 3.2 + 3.8 * depth(angle + p + Math.PI)),
+      aOpK: phases.map((p) => 0.5 + 0.5 * depth(angle + p)),
+      bOpK: phases.map((p) => 0.5 + 0.5 * depth(angle + p + Math.PI)),
+      rungOpK: phases.map((p) => 0.1 + 0.42 * Math.abs(Math.sin(angle + p))),
+    };
+  });
+
+  const loop = { duration: DURATION, repeat: Infinity, ease: "linear" as const };
+
+  const particles = Array.from({ length: 18 }, (_, i) => ({
     id: i,
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 100}%`,
-    size: Math.random() * 4 + 2,
-    duration: 3 + Math.random() * 4,
-    delay: Math.random() * 2,
+    left: `${6 + ((i * 37) % 88)}%`,
+    top: `${8 + ((i * 53) % 84)}%`,
+    size: 1.5 + (i % 3),
+    color: ["#3B82F6", "#22D3EE", "#8B5CF6", "#D946EF"][i % 4],
+    duration: 3 + (i % 4),
+    delay: (i % 5) * 0.4,
   }));
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          className="absolute rounded-full bg-violet-400/30"
-          style={{ left: p.left, top: p.top, width: p.size, height: p.size }}
-          animate={{ y: [-20, 20, -20], opacity: [0.2, 0.6, 0.2] }}
-          transition={{ duration: p.duration, repeat: Infinity, delay: p.delay }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// DNA Helix Animation for Hero
-const DNAHelix = () => {
-  return (
     <div className="relative w-full h-[540px] flex items-center justify-center">
+      {/* Deep glow pools (depth-of-field bloom) */}
+      <div className="absolute left-1/2 top-1/2 h-[380px] w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.2),transparent_60%)] blur-2xl" />
+      <div className="absolute left-1/2 top-1/2 h-[250px] w-[250px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.18),transparent_60%)] blur-2xl" />
+
+      {/* Concentric radar rings */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="absolute h-[430px] w-[430px] rounded-full border border-white/[0.05]" />
-        <div className="absolute h-[320px] w-[320px] rounded-full border border-white/[0.04]" />
-        <div className="absolute h-[220px] w-[220px] rounded-full border border-white/[0.03]" />
+        <div className="absolute h-[480px] w-[480px] rounded-full border border-white/[0.05]" />
+        <div className="absolute h-[370px] w-[370px] rounded-full border border-white/[0.04]" />
+        <div className="absolute h-[260px] w-[260px] rounded-full border border-white/[0.03]" />
         <motion.div
-          className="absolute h-[430px] w-[430px] rounded-full border border-violet-400/10"
+          className="absolute h-[480px] w-[480px] rounded-full border border-violet-400/10"
+          style={{ borderTopColor: "rgba(34,211,238,0.35)" }}
           animate={{ rotate: 360 }}
-          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div
+          className="absolute h-[300px] w-[300px] rounded-full border border-dashed border-fuchsia-400/10"
+          animate={{ rotate: -360 }}
+          transition={{ duration: 46, repeat: Infinity, ease: "linear" }}
         />
       </div>
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.12),transparent_55%)]" />
+      {/* Floating particles / glowing dots */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {particles.map((p) => (
+          <motion.span
+            key={p.id}
+            className="absolute rounded-full"
+            style={{ left: p.left, top: p.top, width: p.size, height: p.size, backgroundColor: p.color, boxShadow: `0 0 8px ${p.color}` }}
+            animate={{ opacity: [0.15, 0.85, 0.15], scale: [1, 1.6, 1] }}
+            transition={{ duration: p.duration, repeat: Infinity, delay: p.delay, ease: "easeInOut" }}
+          />
+        ))}
+      </div>
 
-      <svg viewBox="0 0 200 400" className="relative z-10 w-48 h-96">
-        {/* DNA Strand Animation */}
-        {Array.from({ length: 12 }).map((_, i) => {
-          const y = 30 + i * 30;
-          return (
-            <g key={i}>
-              <motion.circle
-                cx="60"
-                cy={y}
-                r="8"
-                className="fill-violet-500"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1, x: [0, 20, 0] }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  delay: i * 0.1,
-                  ease: "easeInOut"
-                }}
-              />
-              <motion.circle
-                cx="140"
-                cy={y}
-                r="8"
-                className="fill-cyan-400"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1, x: [0, -20, 0] }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  delay: i * 0.1,
-                  ease: "easeInOut"
-                }}
-              />
-              <motion.line
-                x1="68"
-                y1={y}
-                x2="132"
-                y2={y}
-                className="stroke-white/20"
-                strokeWidth="2"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-              />
-            </g>
-          );
-        })}
+      <svg
+        viewBox="0 0 200 410"
+        className="relative z-10 w-[330px] h-[480px]"
+        style={{ filter: "drop-shadow(0 0 20px rgba(99,102,241,0.45)) drop-shadow(0 0 12px rgba(34,211,238,0.32))" }}
+      >
+        <defs>
+          {rows.flatMap((r) => {
+            const a = { s0: lighten(r.colorA, 0.92), s1: lighten(r.colorA, 0.35), s2: r.colorA, s3: darken(r.colorA, 0.55) };
+            const b = { s0: lighten(r.colorB, 0.92), s1: lighten(r.colorB, 0.35), s2: r.colorB, s3: darken(r.colorB, 0.55) };
+            return [
+              <radialGradient key={`sphA-${r.i}`} id={`sphA-${r.i}`} cx="35%" cy="28%" r="72%">
+                <stop offset="0%" stopColor={a.s0} stopOpacity="0.95" />
+                <stop offset="26%" stopColor={a.s1} />
+                <stop offset="66%" stopColor={a.s2} />
+                <stop offset="100%" stopColor={a.s3} />
+              </radialGradient>,
+              <radialGradient key={`sphB-${r.i}`} id={`sphB-${r.i}`} cx="35%" cy="28%" r="72%">
+                <stop offset="0%" stopColor={b.s0} stopOpacity="0.95" />
+                <stop offset="26%" stopColor={b.s1} />
+                <stop offset="66%" stopColor={b.s2} />
+                <stop offset="100%" stopColor={b.s3} />
+              </radialGradient>,
+            ];
+          })}
+          <linearGradient id="dnaRung" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#3B82F6" />
+            <stop offset="50%" stopColor="#8B5CF6" />
+            <stop offset="100%" stopColor="#D946EF" />
+          </linearGradient>
+        </defs>
+
+        {rows.map((r) => (
+          <g key={r.i}>
+            {/* glowing rod */}
+            <motion.line
+              x1={r.axK[0]}
+              x2={r.bxK[0]}
+              y1={r.y}
+              y2={r.y}
+              stroke="url(#dnaRung)"
+              strokeWidth={2.4}
+              strokeLinecap="round"
+              initial={{ opacity: r.rungOpK[0] }}
+              animate={{ x1: r.axK, x2: r.bxK, opacity: r.rungOpK }}
+              transition={loop}
+            />
+            {/* glassy sphere — strand A */}
+            <motion.circle
+              cy={r.y}
+              fill={`url(#sphA-${r.i})`}
+              stroke={lighten(r.colorA, 0.45)}
+              strokeWidth={0.4}
+              strokeOpacity={0.45}
+              initial={{ cx: r.axK[0], r: r.aRK[0], opacity: r.aOpK[0] }}
+              animate={{ cx: r.axK, r: r.aRK, opacity: r.aOpK }}
+              transition={loop}
+            />
+            {/* glassy sphere — strand B */}
+            <motion.circle
+              cy={r.y}
+              fill={`url(#sphB-${r.i})`}
+              stroke={lighten(r.colorB, 0.45)}
+              strokeWidth={0.4}
+              strokeOpacity={0.45}
+              initial={{ cx: r.bxK[0], r: r.bRK[0], opacity: r.bOpK[0] }}
+              animate={{ cx: r.bxK, r: r.bRK, opacity: r.bOpK }}
+              transition={loop}
+            />
+          </g>
+        ))}
       </svg>
 
       {/* Floating skill badges */}
@@ -201,6 +306,64 @@ const DNAHelix = () => {
           </div>
         </motion.div>
       ))}
+    </div>
+  );
+};
+
+// Lazily-loaded interactive three.js DNA helix element (keeps three.js off the main bundle)
+const DNAHelixHero = lazy(() => import("@/components/DNAHelixHero"));
+
+// Hero DNA visual — interactive 3D genome panel
+const HeroDNAVisual = () => {
+  return (
+    <div className="relative w-full h-[900px] -mt-32 flex items-center justify-center">
+      {/* Soft outer bloom into the page */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(138,92,255,0.28),transparent_62%)] blur-3xl" />
+
+      {/* Interactive genome — transparent canvas, blends straight into the page */}
+      <div className="absolute inset-0 z-10">
+        <Suspense fallback={<DNAHelix />}>
+          <DNAHelixHero />
+        </Suspense>
+        <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.2em] text-white/35">
+          Drag to rotate
+        </div>
+      </div>
+
+      {/* Skill badges orbiting the helix */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 z-20"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 52, repeat: Infinity, ease: "linear" }}
+      >
+        {HERO_SKILLS.map((skill, i) => {
+          const angle = (i * 360) / HERO_SKILLS.length;
+          return (
+            <div
+              key={skill.name}
+              className="absolute left-1/2 top-1/2"
+              style={{ transform: `rotate(${angle}deg) translateY(-340px)` }}
+            >
+              {/* counter-rotate so the badge stays upright while the ring spins */}
+              <motion.div
+                className={`flex items-center gap-2 rounded-2xl border border-white/10 bg-gradient-to-br ${skill.glowClassName} px-3 py-2.5 text-sm text-white shadow-[0_18px_50px_rgba(0,0,0,0.32)] backdrop-blur-xl`}
+                style={{ x: "-50%", y: "-50%" }}
+                initial={{ rotate: -angle }}
+                animate={{ rotate: -angle - 360 }}
+                transition={{ duration: 52, repeat: Infinity, ease: "linear" }}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/35 ring-1 ring-white/10">
+                  <skill.Icon className={`h-5 w-5 ${skill.iconClassName}`} />
+                </div>
+                <div className="pr-1">
+                  <span className="block text-[15px] font-semibold tracking-wide">{skill.name}</span>
+                  <span className="block text-[10px] uppercase tracking-[0.24em] text-white/45">Skill</span>
+                </div>
+              </motion.div>
+            </div>
+          );
+        })}
+      </motion.div>
     </div>
   );
 };
@@ -422,7 +585,7 @@ const ThinkRankCapabilityAnimation = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-3xl font-bold leading-tight text-white sm:text-4xl"
+            className="text-3xl font-bold leading-tight text-white sm:text-4xl font-display tracking-tight"
           >
             From raw skills to{" "}
             <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
@@ -604,7 +767,15 @@ const Index = () => {
   const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 0.95]);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F] text-white selection:bg-violet-500/30 font-sans overflow-x-hidden" ref={containerRef}>
+    <div className="relative min-h-screen bg-[#05050A] text-white selection:bg-violet-500/30 font-sans overflow-x-hidden" ref={containerRef}>
+      {/* Atmosphere — dark purple gradient + subtle blue/violet nebula behind everything */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_-10%,#1A103D_0%,#120B2F_28%,#0A0718_58%,#05050A_100%)]" />
+        <div className="absolute -top-32 left-1/4 h-[620px] w-[620px] -translate-x-1/2 rounded-full bg-[#3F7DFF]/[0.12] blur-[170px]" />
+        <div className="absolute top-1/4 right-0 h-[560px] w-[560px] translate-x-1/3 rounded-full bg-[#8A5CFF]/[0.12] blur-[170px]" />
+        <div className="absolute bottom-0 left-1/3 h-[520px] w-[520px] rounded-full bg-[#38E8FF]/[0.06] blur-[180px]" />
+      </div>
+      <div className="relative z-10">
 
       {/* ============================================
           HERO SECTION
@@ -613,12 +784,6 @@ const Index = () => {
         style={{ opacity: heroOpacity, scale: heroScale }}
         className="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden"
       >
-        <GradientOrbs />
-        <FloatingParticles />
-
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]" />
-
         <div className="container mx-auto px-4 z-10 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
 
@@ -643,7 +808,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight"
+                className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight font-display"
               >
                 <span className="text-white">Stop Guessing.</span>
                 <br />
@@ -672,7 +837,7 @@ const Index = () => {
               >
                 <Link to="/build">
                   <Button
-                    className="h-14 px-8 text-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(139,92,246,0.4)] transition-all duration-300 group"
+                    className="h-14 px-8 text-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold rounded-2xl shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(139,92,246,0.4)] transition-all duration-300 group"
                   >
                     Decode Your Genome
                     <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -681,7 +846,7 @@ const Index = () => {
                 <Link to="/how-it-works">
                   <Button
                     variant="outline"
-                    className="h-14 px-8 text-lg border-white/20 hover:bg-white/5 text-white rounded-xl backdrop-blur-sm"
+                    className="h-14 px-8 text-lg border-white/20 hover:bg-white/5 text-white rounded-2xl backdrop-blur-sm"
                   >
                     <Play className="mr-2 w-5 h-5 fill-current" />
                     Watch Demo
@@ -718,7 +883,7 @@ const Index = () => {
               transition={{ duration: 1, delay: 0.3 }}
               className="hidden lg:block"
             >
-              <DNAHelix />
+              <HeroDNAVisual />
             </motion.div>
           </div>
         </div>
@@ -739,8 +904,6 @@ const Index = () => {
           PROBLEM SECTION
           ============================================ */}
       <section className="py-32 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-red-900/5 to-transparent" />
-
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -752,7 +915,7 @@ const Index = () => {
             <span className="inline-block px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium mb-6">
               The Problem
             </span>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display tracking-tight mb-6">
               Why Developers Get{" "}
               <span className="text-red-400">Stuck</span>
             </h2>
@@ -776,7 +939,7 @@ const Index = () => {
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${problem.color} flex items-center justify-center mb-6`}>
                     <problem.icon className={`w-7 h-7 ${problem.iconColor}`} />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">{problem.title}</h3>
+                  <h3 className="text-xl font-semibold text-white font-display tracking-tight mb-3">{problem.title}</h3>
                   <p className="text-gray-400 leading-relaxed">{problem.description}</p>
                 </div>
               </motion.div>
@@ -789,8 +952,6 @@ const Index = () => {
           SOLUTION SECTION
           ============================================ */}
       <section className="py-32 relative overflow-hidden">
-        <GradientOrbs />
-
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -802,7 +963,7 @@ const Index = () => {
             <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium mb-6">
               The Solution
             </span>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display tracking-tight mb-6">
               Your Personal{" "}
               <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">AI Co-Pilot</span>
             </h2>
@@ -825,7 +986,7 @@ const Index = () => {
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${solution.gradient} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                     <solution.icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">{solution.title}</h3>
+                  <h3 className="text-xl font-semibold text-white font-display tracking-tight mb-3">{solution.title}</h3>
                   <p className="text-gray-400 leading-relaxed">{solution.description}</p>
                 </div>
               </motion.div>
@@ -849,7 +1010,7 @@ const Index = () => {
             <span className="inline-block px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-6">
               ThinkRank In Action
             </span>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display tracking-tight mb-6">
               One system for{" "}
               <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
                 roadmap, practice, and placement
@@ -879,7 +1040,7 @@ const Index = () => {
             <span className="inline-block px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-sm font-medium mb-6">
               How It Works
             </span>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display tracking-tight mb-6">
               Four Steps to{" "}
               <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">Evolution</span>
             </h2>
@@ -918,8 +1079,6 @@ const Index = () => {
           STATS SECTION
           ============================================ */}
       <section className="py-24 relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-violet-900/20 via-purple-900/20 to-violet-900/20" />
-
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
             {stats.map((stat, i) => (
@@ -945,11 +1104,6 @@ const Index = () => {
           CTA SECTION
           ============================================ */}
       <section className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-violet-900/10 to-transparent" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-600/20 rounded-full blur-[150px]" />
-        </div>
-
         <div className="container mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -958,7 +1112,7 @@ const Index = () => {
             transition={{ duration: 0.8 }}
             className="max-w-3xl mx-auto text-center"
           >
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display tracking-tight mb-6">
               Ready to Decode Your{" "}
               <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
                 Potential?
@@ -971,7 +1125,7 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/build">
                 <Button
-                  className="h-14 px-10 text-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(139,92,246,0.4)] transition-all duration-300"
+                  className="h-14 px-10 text-lg bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold rounded-2xl shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(139,92,246,0.4)] transition-all duration-300"
                 >
                   Get Started Free
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -980,7 +1134,7 @@ const Index = () => {
               <Link to="/auth">
                 <Button
                   variant="outline"
-                  className="h-14 px-10 text-lg border-white/20 hover:bg-white/5 text-white rounded-xl"
+                  className="h-14 px-10 text-lg border-white/20 hover:bg-white/5 text-white rounded-2xl"
                 >
                   Sign In
                 </Button>
@@ -991,6 +1145,7 @@ const Index = () => {
       </section>
 
       <Footer />
+      </div>
     </div>
   );
 };

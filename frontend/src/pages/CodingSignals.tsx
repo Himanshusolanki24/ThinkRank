@@ -352,16 +352,52 @@ const CodingSignals = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-black text-white">
-            <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="relative min-h-screen bg-[#050507] text-white overflow-hidden">
+            {/* Themed background (matches dashboard / mock interview) */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div
+                    className="absolute inset-0 animate-gradient-mesh opacity-60"
+                    style={{
+                        background:
+                            "radial-gradient(ellipse at 20% 18%, rgba(139, 92, 246, 0.07) 0%, transparent 50%), " +
+                            "radial-gradient(ellipse at 82% 30%, rgba(0, 229, 255, 0.05) 0%, transparent 50%), " +
+                            "radial-gradient(ellipse at 50% 95%, rgba(16, 185, 129, 0.04) 0%, transparent 50%)",
+                    }}
+                />
+                <div
+                    className="absolute w-[600px] h-[600px] rounded-full blur-[170px] animate-float"
+                    style={{ background: "rgba(139, 92, 246, 0.05)", top: "-12%", right: "4%" }}
+                />
+                <div
+                    className="absolute w-[500px] h-[500px] rounded-full blur-[150px] animate-float"
+                    style={{ background: "rgba(0, 229, 255, 0.035)", bottom: "-5%", left: "8%", animationDelay: "3s" }}
+                />
+                <div
+                    className="absolute inset-0 opacity-[0.015]"
+                    style={{
+                        backgroundImage:
+                            "linear-gradient(rgba(255,255,255,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.15) 1px,transparent 1px)",
+                        backgroundSize: "48px 48px",
+                    }}
+                />
+            </div>
+
+            <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
 
                 {/* Header */}
                 <div className="mb-8">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/[0.06] px-4 py-1.5 mb-4">
+                        <span className="relative flex w-2 h-2">
+                            <span className="absolute inline-flex w-full h-full rounded-full bg-violet-400/70 animate-ping" />
+                            <span className="relative inline-flex w-2 h-2 rounded-full bg-violet-400" />
+                        </span>
+                        <span className="text-xs font-medium text-violet-300 tracking-wide">Coding Signal Engine</span>
+                    </div>
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30">
-                            <Code2 className="h-6 w-6 text-purple-400" />
+                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-500/20 to-cyan-500/20 border border-violet-500/30 flex items-center justify-center">
+                            <Code2 className="h-6 w-6 text-violet-300" />
                         </div>
-                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
+                        <h1 className="text-3xl md:text-4xl font-bold font-display tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-purple-400 to-cyan-400">
                             Coding Signal Engine
                         </h1>
                     </div>
@@ -373,7 +409,7 @@ const CodingSignals = () => {
 
                 {/* Overall Score Card (if data exists) */}
                 {normalizedProfile && (
-                    <Card className="mb-8 bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/50 overflow-hidden">
+                    <Card className="mb-8 bg-gradient-to-b from-white/[0.04] to-white/[0.01] border-white/[0.06] backdrop-blur-sm overflow-hidden relative">
                         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5" />
                         <CardContent className="p-6 relative">
                             <div className="flex flex-col md:flex-row items-center gap-6">
@@ -391,7 +427,7 @@ const CodingSignals = () => {
                                 {/* Metrics Grid */}
                                 <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
                                     {["problemSolving", "algorithmicDepth", "consistency", "competitiveStrength"].map((metric) => (
-                                        <div key={metric} className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
+                                        <div key={metric} className="bg-white/[0.03] rounded-xl p-4 border border-white/[0.06]">
                                             <div className="flex items-center gap-2 mb-2 text-gray-400">
                                                 {getMetricIcon(metric)}
                                                 <span className="text-xs">{getMetricLabel(metric)}</span>
@@ -417,7 +453,7 @@ const CodingSignals = () => {
                                         variant={normalizedProfile.platformCoverage[platform.id] ? "default" : "outline"}
                                         className={normalizedProfile.platformCoverage[platform.id]
                                             ? `bg-gradient-to-r ${platform.color} text-white border-0`
-                                            : "text-gray-500 border-gray-700"
+                                            : "text-gray-500 border-white/[0.08]"
                                         }
                                     >
                                         <platform.Logo className={`w-4 h-4 ${normalizedProfile.platformCoverage[platform.id] ? "text-white" : "text-gray-500"}`} /> {platform.name}
@@ -438,7 +474,7 @@ const CodingSignals = () => {
                 )}
 
                 <Tabs defaultValue="connect" className="space-y-6">
-                    <TabsList className="bg-gray-800/50 border border-gray-700/50">
+                    <TabsList className="bg-white/[0.03] border border-white/[0.06]">
                         <TabsTrigger value="connect" className="data-[state=active]:bg-purple-500/20">
                             <Zap className="h-4 w-4 mr-2" />
                             Connect Platforms
@@ -485,7 +521,7 @@ const CodingSignals = () => {
                                                 placeholder={`Enter ${platform.name} username`}
                                                 value={usernames[platform.id as keyof PlatformUsernames] || ""}
                                                 onChange={(e) => handleUsernameChange(platform.id, e.target.value)}
-                                                className="mt-1 bg-gray-800/50 border-gray-700 text-white placeholder:text-gray-500"
+                                                className="mt-1 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-gray-500"
                                             />
                                             {errors[platform.id] && (
                                                 <p className="text-red-400 text-xs mt-1">{errors[platform.id]}</p>
@@ -495,7 +531,7 @@ const CodingSignals = () => {
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                className="flex-1 border-gray-700 hover:bg-gray-800"
+                                                className="flex-1 border-white/[0.08] hover:bg-white/[0.06]"
                                                 onClick={() => fetchSinglePlatform(platform.id)}
                                                 disabled={fetchingPlatform === platform.id || !usernames[platform.id as keyof PlatformUsernames]}
                                             >
@@ -541,7 +577,7 @@ const CodingSignals = () => {
                     {/* Detailed Stats Tab */}
                     <TabsContent value="details" className="space-y-4">
                         {Object.keys(platformData).length === 0 ? (
-                            <Alert className="bg-gray-800/50 border-gray-700">
+                            <Alert className="bg-white/[0.03] border-white/[0.08]">
                                 <Code2 className="h-4 w-4" />
                                 <AlertTitle>No Data Yet</AlertTitle>
                                 <AlertDescription>
@@ -722,7 +758,7 @@ const CodingSignals = () => {
                         {normalizedProfile?.recommendations && normalizedProfile.recommendations.length > 0 ? (
                             <div className="space-y-3">
                                 {normalizedProfile.recommendations.map((rec, index) => (
-                                    <Alert key={index} className="bg-gray-800/50 border-gray-700/50">
+                                    <Alert key={index} className="bg-white/[0.03] border-white/[0.06]">
                                         <Award className="h-4 w-4 text-purple-400" />
                                         <AlertDescription className="text-gray-300">
                                             {rec}
@@ -731,7 +767,7 @@ const CodingSignals = () => {
                                 ))}
                             </div>
                         ) : (
-                            <Alert className="bg-gray-800/50 border-gray-700">
+                            <Alert className="bg-white/[0.03] border-white/[0.08]">
                                 <Sparkles className="h-4 w-4" />
                                 <AlertTitle>Get Personalized Recommendations</AlertTitle>
                                 <AlertDescription>
@@ -744,7 +780,7 @@ const CodingSignals = () => {
                 </Tabs>
 
                 {/* Ethical Notice */}
-                <div className="mt-12 p-4 bg-gray-800/30 rounded-xl border border-gray-700/50">
+                <div className="mt-12 p-4 bg-white/[0.02] rounded-2xl border border-white/[0.06] backdrop-blur-sm">
                     <h3 className="text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
                         <CheckCircle2 className="h-4 w-4 text-green-400" />
                         Privacy & Data Notice
