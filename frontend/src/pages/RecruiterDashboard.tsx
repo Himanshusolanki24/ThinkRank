@@ -3,26 +3,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
   TrendingUp,
-  ShieldCheck,
   AlertTriangle,
-  Search,
-  Filter,
+  Target,
+  Plus,
+  Bookmark,
   ChevronDown,
-  Star,
-  Eye,
-  FileText,
-  BarChart3,
-  Brain,
-  Code2,
+  ChevronRight,
+  ArrowRight,
   Sparkles,
-  ArrowUpRight,
+  FileText,
   Clock,
   CheckCircle2,
   XCircle,
-  Zap,
-  Target,
-  Award,
+  Code2,
+  Eye,
+  Brain,
   GitBranch,
+  Zap,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -48,11 +45,11 @@ const MOCK_CANDIDATES: CandidateCard[] = [
   {
     id: "cand_1",
     name: "Alice Vance",
-    role: "Senior Full-Stack Engineer",
+    role: "Full-Stack Engineer",
     avatar: "AV",
-    skills: ["TypeScript", "Next.js", "Docker", "PostgreSQL"],
+    skills: ["React", "Node.js", "TypeScript", "Docker"],
     archetype: "Full Stack Generalist",
-    scores: { thinkRank: 94, readiness: 92, credibility: 95, trustIndex: 98 },
+    scores: { thinkRank: 92, readiness: 92, credibility: 95, trustIndex: 98 },
     decision: "HIRE",
     appliedAt: "2 hours ago",
   },
@@ -61,9 +58,9 @@ const MOCK_CANDIDATES: CandidateCard[] = [
     name: "Bob Chen",
     role: "Backend Engineer",
     avatar: "BC",
-    skills: ["Go", "Kubernetes", "Redis", "Kafka"],
+    skills: ["Python", "Django", "PostgreSQL", "Redis"],
     archetype: "Backend Wizard",
-    scores: { thinkRank: 88, readiness: 85, credibility: 90, trustIndex: 92 },
+    scores: { thinkRank: 89, readiness: 85, credibility: 90, trustIndex: 92 },
     decision: "HIRE",
     appliedAt: "5 hours ago",
   },
@@ -72,9 +69,9 @@ const MOCK_CANDIDATES: CandidateCard[] = [
     name: "Chloe Smith",
     role: "Frontend Engineer",
     avatar: "CS",
-    skills: ["React", "CSS", "Tailwind", "Figma"],
+    skills: ["React", "Tailwind", "JavaScript", "Figma"],
     archetype: "Frontend Specialist",
-    scores: { thinkRank: 78, readiness: 76, credibility: 72, trustIndex: 95 },
+    scores: { thinkRank: 85, readiness: 76, credibility: 72, trustIndex: 95 },
     decision: "MAYBE",
     appliedAt: "1 day ago",
   },
@@ -118,6 +115,7 @@ const PIPELINE_STATS = {
   avgThinkRank: 82,
   trustAlerts: 2,
   conversionRate: "24%",
+  conversionValue: 24,
   hireCount: 12,
   maybeCount: 18,
   rejectCount: 18,
@@ -142,6 +140,18 @@ function scoreGradient(score: number) {
   return "from-red-500 to-pink-500";
 }
 
+function scoreRing(score: number) {
+  if (score >= 85) return "ring-emerald-500/40";
+  if (score >= 70) return "ring-amber-500/40";
+  return "ring-red-500/40";
+}
+
+function scoreBadge(score: number) {
+  if (score >= 85) return "text-emerald-300 bg-emerald-500/10";
+  if (score >= 70) return "text-amber-300 bg-amber-500/10";
+  return "text-red-300 bg-red-500/10";
+}
+
 function archetypeIcon(archetype: string) {
   if (archetype.includes("Backend")) return <Code2 className="w-3.5 h-3.5" />;
   if (archetype.includes("Frontend")) return <Eye className="w-3.5 h-3.5" />;
@@ -150,302 +160,370 @@ function archetypeIcon(archetype: string) {
   return <Zap className="w-3.5 h-3.5" />;
 }
 
+// ─── Mini Charts ──────────────────────────────────────────────────────────────
+const Sparkline = ({ data, color }: { data: number[]; color: string }) => {
+  const w = 96;
+  const h = 40;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const pts = data
+    .map((d, i) => {
+      const x = (i / (data.length - 1)) * w;
+      const y = h - ((d - min) / range) * (h - 6) - 3;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+  return (
+    <svg width={w} height={h} className="overflow-visible">
+      <polyline
+        points={pts}
+        fill="none"
+        stroke={color}
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+const ProgressRing = ({ value, color }: { value: number; color: string }) => {
+  const r = 20;
+  const c = 2 * Math.PI * r;
+  const offset = c - (value / 100) * c;
+  return (
+    <svg width={52} height={52} viewBox="0 0 52 52">
+      <circle cx={26} cy={26} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={5} />
+      <motion.circle
+        cx={26}
+        cy={26}
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={5}
+        strokeLinecap="round"
+        strokeDasharray={c}
+        initial={{ strokeDashoffset: c }}
+        animate={{ strokeDashoffset: offset }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        transform="rotate(-90 26 26)"
+      />
+    </svg>
+  );
+};
+
+const RadarMini = ({ color }: { color: string }) => (
+  <svg width={52} height={52} viewBox="0 0 52 52">
+    {[20, 13, 6].map((r) => (
+      <circle key={r} cx={26} cy={26} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
+    ))}
+    <motion.circle
+      cx={38}
+      cy={20}
+      r={3}
+      fill={color}
+      initial={{ scale: 0.6, opacity: 0.4 }}
+      animate={{ scale: [0.6, 1.1, 0.6], opacity: [0.4, 1, 0.4] }}
+      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+    />
+  </svg>
+);
+
+// ─── Animated Background (shared theme) ───────────────────────────────────────
+const RecruiterBackground = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div
+      className="absolute inset-0 animate-gradient-mesh opacity-60"
+      style={{
+        background:
+          "radial-gradient(ellipse at 18% 12%, rgba(139, 92, 246, 0.10) 0%, transparent 45%), " +
+          "radial-gradient(ellipse at 85% 25%, rgba(0, 229, 255, 0.04) 0%, transparent 50%)",
+      }}
+    />
+    <motion.div
+      className="absolute w-[600px] h-[600px] rounded-full blur-[170px]"
+      style={{ background: "rgba(139, 92, 246, 0.05)", top: "-15%", left: "-5%" }}
+      animate={{ x: [0, 30, -20, 0], y: [0, 25, -15, 0] }}
+      transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+    />
+  </div>
+);
+
+// ─── Stat Cards Config ────────────────────────────────────────────────────────
+const STAT_CARDS = [
+  {
+    label: "Evaluated",
+    value: PIPELINE_STATS.totalEvaluated,
+    icon: Users,
+    iconBg: "bg-violet-500/15 text-violet-300",
+    chart: <Sparkline data={[20, 28, 24, 32, 30, 40, 38, 48]} color="#a78bfa" />,
+  },
+  {
+    label: "Avg. Score",
+    value: PIPELINE_STATS.avgThinkRank,
+    suffix: "/100",
+    icon: TrendingUp,
+    iconBg: "bg-blue-500/15 text-blue-300",
+    chart: <Sparkline data={[58, 64, 60, 70, 66, 76, 72, 82]} color="#60a5fa" />,
+  },
+  {
+    label: "Alerts",
+    value: PIPELINE_STATS.trustAlerts,
+    icon: AlertTriangle,
+    iconBg: "bg-amber-500/15 text-amber-300",
+    chart: <RadarMini color="#fbbf24" />,
+  },
+  {
+    label: "Conversion",
+    value: PIPELINE_STATS.conversionRate,
+    icon: Target,
+    iconBg: "bg-emerald-500/15 text-emerald-300",
+    chart: <ProgressRing value={PIPELINE_STATS.conversionValue} color="#34d399" />,
+  },
+];
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function RecruiterDashboard() {
-  const [candidates, setCandidates] = useState<CandidateCard[]>(MOCK_CANDIDATES);
-  const [filterDecision, setFilterDecision] = useState<string>("ALL");
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateCard | null>(null);
+  const [bookmarked, setBookmarked] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API fetch
-    const timer = setTimeout(() => setLoading(false), 800);
+    const timer = setTimeout(() => setLoading(false), 700);
     return () => clearTimeout(timer);
   }, []);
 
-  const filtered = candidates.filter((c) => {
-    const matchDecision = filterDecision === "ALL" || c.decision === filterDecision;
-    const matchSearch =
-      searchQuery === "" ||
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.skills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchDecision && matchSearch;
-  });
+  const topCandidates = [...MOCK_CANDIDATES]
+    .sort((a, b) => b.scores.thinkRank - a.scores.thinkRank)
+    .slice(0, 3);
+
+  const toggleBookmark = (id: string) => {
+    setBookmarked((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
 
   return (
-    <div className="min-h-screen bg-[#060611] text-white px-4 md:px-8 py-6 overflow-y-auto">
-      {/* ─── Header ─────────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
-      >
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-            Recruiter Copilot
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            AI-powered talent pipeline · Real-time candidate intelligence
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs text-emerald-400 font-medium">Live Pipeline</span>
+    <div className="relative min-h-screen bg-[#08080d] text-white overflow-y-auto">
+      <RecruiterBackground />
+
+      <div className="relative z-10 px-5 md:px-8 py-7 max-w-[1400px] mx-auto">
+        {/* ─── Header ──────────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
+        >
+          <div>
+            <p className="text-sm text-gray-400 mb-1">Good morning, User 👋</p>
+            <h1 className="text-3xl md:text-[2.6rem] leading-tight font-bold tracking-tight">
+              Build your team with the{" "}
+              <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+                right talent.
+              </span>
+            </h1>
           </div>
-        </div>
-      </motion.div>
+          <button className="self-start md:self-auto inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-violet-500/40 bg-violet-500/10 text-sm font-medium text-violet-200 hover:bg-violet-500/20 transition-colors">
+            <Plus className="w-4 h-4" />
+            Add Role
+          </button>
+        </motion.div>
 
-      {/* ─── Stats Row ──────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {[
-          {
-            label: "Total Evaluated",
-            value: PIPELINE_STATS.totalEvaluated,
-            icon: Users,
-            color: "from-violet-500 to-purple-600",
-            accent: "text-violet-400",
-          },
-          {
-            label: "Avg ThinkRank",
-            value: PIPELINE_STATS.avgThinkRank,
-            icon: TrendingUp,
-            color: "from-cyan-500 to-blue-600",
-            accent: "text-cyan-400",
-            suffix: "/100",
-          },
-          {
-            label: "Trust Alerts",
-            value: PIPELINE_STATS.trustAlerts,
-            icon: AlertTriangle,
-            color: "from-amber-500 to-orange-600",
-            accent: "text-amber-400",
-          },
-          {
-            label: "Conversion Rate",
-            value: PIPELINE_STATS.conversionRate,
-            icon: Target,
-            color: "from-emerald-500 to-teal-600",
-            accent: "text-emerald-400",
-          },
-        ].map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div
-                className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center`}
-              >
-                <stat.icon className="w-5 h-5 text-white" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-white">
-              {stat.value}
-              {stat.suffix && (
-                <span className="text-sm font-normal text-gray-500">{stat.suffix}</span>
-              )}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
-            {/* Decorative glow */}
-            <div
-              className={`absolute -top-12 -right-12 w-32 h-32 rounded-full bg-gradient-to-br ${stat.color} opacity-[0.04] blur-2xl`}
-            />
-          </motion.div>
-        ))}
-      </div>
-
-      {/* ─── Pipeline Mini-bar ──────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="flex items-center gap-3 mb-8 p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02]"
-      >
-        <span className="text-xs text-gray-500 font-medium uppercase tracking-wider mr-2">
-          Pipeline
-        </span>
-        <div className="flex-1 flex items-center gap-1 h-3 rounded-full overflow-hidden bg-white/[0.03]">
-          <div
-            className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-l-full"
-            style={{ width: `${(PIPELINE_STATS.hireCount / PIPELINE_STATS.totalEvaluated) * 100}%` }}
-          />
-          <div
-            className="h-full bg-gradient-to-r from-amber-500 to-amber-400"
-            style={{ width: `${(PIPELINE_STATS.maybeCount / PIPELINE_STATS.totalEvaluated) * 100}%` }}
-          />
-          <div
-            className="h-full bg-gradient-to-r from-red-500 to-red-400 rounded-r-full"
-            style={{ width: `${(PIPELINE_STATS.rejectCount / PIPELINE_STATS.totalEvaluated) * 100}%` }}
-          />
-        </div>
-        <div className="flex items-center gap-4 text-xs text-gray-400">
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" /> {PIPELINE_STATS.hireCount} Hire
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-amber-400" /> {PIPELINE_STATS.maybeCount} Maybe
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-red-400" /> {PIPELINE_STATS.rejectCount} Reject
-          </span>
-        </div>
-      </motion.div>
-
-      {/* ─── Filters & Search ──────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search candidates or skills..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-violet-500/30 transition-all"
-          />
-        </div>
-
-        <div className="flex items-center gap-2">
-          {["ALL", "HIRE", "MAYBE", "REJECT"].map((d) => (
-            <button
-              key={d}
-              onClick={() => setFilterDecision(d)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                filterDecision === d
-                  ? "bg-violet-600/20 border-violet-500/30 text-violet-300"
-                  : "bg-white/[0.02] border-white/[0.06] text-gray-400 hover:text-white hover:bg-white/[0.05]"
-              }`}
+        {/* ─── Stat Cards ──────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {STAT_CARDS.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.08 }}
+              whileHover={{ y: -3 }}
+              className="rounded-2xl border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-white/[0.01] backdrop-blur-sm p-5 transition-all duration-300 hover:border-white/[0.12]"
             >
-              {d === "ALL" ? "All" : d.charAt(0) + d.slice(1).toLowerCase()}
-            </button>
+              <div className="flex items-center gap-4">
+                <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${stat.iconBg}`}>
+                  <stat.icon className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-3xl font-bold text-white tracking-tight leading-none">
+                    {stat.value}
+                    {stat.suffix && (
+                      <span className="text-sm font-normal text-gray-500"> {stat.suffix}</span>
+                    )}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1.5">{stat.label}</p>
+                </div>
+                <div className="ml-auto shrink-0">{stat.chart}</div>
+              </div>
+            </motion.div>
           ))}
         </div>
-      </div>
 
-      {/* ─── Candidate Grid ────────────────────────────────────────── */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-64 rounded-2xl bg-white/[0.02] border border-white/[0.06] animate-pulse"
-            />
-          ))}
+        {/* ─── Hiring Pipeline ─────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="rounded-2xl border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-white/[0.01] backdrop-blur-sm p-6 mb-7"
+        >
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-semibold text-white">Hiring Pipeline</h2>
+            <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.02] text-xs text-gray-300 hover:bg-white/[0.05] transition-colors">
+              This Month
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 mb-5">
+            {[
+              { count: PIPELINE_STATS.hireCount, grad: "from-emerald-500 to-emerald-400" },
+              { count: PIPELINE_STATS.maybeCount, grad: "from-amber-500 to-amber-400" },
+              { count: PIPELINE_STATS.rejectCount, grad: "from-red-500 to-red-400" },
+            ].map((seg, i) => (
+              <motion.div
+                key={i}
+                style={{ flexGrow: seg.count }}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 + i * 0.12 }}
+                className={`origin-left h-2.5 rounded-full bg-gradient-to-r ${seg.grad}`}
+              />
+            ))}
+          </div>
+
+          <div className="flex items-center gap-10">
+            {[
+              { label: "Hired", count: PIPELINE_STATS.hireCount, dot: "bg-emerald-400" },
+              { label: "In Review", count: PIPELINE_STATS.maybeCount, dot: "bg-amber-400" },
+              { label: "Rejected", count: PIPELINE_STATS.rejectCount, dot: "bg-red-400" },
+            ].map((l) => (
+              <div key={l.label}>
+                <p className="flex items-center gap-2 text-lg font-semibold text-white">
+                  <span className={`w-2 h-2 rounded-full ${l.dot}`} />
+                  {l.count}
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5 ml-4">{l.label}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* ─── Top Candidates ──────────────────────────────────────── */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-white">Top Candidates</h2>
+          <button className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-white transition-colors">
+            View all
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
-      ) : (
-        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((candidate, i) => (
+
+        {loading ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-7">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-28 rounded-2xl bg-white/[0.02] border border-white/[0.06] animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-7">
+            {topCandidates.map((candidate, i) => (
               <motion.div
                 key={candidate.id}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ delay: i * 0.05 }}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 + i * 0.08 }}
+                whileHover={{ y: -3 }}
                 onClick={() => setSelectedCandidate(candidate)}
-                className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-violet-500/20 transition-all cursor-pointer overflow-hidden"
+                className="group rounded-2xl border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-white/[0.01] backdrop-blur-sm p-4 transition-all duration-300 hover:border-violet-500/30 cursor-pointer"
               >
-                {/* Top Accent */}
-                <div
-                  className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${scoreGradient(
-                    candidate.scores.thinkRank
-                  )}`}
-                />
-
-                <div className="p-5">
-                  {/* Header Row */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center text-sm font-bold text-white">
-                        {candidate.avatar}
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-semibold text-white group-hover:text-violet-300 transition-colors">
-                          {candidate.name}
-                        </h3>
-                        <p className="text-xs text-gray-500">{candidate.role}</p>
-                      </div>
-                    </div>
-
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold border ${decisionColor(
-                        candidate.decision
-                      )}`}
-                    >
-                      {decisionIcon(candidate.decision)}
-                      {candidate.decision}
-                    </span>
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`w-12 h-12 rounded-full bg-gradient-to-br ${scoreGradient(
+                      candidate.scores.thinkRank
+                    )} flex items-center justify-center text-sm font-bold text-white ring-2 ${scoreRing(
+                      candidate.scores.thinkRank
+                    )} ring-offset-2 ring-offset-[#0c0c14] shrink-0`}
+                  >
+                    {candidate.avatar}
                   </div>
 
-                  {/* Archetype */}
-                  <div className="flex items-center gap-1.5 mb-4">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-[10px] text-gray-400">
-                      {archetypeIcon(candidate.archetype)}
-                      {candidate.archetype}
-                    </span>
-                    <span className="text-[10px] text-gray-600">· {candidate.appliedAt}</span>
-                  </div>
-
-                  {/* Score Grid */}
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    {[
-                      { label: "ThinkRank", val: candidate.scores.thinkRank },
-                      { label: "Readiness", val: candidate.scores.readiness },
-                      { label: "Credibility", val: candidate.scores.credibility },
-                      { label: "Trust", val: candidate.scores.trustIndex },
-                    ].map((s) => (
-                      <div
-                        key={s.label}
-                        className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.04]"
-                      >
-                        <span className="text-[10px] text-gray-500">{s.label}</span>
-                        <span
-                          className={`text-xs font-bold ${
-                            s.val >= 85
-                              ? "text-emerald-400"
-                              : s.val >= 70
-                              ? "text-amber-400"
-                              : "text-red-400"
-                          }`}
-                        >
-                          {s.val}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Skills */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {candidate.skills.map((skill) => (
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-sm font-semibold text-white truncate group-hover:text-violet-200 transition-colors">
+                        {candidate.name}
+                      </h3>
                       <span
-                        key={skill}
-                        className="px-2 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/15 text-[10px] text-violet-300 font-medium"
+                        className={`px-1.5 py-0.5 rounded-md text-xs font-bold ${scoreBadge(
+                          candidate.scores.thinkRank
+                        )}`}
                       >
-                        {skill}
+                        {candidate.scores.thinkRank}
                       </span>
-                    ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mb-2.5">{candidate.role}</p>
+
+                    <div className="flex items-center gap-1.5">
+                      {candidate.skills.slice(0, 3).map((skill) => (
+                        <span
+                          key={skill}
+                          className="px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-[10px] text-gray-300"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                      {candidate.skills.length > 3 && (
+                        <span className="px-1.5 py-0.5 rounded-md bg-white/[0.04] text-[10px] text-gray-400">
+                          +{candidate.skills.length - 3}
+                        </span>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(candidate.id);
+                        }}
+                        className="ml-auto text-gray-500 hover:text-violet-300 transition-colors"
+                      >
+                        <Bookmark
+                          className={`w-4 h-4 ${
+                            bookmarked.has(candidate.id) ? "fill-violet-400 text-violet-400" : ""
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                {/* Hover Glow */}
-                <div className="absolute -bottom-16 -right-16 w-40 h-40 rounded-full bg-violet-600/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </motion.div>
             ))}
-          </AnimatePresence>
-        </motion.div>
-      )}
+          </div>
+        )}
 
-      {filtered.length === 0 && !loading && (
-        <div className="text-center py-20">
-          <Users className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-500">No candidates match your filters.</p>
-        </div>
-      )}
+        {/* ─── AI Copilot Insight ──────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="relative overflow-hidden rounded-2xl border border-violet-500/20 bg-gradient-to-r from-violet-500/[0.12] to-fuchsia-500/[0.06] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5 text-violet-300" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-white">AI Copilot Insight</h3>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Frontend Engineer roles get 35% more qualified applicants when skills are clearly listed.
+              </p>
+            </div>
+          </div>
+          <button className="self-start sm:self-auto inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 text-sm font-medium text-white hover:bg-violet-500 transition-colors whitespace-nowrap">
+            View Insight
+            <ArrowRight className="w-4 h-4" />
+          </button>
+          <div className="absolute -bottom-16 -right-10 w-48 h-48 rounded-full bg-violet-600/10 blur-3xl" />
+        </motion.div>
+      </div>
 
       {/* ─── Candidate Detail Modal ────────────────────────────────── */}
       <AnimatePresence>
@@ -464,13 +542,9 @@ export default function RecruiterDashboard() {
               exit={{ opacity: 0, y: 40, scale: 0.95 }}
               className="fixed inset-x-4 top-[10%] md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-[520px] max-h-[75vh] overflow-y-auto z-50 rounded-2xl border border-white/[0.1] bg-[#0C0C16] shadow-2xl"
             >
-              {/* Modal Top Gradient */}
-              <div
-                className={`h-1 bg-gradient-to-r ${scoreGradient(selectedCandidate.scores.thinkRank)}`}
-              />
+              <div className={`h-1 bg-gradient-to-r ${scoreGradient(selectedCandidate.scores.thinkRank)}`} />
 
               <div className="p-6">
-                {/* Header */}
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center text-lg font-bold text-white">
                     {selectedCandidate.avatar}
@@ -495,7 +569,6 @@ export default function RecruiterDashboard() {
                   </div>
                 </div>
 
-                {/* Big Score */}
                 <div className="flex items-center justify-center gap-4 mb-6 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                   <div className="text-center">
                     <p
@@ -505,13 +578,10 @@ export default function RecruiterDashboard() {
                     >
                       {selectedCandidate.scores.thinkRank}
                     </p>
-                    <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">
-                      ThinkRank Score
-                    </p>
+                    <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">ThinkRank Score</p>
                   </div>
                 </div>
 
-                {/* Score Bars */}
                 <div className="space-y-3 mb-6">
                   {[
                     { label: "Placement Readiness", val: selectedCandidate.scores.readiness },
@@ -535,7 +605,6 @@ export default function RecruiterDashboard() {
                   ))}
                 </div>
 
-                {/* Skills */}
                 <div className="mb-6">
                   <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider">Skills</p>
                   <div className="flex flex-wrap gap-2">
@@ -550,7 +619,6 @@ export default function RecruiterDashboard() {
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-3">
                   <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-sm font-medium text-white hover:opacity-90 transition-opacity">
                     <FileText className="w-4 h-4" />
