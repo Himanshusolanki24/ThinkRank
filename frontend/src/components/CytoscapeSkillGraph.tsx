@@ -157,7 +157,7 @@ export const CytoscapeSkillGraph = ({ skills, onNodeSelect }: CytoscapeSkillGrap
                 edgeElasticity: () => 100,
                 nestingFactor: 5,
                 gravity: 0.5,
-                numIter: 1000,
+                numIter: 300,
                 initialTemp: 300,
                 coolingFactor: 0.99,
                 minTemp: 1.0,

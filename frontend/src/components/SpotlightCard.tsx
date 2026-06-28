@@ -7,13 +7,19 @@ export const SpotlightCard = ({ children, className = "" }: { children: React.Re
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [opacity, setOpacity] = useState(0);
 
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!divRef.current) return;
+    const ticking = useRef(false);
 
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!divRef.current || ticking.current) return;
+        
+        ticking.current = true;
         const div = divRef.current;
         const rect = div.getBoundingClientRect();
-
-        setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+        
+        window.requestAnimationFrame(() => {
+            setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+            ticking.current = false;
+        });
     };
 
     const handleFocus = () => {

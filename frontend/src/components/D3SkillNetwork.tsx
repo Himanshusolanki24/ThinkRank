@@ -277,6 +277,10 @@ export const D3SkillNetwork = ({ skills, onNodeClick }: D3SkillNetworkProps) => 
 
         node.call(drag);
 
+        simulation.on("end", () => {
+            simulation.stop();
+        });
+
         return () => {
             simulation.stop();
         };

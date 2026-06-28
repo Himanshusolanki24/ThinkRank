@@ -132,6 +132,61 @@ Provide raw JSON only. Do not include markdown tags.`;
             ]
         };
     }
+
+    async matchJobDescription(jobDescription, resumeText, profileSkills) {
+        try {
+            const prompt = this.buildMatchPrompt(jobDescription, resumeText, profileSkills);
+            
+            if (geminiModel) {
+                const result = await geminiModel.generateContent(prompt);
+                let responseText = result.response.text().trim();
+                return this.parseJSONResponse(responseText);
+            } else if (mistralClient) {
+                const response = await mistralClient.chat.complete({
+                    model: "mistral-large-latest",
+                    messages: [{ role: "user", content: prompt }],
+                });
+                let responseText = response.choices[0].message.content.trim();
+                return this.parseJSONResponse(responseText);
+            } else {
+                return {
+                    matchPercentage: 75,
+                    recommendation: "MAYBE",
+                    reasoning: "Fallback mode activated. The candidate appears to have general software engineering skills.",
+                    matchingSkills: profileSkills || ["JavaScript", "React"],
+                    missingSkills: ["Cloud Infrastructure (Fallback)"]
+                };
+            }
+        } catch (error) {
+            console.error("ResumeAgent matchJobDescription error:", error);
+            throw error;
+        }
+    }
+
+    buildMatchPrompt(jobDescription, resumeText, profileSkills) {
+        return `You are an expert technical recruiter and ATS evaluation system.
+Evaluate the candidate's fit for the provided Job Description.
+        
+Job Description:
+${jobDescription}
+
+Candidate Profile Skills (Self-reported):
+${profileSkills ? profileSkills.join(", ") : "None provided"}
+
+Candidate Resume Content:
+${resumeText ? resumeText : "No resume provided"}
+
+Provide an accurate, detailed analysis in the following JSON format:
+{
+  "matchPercentage": <integer between 0 and 100>,
+  "recommendation": "HIRE" | "MAYBE" | "REJECT",
+  "reasoning": "1-2 sentences explaining the recommendation based on the skills and JD.",
+  "matchingSkills": ["Skill 1", "Skill 2"],
+  "missingSkills": ["Missing Skill 1", "Missing Skill 2"]
+}
+
+Provide raw JSON only. Do not include markdown tags.`;
+    }
 }
 
 module.exports = new ResumeAgent();

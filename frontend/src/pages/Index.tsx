@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import { useRef, useState, useEffect, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { SiAmazonwebservices, SiNodedotjs, SiPython, SiReact, SiTypescript, SiDocker, SiGraphql } from "react-icons/si";
+=======
+import { useRef, useState, useEffect, memo, useCallback } from "react";
+import { Link } from "react-router-dom";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { SiAmazonwebservices, SiNodedotjs, SiPython, SiReact } from "react-icons/si";
+>>>>>>> main
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
 import {
@@ -35,20 +42,30 @@ const HERO_SKILLS = [
     name: "React",
     Icon: SiReact,
     iconClassName: "text-cyan-400",
+<<<<<<< HEAD
     left: "2%",
     top: "12%",
     duration: 3.4,
     rotate: -8,
+=======
+    left: "10%",
+    top: "16%",
+>>>>>>> main
     glowClassName: "from-cyan-500/25 to-cyan-400/5",
   },
   {
     name: "AWS",
     Icon: SiAmazonwebservices,
     iconClassName: "text-orange-400",
+<<<<<<< HEAD
     left: "64%",
     top: "6%",
     duration: 4.1,
     rotate: 7,
+=======
+    left: "72%",
+    top: "10%",
+>>>>>>> main
     glowClassName: "from-orange-500/25 to-orange-400/5",
   },
   {
@@ -65,10 +82,15 @@ const HERO_SKILLS = [
     name: "Python",
     Icon: SiPython,
     iconClassName: "text-[#FFD43B]",
+<<<<<<< HEAD
     left: "0%",
     top: "46%",
     duration: 3.8,
     rotate: -6,
+=======
+    left: "66%",
+    top: "77%",
+>>>>>>> main
     glowClassName: "from-yellow-500/25 to-blue-400/5",
   },
   {
@@ -95,14 +117,20 @@ const HERO_SKILLS = [
     name: "Node.js",
     Icon: SiNodedotjs,
     iconClassName: "text-green-400",
+<<<<<<< HEAD
     left: "6%",
     top: "80%",
     duration: 4.5,
     rotate: 9,
+=======
+    left: "82%",
+    top: "84%",
+>>>>>>> main
     glowClassName: "from-green-500/25 to-emerald-400/5",
   },
 ] as const;
 
+<<<<<<< HEAD
 // ── Neon colour helpers for the DNA helix ──
 const hexToRgb = (hex: string): [number, number, number] => {
   const h = hex.replace("#", "");
@@ -193,8 +221,107 @@ const DNAHelix = () => {
           animate={{ rotate: -360 }}
           transition={{ duration: 46, repeat: Infinity, ease: "linear" }}
         />
-      </div>
+=======
+// PERFORMANCE: Static gradient orbs — no animations
+const GradientOrbs = memo(() => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-violet-600/20 rounded-full blur-[120px]" />
+    <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-cyan-500/15 rounded-full blur-[100px]" />
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-purple-600/10 rounded-full blur-[150px]" />
+  </div>
+));
+GradientOrbs.displayName = "GradientOrbs";
 
+// PERFORMANCE: Reduced from 20 → 6 particles, CSS animation instead of framer-motion
+const PARTICLES = Array.from({ length: 6 }, (_, i) => ({
+  id: i,
+  left: `${15 + i * 15}%`,
+  top: `${10 + ((i * 37) % 80)}%`,
+  size: 3 + (i % 3),
+  duration: `${4 + i * 0.8}s`,
+  delay: `${i * 0.4}s`,
+}));
+
+const FloatingParticles = memo(() => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    {PARTICLES.map((p) => (
+      <div
+        key={p.id}
+        className="absolute rounded-full bg-violet-400/30 animate-float"
+        style={{
+          left: p.left,
+          top: p.top,
+          width: p.size,
+          height: p.size,
+          animationDuration: p.duration,
+          animationDelay: p.delay,
+        }}
+      />
+    ))}
+  </div>
+));
+FloatingParticles.displayName = "FloatingParticles";
+
+// DNA Helix Animation — PERFORMANCE: reduced from 12 → 6 nodes, CSS animations
+const DNAHelix = memo(() => (
+  <div className="relative w-full h-[540px] flex items-center justify-center">
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute h-[430px] w-[430px] rounded-full border border-white/[0.05]" />
+      <div className="absolute h-[320px] w-[320px] rounded-full border border-white/[0.04]" />
+      <div className="absolute h-[220px] w-[220px] rounded-full border border-white/[0.03]" />
+      {/* Single rotating ring via CSS */}
+      <div
+        className="absolute h-[430px] w-[430px] rounded-full border border-violet-400/10"
+        style={{ animation: "spin 28s linear infinite" }}
+      />
+    </div>
+
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.12),transparent_55%)]" />
+
+    <svg viewBox="0 0 200 400" className="relative z-10 w-48 h-96">
+      {Array.from({ length: 6 }).map((_, i) => {
+        const y = 50 + i * 55;
+        return (
+          <g key={i}>
+            <circle cx="60" cy={y} r="8" className="fill-violet-500" opacity="0.8">
+              <animate attributeName="cx" values="60;80;60" dur="2.5s" repeatCount="indefinite" begin={`${i * 0.15}s`} />
+            </circle>
+            <circle cx="140" cy={y} r="8" className="fill-cyan-400" opacity="0.8">
+              <animate attributeName="cx" values="140;120;140" dur="2.5s" repeatCount="indefinite" begin={`${i * 0.15}s`} />
+            </circle>
+            <line x1="68" y1={y} x2="132" y2={y} className="stroke-white/20" strokeWidth="2" />
+          </g>
+        );
+      })}
+    </svg>
+
+    {/* Floating skill badges — CSS animation instead of framer-motion */}
+    {HERO_SKILLS.map((skill, i) => (
+      <div
+        key={skill.name}
+        className={`absolute z-20 flex items-center gap-2 rounded-2xl border border-white/10 bg-gradient-to-br ${skill.glowClassName} px-3 py-2.5 text-sm text-white shadow-[0_18px_50px_rgba(0,0,0,0.32)] animate-float`}
+        style={{
+          left: skill.left,
+          top: skill.top,
+          animationDuration: `${3.4 + i * 0.7}s`,
+          animationDelay: `${i * 0.3}s`,
+        }}
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/35 ring-1 ring-white/10">
+          <skill.Icon className={`h-5 w-5 ${skill.iconClassName}`} />
+        </div>
+        <div className="pr-1">
+          <span className="block text-[15px] font-semibold tracking-wide">{skill.name}</span>
+          <span className="block text-[10px] uppercase tracking-[0.24em] text-white/45">Skill</span>
+        </div>
+>>>>>>> main
+      </div>
+    ))}
+  </div>
+));
+DNAHelix.displayName = "DNAHelix";
+
+<<<<<<< HEAD
       {/* Floating particles / glowing dots */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {particles.map((p) => (
@@ -370,29 +497,33 @@ const HeroDNAVisual = () => {
 
 // Animated counter component
 const AnimatedCounter = ({ value, suffix = "" }: { value: number; suffix?: string }) => {
+=======
+// Animated counter — PERFORMANCE: uses rAF instead of setInterval
+const AnimatedCounter = memo(({ value, suffix = "" }: { value: number; suffix?: string }) => {
+>>>>>>> main
   const [count, setCount] = useState(0);
+  const rafRef = useRef<number>();
 
   useEffect(() => {
     const duration = 2000;
-    const steps = 60;
-    const increment = value / steps;
-    let current = 0;
+    const start = performance.now();
 
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= value) {
-        setCount(value);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
+    const step = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      setCount(Math.floor(progress * value));
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(step);
       }
-    }, duration / steps);
+    };
 
-    return () => clearInterval(timer);
+    rafRef.current = requestAnimationFrame(step);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [value]);
 
   return <span>{count.toLocaleString()}{suffix}</span>;
-};
+});
+AnimatedCounter.displayName = "AnimatedCounter";
 
 // Problem cards data
 const problems = [
@@ -549,21 +680,21 @@ const toneClasses: Record<string, { border: string; glow: string; iconBg: string
   },
 };
 
-const ThinkRankCapabilityAnimation = () => {
+// PERFORMANCE: Removed 30 background cells, longer interval (4s instead of 1.8s)
+const ThinkRankCapabilityAnimation = memo(() => {
   const [activeFlowIndex, setActiveFlowIndex] = useState(0);
-  const activeFlowItem = thinkRankFlow[activeFlowIndex];
-  const backgroundCells = Array.from({ length: 30 }, (_, i) => i);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveFlowIndex((current) => (current + 1) % thinkRankFlow.length);
-    }, 1800);
+    }, 4000);
 
     return () => clearInterval(timer);
   }, []);
 
   return (
     <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[32px] border border-white/[0.08] bg-[#09090D] px-5 py-8 sm:px-8 sm:py-10">
+      {/* Static grid — no animation */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:72px_72px]" />
       <div className="absolute -top-28 left-1/3 h-64 w-64 rounded-full bg-violet-600/10 blur-[120px]" />
       <div className="absolute bottom-0 right-1/4 h-56 w-56 rounded-full bg-cyan-600/10 blur-[120px]" />
@@ -633,112 +764,39 @@ const ThinkRankCapabilityAnimation = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="relative min-h-[520px] overflow-hidden rounded-[28px] border border-white/[0.08] bg-black/40 p-4 backdrop-blur-xl"
+            className="relative min-h-[520px] overflow-hidden rounded-[28px] border border-white/[0.08] bg-black/40 p-4"
           >
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.08),transparent_55%)]" />
-              <div className="grid grid-cols-6 gap-3 px-4 py-8">
-                {backgroundCells.map((cell) => (
-                  <motion.div
-                    key={cell}
-                    className="h-[84px] rounded-[18px] border border-dashed border-white/[0.06] bg-white/[0.01]"
-                    animate={{ opacity: [0.24, 0.36, 0.24] }}
-                    transition={{ duration: 2.8 + (cell % 5) * 0.2, repeat: Infinity, delay: cell * 0.03 }}
-                  />
-                ))}
-              </div>
             </div>
 
             <div className="pointer-events-none absolute inset-0 rounded-[28px] border border-white/[0.04]" />
-            <div className="pointer-events-none absolute inset-0">
-              <motion.div
-                className="absolute left-[28%] top-[33%] h-[2px] w-[16%] border-t border-dashed border-cyan-400/70"
-                animate={{ opacity: activeFlowIndex >= 1 ? [0.25, 1, 0.5] : 0.18 }}
-                transition={{ duration: 0.8, repeat: Infinity }}
-              />
-              <motion.div
-                className="absolute left-[52%] top-[33%] h-[2px] w-[10%] bg-gradient-to-r from-violet-400 to-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.45)]"
-                animate={{ x: activeFlowIndex === 1 ? ["-100%", "100%"] : "-100%", opacity: activeFlowIndex === 1 ? [0, 1, 0] : 0 }}
-                transition={{ duration: 1, ease: "easeInOut" }}
-              />
-
-              <motion.div
-                className="absolute left-[52%] top-[41%] h-[18%] w-[2px] border-l border-dashed border-violet-400/70"
-                animate={{ opacity: activeFlowIndex >= 2 ? [0.25, 1, 0.5] : 0.18 }}
-                transition={{ duration: 0.8, repeat: Infinity }}
-              />
-              <motion.div
-                className="absolute left-[52%] top-[47%] h-[10%] w-[2px] bg-gradient-to-b from-cyan-300 to-violet-400 shadow-[0_0_20px_rgba(168,85,247,0.45)]"
-                animate={{ y: activeFlowIndex === 2 ? ["-90%", "120%"] : "-90%", opacity: activeFlowIndex === 2 ? [0, 1, 0] : 0 }}
-                transition={{ duration: 1, ease: "easeInOut" }}
-              />
-
-              <motion.div
-                className="absolute left-[60%] top-[69%] h-[2px] w-[14%] border-t border-dashed border-amber-400/70"
-                animate={{ opacity: activeFlowIndex >= 3 ? [0.25, 1, 0.5] : 0.18 }}
-                transition={{ duration: 0.8, repeat: Infinity }}
-              />
-              <motion.div
-                className="absolute left-[64%] top-[69%] h-[2px] w-[10%] bg-gradient-to-r from-emerald-300 to-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.45)]"
-                animate={{ x: activeFlowIndex === 3 ? ["-100%", "100%"] : "-100%", opacity: activeFlowIndex === 3 ? [0, 1, 0] : 0 }}
-                transition={{ duration: 1, ease: "easeInOut" }}
-              />
-            </div>
 
             <div className="relative h-[520px]">
               {thinkRankFlow.map((item, index) => {
                 const tone = toneClasses[item.tone];
                 const isActive = index === activeFlowIndex;
                 return (
-                  <motion.div
+                  <div
                     key={item.title}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.45, delay: index * 0.08 }}
-                    className={`group absolute h-[150px] w-[170px] overflow-hidden rounded-[22px] border bg-gradient-to-br ${tone.glow} ${tone.border} ${item.positionClassName}`}
+                    className={`group absolute h-[150px] w-[170px] overflow-hidden rounded-[22px] border bg-gradient-to-br ${tone.glow} ${tone.border} ${item.positionClassName} transition-all duration-500`}
+                    style={{
+                      transform: isActive ? "scale(1.06)" : "scale(0.96)",
+                      opacity: isActive ? 1 : 0.78,
+                    }}
                   >
-                    <motion.div
+                    <div
                       className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.06),transparent_45%)]"
-                      animate={{ opacity: isActive ? 1 : 0.5 }}
-                      transition={{ duration: 0.4 }}
+                      style={{ opacity: isActive ? 1 : 0.5 }}
                     />
-                    <motion.div
-                      className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/15 to-transparent"
-                      animate={{ x: isActive ? ["0%", "420%"] : "0%", opacity: isActive ? [0, 0.8, 0] : 0 }}
-                      transition={{ duration: 1, ease: "easeInOut" }}
-                    />
-                    <motion.div
-                      animate={{
-                        scale: isActive ? 1.06 : 0.96,
-                        opacity: isActive ? 1 : 0.78,
-                        y: isActive ? [0, -8, 0] : [0, index % 2 === 0 ? -3 : 3, 0],
-                        boxShadow: [
-                          "0 0 0 rgba(0,0,0,0)",
-                          isActive ? "0 22px 55px rgba(0,0,0,0.38)" : "0 10px 24px rgba(0,0,0,0.16)",
-                          "0 0 0 rgba(0,0,0,0)",
-                        ],
-                      }}
-                      transition={{
-                        scale: { duration: 0.45, ease: "easeOut" },
-                        opacity: { duration: 0.45, ease: "easeOut" },
-                        y: { duration: isActive ? 1.2 : 3.8 + index * 0.2, repeat: Infinity, ease: "easeInOut" },
-                        boxShadow: { duration: isActive ? 1.2 : 3.8 + index * 0.2, repeat: Infinity, ease: "easeInOut" },
-                      }}
-                      className="relative flex h-full flex-col justify-between p-4"
-                    >
+                    <div className="relative flex h-full flex-col justify-between p-4">
                       <div className="flex items-start justify-between">
-                        <motion.div
-                          className={`flex h-11 w-11 items-center justify-center rounded-2xl ${tone.iconBg} ring-1 ring-white/10`}
-                          animate={isActive ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-                          transition={{ duration: 1, repeat: isActive ? Infinity : 0 }}
-                        >
+                        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${tone.iconBg} ring-1 ring-white/10`}>
                           <item.icon className={`h-5 w-5 ${tone.iconColor}`} />
-                        </motion.div>
-                        <motion.span
-                          className={`mt-1 h-2.5 w-2.5 rounded-full ${tone.dot}`}
-                          animate={isActive ? { opacity: [0.5, 1, 0.5], scale: [1, 1.35, 1] } : { opacity: [0.2, 0.45, 0.2], scale: [1, 1.05, 1] }}
-                          transition={{ duration: isActive ? 0.9 : 2.2, repeat: Infinity, delay: index * 0.15 }}
+                        </div>
+                        <span
+                          className={`mt-1 h-2.5 w-2.5 rounded-full ${tone.dot} transition-opacity duration-300`}
+                          style={{ opacity: isActive ? 1 : 0.3 }}
                         />
                       </div>
 
@@ -748,8 +806,8 @@ const ThinkRankCapabilityAnimation = () => {
                         </div>
                         <h4 className={`whitespace-pre-line text-[18px] font-semibold leading-tight ${isActive ? "text-white" : "text-white/80"}`}>{item.title}</h4>
                       </div>
-                    </motion.div>
-                  </motion.div>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -758,7 +816,11 @@ const ThinkRankCapabilityAnimation = () => {
       </div>
     </div>
   );
-};
+});
+ThinkRankCapabilityAnimation.displayName = "ThinkRankCapabilityAnimation";
+
+// Viewport config used for all whileInView — fires only once
+const ONCE_VIEWPORT = { once: true, amount: 0.2 } as const;
 
 const Index = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -794,7 +856,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 backdrop-blur-sm"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20"
               >
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
@@ -846,7 +908,11 @@ const Index = () => {
                 <Link to="/how-it-works">
                   <Button
                     variant="outline"
+<<<<<<< HEAD
                     className="h-14 px-8 text-lg border-white/20 hover:bg-white/5 text-white rounded-2xl backdrop-blur-sm"
+=======
+                    className="h-14 px-8 text-lg border-white/20 hover:bg-white/5 text-white rounded-xl"
+>>>>>>> main
                   >
                     <Play className="mr-2 w-5 h-5 fill-current" />
                     Watch Demo
@@ -889,15 +955,11 @@ const Index = () => {
         </div>
 
         {/* Scroll indicator */}
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        >
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-float" style={{ animationDuration: "2s" }}>
           <div className="w-6 h-10 rounded-full border-2 border-white/20 flex justify-center pt-2">
             <div className="w-1 h-3 bg-violet-400 rounded-full" />
           </div>
-        </motion.div>
+        </div>
       </motion.section>
 
       {/* ============================================
@@ -908,7 +970,7 @@ const Index = () => {
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={ONCE_VIEWPORT}
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
@@ -930,12 +992,12 @@ const Index = () => {
                 key={problem.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={ONCE_VIEWPORT}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
                 className="group relative"
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${problem.color} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                <div className="relative h-full p-8 rounded-2xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-sm hover:border-white/10 transition-all duration-300">
+                <div className="relative h-full p-8 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:border-white/10 transition-all duration-300">
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${problem.color} flex items-center justify-center mb-6`}>
                     <problem.icon className={`w-7 h-7 ${problem.iconColor}`} />
                   </div>
@@ -956,7 +1018,7 @@ const Index = () => {
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={ONCE_VIEWPORT}
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
@@ -978,11 +1040,11 @@ const Index = () => {
                 key={solution.title}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={ONCE_VIEWPORT}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
                 className="group relative"
               >
-                <div className="relative p-8 rounded-2xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-sm hover:bg-white/[0.04] hover:border-white/10 transition-all duration-300">
+                <div className="relative p-8 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-300">
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${solution.gradient} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                     <solution.icon className="w-7 h-7 text-white" />
                   </div>
@@ -1003,7 +1065,7 @@ const Index = () => {
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={ONCE_VIEWPORT}
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
@@ -1033,7 +1095,7 @@ const Index = () => {
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={ONCE_VIEWPORT}
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
@@ -1052,7 +1114,7 @@ const Index = () => {
                 key={step.step}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={ONCE_VIEWPORT}
                 transition={{ duration: 0.6, delay: i * 0.15 }}
                 className="relative text-center"
               >
@@ -1086,7 +1148,7 @@ const Index = () => {
                 key={stat.label}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
+                viewport={ONCE_VIEWPORT}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 className="text-center"
               >
@@ -1108,7 +1170,7 @@ const Index = () => {
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={ONCE_VIEWPORT}
             transition={{ duration: 0.8 }}
             className="max-w-3xl mx-auto text-center"
           >

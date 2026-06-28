@@ -4,6 +4,7 @@ const codingSignalsAgent = require("../services/codingSignalsAgent");
 const aiOrchestrator = require("../services/aiOrchestrator");
 const { supabaseAdmin } = require("../../config/supabaseClient");
 const { dispatchAnalysis } = require("../queues/bullQueue");
+const pdfParse = require("pdf-parse");
 
 class RecruitOSController {
     /**
@@ -148,6 +149,39 @@ class RecruitOSController {
                 }
             });
         } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+     * Match a JD with Candidate Profile/Resume
+     */
+    async analyzeJobMatch(req, res) {
+        try {
+            const { jobDescription, skills } = req.body;
+            let resumeText = "";
+
+            if (!jobDescription) {
+                return res.status(400).json({ error: "Job Description is required." });
+            }
+
+            if (req.file) {
+                const pdfData = await pdfParse(req.file.buffer);
+                resumeText = pdfData.text;
+            }
+
+            let profileSkills = [];
+            try {
+                if (skills) {
+                    profileSkills = JSON.parse(skills);
+                }
+            } catch(e) {}
+
+            const analysis = await resumeAgent.matchJobDescription(jobDescription, resumeText, profileSkills);
+
+            res.json({ success: true, data: analysis });
+        } catch (error) {
+            console.error("Job Match analysis error:", error);
             res.status(500).json({ error: error.message });
         }
     }
